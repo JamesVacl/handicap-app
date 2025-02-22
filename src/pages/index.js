@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { addScore, addCourse, getCourses } from 'src/firebase';
+import { addScore, addCourse, getCourses, getScores } from 'src/firebase';
 
 
 const Home = () => {
   const [courses, setCourses] = useState([]);
+  const [scores, setScores] = useState([]);
   const [selectedCourse, setSelectedCourse] = useState('');
   const [score, setScore] = useState('');
   const [rating, setRating] = useState('');
@@ -11,13 +12,15 @@ const Home = () => {
   const [newCourse, setNewCourse] = useState('');
   const [addingNewCourse, setAddingNewCourse] = useState(false);
 
-  // Fetch courses from Firestore when the page loads
+  // Fetch courses and scores on page load
   useEffect(() => {
-    const fetchCourses = async () => {
+    const fetchData = async () => {
       const courseList = await getCourses();
       setCourses(courseList);
+      const scoreList = await getScores();
+      setScores(scoreList);
     };
-    fetchCourses();
+    fetchData();
   }, []);
 
   // Handle existing course selection
@@ -38,9 +41,12 @@ const Home = () => {
     } else {
       await addScore({ score: parseFloat(score), course: selectedCourse, rating: parseFloat(rating), slope: parseFloat(slope) });
       alert("Score added!");
+
+      // Refresh scores after submission
+      const updatedScores = await getScores();
+      setScores(updatedScores);
     }
 
-    // Reset form
     setScore('');
     setNewCourse('');
     setRating('');
@@ -104,20 +110,22 @@ const Home = () => {
           {addingNewCourse ? "Cancel" : "Add a New Course"}
         </button>
       </form>
+
+      {/* Display saved scores */}
+      <h2>Previous Scores</h2>
+      <ul>
+        {scores.length > 0 ? (
+          scores.map((score) => (
+            <li key={score.id}>
+              {score.date.toDate().toLocaleDateString()} - {score.course}: {score.score} (Diff: {score.differential})
+            </li>
+          ))
+        ) : (
+          <p>No scores recorded yet.</p>
+        )}
+      </ul>
     </div>
   );
-};
-
-const handleCourseSelect = (e) => {
-  const selected = courses.find(course => course.course === e.target.value);
-
-  console.log("Selected course:", selected); // Debugging log
-
-  if (selected) {
-    setSelectedCourse(selected.course);
-    setRating(selected.rating);
-    setSlope(selected.slope);
-  }
 };
 
 export default Home;

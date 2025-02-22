@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, addDoc, getDocs } from 'firebase/firestore';
+import { getFirestore, collection, addDoc, getDocs, orderBy, query } from 'firebase/firestore';
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -58,4 +58,14 @@ const getCourses = async () => {
   }));
 };
 
-export { db, addScore, addCourse, getCourses };
+// Fetch scores from Firestore, ordered by date (newest first)
+const getScores = async () => {
+  const scoresQuery = query(collection(db, "scores"), orderBy("date", "desc"));
+  const querySnapshot = await getDocs(scoresQuery);
+  return querySnapshot.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+  }));
+};
+
+export { db, addScore, addCourse, getCourses, getScores };
