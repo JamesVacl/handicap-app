@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, addDoc } from 'firebase/firestore';
+import { getFirestore, collection, addDoc, getDocs } from 'firebase/firestore';
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -14,29 +14,48 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 // Function to calculate Handicap Differential
-const calculateDifferential = (score, rating, slope) => {
-  return ((score - rating) * 113) / slope;
+  const calculateDifferential = (score, rating, slope) => {
+  const differential = ((score - rating) * 113) / slope;
+  return parseFloat((differential * 0.96).toFixed(2)); // Apply 0.96 multiplier and round to 2 decimal places
 };
 
-// Add score to Firestore (including differential calculation)
+// Add score to Firestore
 const addScore = async ({ score, course, rating, slope }) => {
   try {
     const differential = calculateDifferential(score, rating, slope);
-
     const scoreData = {
       score,
       course,
       rating,
       slope,
-      differential: parseFloat(differential.toFixed(2)), // Rounding to 2 decimal places
+      differential: parseFloat(differential.toFixed(2)), // Round to 2 decimal places
       date: new Date(),
     };
 
-    const docRef = await addDoc(collection(db, "scores"), scoreData);
-    console.log("Document written with ID: ", docRef.id);
+    await addDoc(collection(db, "scores"), scoreData);
+    console.log("Score added successfully!");
   } catch (e) {
-    console.error("Error adding document: ", e);
+    console.error("Error adding score: ", e);
   }
 };
 
-export { db, addScore };
+// Add a new course to Firestore
+const addCourse = async ({ course, rating, slope }) => {
+  try {
+    await addDoc(collection(db, "courses"), { course, rating, slope });
+    console.log("Course added successfully!");
+  } catch (e) {
+    console.error("Error adding course: ", e);
+  }
+};
+
+// Fetch all courses from Firestore
+const getCourses = async () => {
+  const querySnapshot = await getDocs(collection(db, "courses"));
+  return querySnapshot.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+  }));
+};
+
+export { db, addScore, addCourse, getCourses };
