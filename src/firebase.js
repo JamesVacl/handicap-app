@@ -1,5 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getFirestore, collection, addDoc, getDocs, orderBy, query } from 'firebase/firestore';
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from 'firebase/auth';
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -12,44 +13,40 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth(app);
 
-// Function to calculate Handicap Differential
-  const calculateDifferential = (score, rating, slope) => {
-  const differential = ((score - rating) * 113) / slope;
-  return parseFloat((differential * 0.96).toFixed(2)); // Apply 0.96 multiplier and round to 2 decimal places
-};
-
-// Add score to Firestore
-const addScore = async ({ score, course, rating, slope }) => {
+// Firebase authentication functions
+const signUp = async (email, password) => {
   try {
-    const differential = calculateDifferential(score, rating, slope);
-    const scoreData = {
-      score,
-      course,
-      rating,
-      slope,
-      differential: parseFloat(differential.toFixed(2)), // Round to 2 decimal places
-      date: new Date(),
-    };
-
-    await addDoc(collection(db, "scores"), scoreData);
-    console.log("Score added successfully!");
-  } catch (e) {
-    console.error("Error adding score: ", e);
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    console.log("User signed up:", userCredential.user);
+    return userCredential.user;
+  } catch (error) {
+    console.error("Error signing up: ", error.message);
   }
 };
 
-// Add a new course to Firestore
-const addCourse = async ({ course, rating, slope }) => {
+const signIn = async (email, password) => {
   try {
-    await addDoc(collection(db, "courses"), { course, rating, slope });
-    console.log("Course added successfully!");
-  } catch (e) {
-    console.error("Error adding course: ", e);
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    console.log("User signed in:", userCredential.user);
+    return userCredential.user;
+  } catch (error) {
+    console.error("Error signing in: ", error.message);
   }
 };
 
-// Fetch all courses from Firestore
+const logOut = () => {
+  signOut(auth)
+    .then(() => {
+      console.log("User logged out");
+    })
+    .catch((error) => {
+      console.error("Error logging out: ", error);
+    });
+};
+
+// Fetch courses from Firestore
 const getCourses = async () => {
   const querySnapshot = await getDocs(collection(db, "courses"));
   return querySnapshot.docs.map((doc) => ({
@@ -68,4 +65,45 @@ const getScores = async () => {
   }));
 };
 
-export { db, addScore, addCourse, getCourses, getScores };
+// Function to calculate Handicap Differential
+const calculateDifferential = (score, rating, slope) => {
+  const differential = ((score - rating) * 113) / slope;
+  return parseFloat((differential * 0.96).toFixed(2)); // Apply 0.96 multiplier and round to 2 decimal places
+};
+
+// Function to add a score to Firestore
+const addScore = async ({ score, course, rating, slope, user }) => {
+  try {
+    const differential = calculateDifferential(score, rating, slope);
+    const scoreData = {
+      score,
+      course,
+      rating,
+      slope,
+      differential: parseFloat(differential.toFixed(2)),
+      user,  // Storing the user's email
+      date: new Date(),
+    };
+
+    await addDoc(collection(db, "scores"), scoreData);
+    console.log("Score added successfully!");
+  } catch (e) {
+    console.error("Error adding score: ", e);
+  }
+};
+
+// Function to add a new course to Firestore
+const addCourse = async ({ course, rating, slope }) => {
+  try {
+    await addDoc(collection(db, "courses"), { 
+      course, 
+      rating: parseFloat(rating) || 0, 
+      slope: parseFloat(slope) || 0 
+    });
+    console.log("Course added successfully!");
+  } catch (e) {
+    console.error("Error adding course: ", e);
+  }
+};
+
+export { db, auth, signUp, signIn, logOut, getCourses, getScores, addScore, addCourse };

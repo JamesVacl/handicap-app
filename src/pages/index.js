@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react';
-import { addScore, addCourse, getCourses, getScores } from 'src/firebase';
+import { signUp, signIn, logOut, getCourses, getScores, addScore, addCourse } from 'src/firebase';
 
 
 const Home = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [user, setUser] = useState(null);
   const [courses, setCourses] = useState([]);
   const [scores, setScores] = useState([]);
   const [selectedCourse, setSelectedCourse] = useState('');
@@ -23,7 +26,27 @@ const Home = () => {
     fetchData();
   }, []);
 
-  // Handle existing course selection
+  // Handle Sign Up
+  const handleSignUp = async (e) => {
+    e.preventDefault();
+    const newUser = await signUp(email, password);
+    setUser(newUser);
+  };
+
+  // Handle Sign In
+  const handleSignIn = async (e) => {
+    e.preventDefault();
+    const loggedInUser = await signIn(email, password);
+    setUser(loggedInUser);
+  };
+
+  // Handle Sign Out
+  const handleSignOut = () => {
+    logOut();
+    setUser(null);
+  };
+
+  // Handle course selection
   const handleCourseSelect = (e) => {
     const selected = courses.find(course => course.course === e.target.value);
     setSelectedCourse(selected.course);
@@ -34,12 +57,11 @@ const Home = () => {
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (addingNewCourse) {
       await addCourse({ course: newCourse, rating: parseFloat(rating), slope: parseFloat(slope) });
       alert("New course added!");
     } else {
-      await addScore({ score: parseFloat(score), course: selectedCourse, rating: parseFloat(rating), slope: parseFloat(slope) });
+      await addScore({ score: parseFloat(score), course: selectedCourse, rating: parseFloat(rating), slope: parseFloat(slope), user: user.email });
       alert("Score added!");
 
       // Refresh scores after submission
@@ -57,6 +79,30 @@ const Home = () => {
   return (
     <div>
       <h1>Handicap Tracking</h1>
+
+      {/* Authentication Form */}
+      {!user ? (
+        <div>
+          <h2>Sign Up / Sign In</h2>
+          <form onSubmit={handleSignUp}>
+            <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
+            <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
+            <button type="submit">Sign Up</button>
+          </form>
+          <form onSubmit={handleSignIn}>
+            <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
+            <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
+            <button type="submit">Sign In</button>
+          </form>
+        </div>
+      ) : (
+        <div>
+          <h2>Welcome, {user.email}!</h2>
+          <button onClick={handleSignOut}>Log Out</button>
+        </div>
+      )}
+
+      {/* Score Submission Form */}
       <form onSubmit={handleSubmit}>
         {!addingNewCourse ? (
           <>
@@ -111,13 +157,13 @@ const Home = () => {
         </button>
       </form>
 
-      {/* Display saved scores */}
+      {/* Displaying Scores */}
       <h2>Previous Scores</h2>
       <ul>
         {scores.length > 0 ? (
           scores.map((score) => (
             <li key={score.id}>
-              {score.date.toDate().toLocaleDateString()} - {score.course}: {score.score} (Diff: {score.differential})
+              {score.user} - {score.course}: {score.score} (Diff: {score.differential})
             </li>
           ))
         ) : (
