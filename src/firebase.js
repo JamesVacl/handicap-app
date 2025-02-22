@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getFirestore } from 'firebase/firestore';
+import { getFirestore, collection, addDoc } from 'firebase/firestore';
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -10,20 +10,33 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
-
-// Get Firestore database
 const db = getFirestore(app);
 
-// Add score to Firestore
-const addScore = async (scoreData) => {
-    try {
-      const docRef = await addDoc(collection(db, "scores"), scoreData);
-      console.log("Document written with ID: ", docRef.id);
-    } catch (e) {
-      console.error("Error adding document: ", e);
-    }
-  };
-  
-  export { db, addScore };
+// Function to calculate Handicap Differential
+const calculateDifferential = (score, rating, slope) => {
+  return ((score - rating) * 113) / slope;
+};
+
+// Add score to Firestore (including differential calculation)
+const addScore = async ({ score, course, rating, slope }) => {
+  try {
+    const differential = calculateDifferential(score, rating, slope);
+
+    const scoreData = {
+      score,
+      course,
+      rating,
+      slope,
+      differential: parseFloat(differential.toFixed(2)), // Rounding to 2 decimal places
+      date: new Date(),
+    };
+
+    const docRef = await addDoc(collection(db, "scores"), scoreData);
+    console.log("Document written with ID: ", docRef.id);
+  } catch (e) {
+    console.error("Error adding document: ", e);
+  }
+};
+
+export { db, addScore };
