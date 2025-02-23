@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, addDoc, getDocs, orderBy, query } from 'firebase/firestore';
+import { getFirestore, collection, addDoc, getDocs, orderBy, query, where, limit } from 'firebase/firestore';
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from 'firebase/auth';
 
 const firebaseConfig = {
@@ -16,11 +16,21 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 
 // Firebase authentication functions
-const signUp = async (email, password) => {
+const signUp = async (email, password, firstName, lastName) => {
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    console.log("User signed up:", userCredential.user);
-    return userCredential.user;
+    const user = userCredential.user;
+
+    // Store user details (firstName, lastName) in Firestore
+    await addDoc(collection(db, "users"), {
+      userId: user.uid,
+      email: user.email,
+      firstName,
+      lastName
+    });
+
+    console.log("User signed up:", user);
+    return { ...user, firstName, lastName };
   } catch (error) {
     console.error("Error signing up: ", error.message);
   }
@@ -29,8 +39,12 @@ const signUp = async (email, password) => {
 const signIn = async (email, password) => {
   try {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    console.log("User signed in:", userCredential.user);
-    return userCredential.user;
+    const user = userCredential.user;
+
+    // Fetch user details from Firestore
+    const userDoc = await getDocs(query(collection(db, "users"), where("userId", "==", user.uid)));
+    const userData = userDoc.docs[0]?.data();
+    return { ...user, firstName: userData?.firstName, lastName: userData?.lastName };
   } catch (error) {
     console.error("Error signing in: ", error.message);
   }
@@ -46,6 +60,26 @@ const logOut = () => {
     });
 };
 
+// Fetch the latest 20 scores for a specific user
+const getScoresForUser = async (userEmail) => {
+  try {
+    const scoresQuery = query(
+      collection(db, "scores"),
+      where("user", "==", userEmail),  // Filter by user email
+      orderBy("date", "desc"),         // Order by date (newest first)
+      limit(20)                        // Limit to the latest 20 scores
+    );
+
+    const querySnapshot = await getDocs(scoresQuery);
+    return querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+  } catch (error) {
+    console.error("Error fetching scores for user: ", error);
+  }
+};
+
 // Fetch courses from Firestore
 const getCourses = async () => {
   const querySnapshot = await getDocs(collection(db, "courses"));
@@ -57,7 +91,7 @@ const getCourses = async () => {
 
 // Fetch scores from Firestore, ordered by date (newest first)
 const getScores = async () => {
-  const scoresQuery = query(collection(db, "scores"), orderBy("date", "desc"));
+  const scoresQuery = query(collection(db, "scores"), orderBy("date", "desc"), limit(20));
   const querySnapshot = await getDocs(scoresQuery);
   return querySnapshot.docs.map((doc) => ({
     id: doc.id,
@@ -74,6 +108,12 @@ const calculateDifferential = (score, rating, slope) => {
 // Function to add a score to Firestore
 const addScore = async ({ score, course, rating, slope, user }) => {
   try {
+    // Fetch user details (first name and last name) from Firestore
+    const userDoc = await getDocs(query(collection(db, "users"), where("email", "==", user)));
+    const userData = userDoc.docs[0]?.data();
+    const firstName = userData?.firstName || 'Unknown';
+    const lastName = userData?.lastName || 'Unknown';
+
     const differential = calculateDifferential(score, rating, slope);
     const scoreData = {
       score,
@@ -82,6 +122,8 @@ const addScore = async ({ score, course, rating, slope, user }) => {
       slope,
       differential: parseFloat(differential.toFixed(2)),
       user,  // Storing the user's email
+      firstName,  // Store first name
+      lastName,  // Store last name
       date: new Date(),
     };
 
@@ -106,4 +148,5 @@ const addCourse = async ({ course, rating, slope }) => {
   }
 };
 
-export { db, auth, signUp, signIn, logOut, getCourses, getScores, addScore, addCourse };
+// Export all functions
+export { db, auth, signUp, signIn, logOut, getCourses, getScores, getScoresForUser, addScore, addCourse };
