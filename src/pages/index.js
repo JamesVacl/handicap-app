@@ -15,9 +15,9 @@ const Home = () => {
   const [addingNewCourse, setAddingNewCourse] = useState(false);
   const [passcodeEntered, setPasscodeEntered] = useState(false);
   const [passcode, setPasscode] = useState('');
-  const [holeType, setHoleType] = useState('18'); // Hole type state
+  const [holeType, setHoleType] = useState('18');
   const [currentPage, setCurrentPage] = useState(0);
-  const itemsPerPage = 15; // Changed to 15 rows per page
+  const itemsPerPage = 15;
 
   useEffect(() => {
     if (sessionStorage.getItem('passcodeVerified')) {
@@ -42,51 +42,55 @@ const Home = () => {
     fetchData();
   }, []);
 
-  // Handicap Calculation for 9-hole and 18-hole scores
   const calculateDifferential = (score, rating, slope, holeType) => {
     let differential;
 
     if (holeType === '18') {
-      // Standard calculation for 18-hole scores
       differential = ((score - rating) * 113) / slope;
     } else {
-      // For 9-hole scores, adjust by halving the rating and doubling the differential
       const adjustedRating = rating / 2;
       differential = ((score - adjustedRating) * 113) / slope;
       differential *= 2; // Adjust to 18-hole equivalent
     }
 
-    // Apply the 0.96 multiplier to all differentials
-    return parseFloat((differential * 0.96).toFixed(2));
+    return parseFloat((differential * 0.96).toFixed(2)); // Apply 0.96 multiplier
   };
 
   const calculateLeaderboard = (scores) => {
     const playerScores = {};
-
+  
     scores.forEach(score => {
       if (!playerScores[score.player]) {
-        playerScores[score.player] = { differentials: [], totalScore: 0, totalRounds: 0 };
+        playerScores[score.player] = { differentials: [], totalScore: 0, totalRounds: 0, total18HoleScores: 0 };
       }
+  
+      // Add to differentials for both 9-hole and 18-hole scores
       playerScores[score.player].differentials.push(score.differential);
-      playerScores[score.player].totalScore += score.score;
-      playerScores[score.player].totalRounds += 1;
+  
+      // Only calculate total score and rounds for 18-hole scores
+      if (score.holeType === '18') {
+        playerScores[score.player].totalScore += score.score;
+        playerScores[score.player].totalRounds += 1;
+        playerScores[score.player].total18HoleScores += 1;
+      }
     });
-
+  
     const leaderboard = Object.keys(playerScores).map(playerName => {
-      const { differentials, totalScore, totalRounds } = playerScores[playerName];
+      const { differentials, totalScore, totalRounds, total18HoleScores } = playerScores[playerName];
       const sortedDifferentials = differentials.sort((a, b) => a - b);
       const lowestDifferentials = sortedDifferentials.slice(0, Math.min(8, differentials.length));
       const averageHandicap = lowestDifferentials.reduce((acc, diff) => acc + diff, 0) / lowestDifferentials.length;
-
-      const averageScore = totalScore / totalRounds;
-
+  
+      // Calculate the average 18-hole score (ignore 9-hole scores for this)
+      const averageScore = total18HoleScores > 0 ? totalScore / total18HoleScores : 0;
+  
       return {
         name: playerName,
         handicap: parseFloat(averageHandicap.toFixed(2)),
         averageScore: parseFloat(averageScore.toFixed(2)),
       };
     });
-
+  
     return leaderboard.sort((a, b) => a.handicap - b.handicap);
   };
 
@@ -108,29 +112,41 @@ const Home = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!passcodeEntered) {
-      alert("You must enter the passcode first!");
-      return;
-    }
+  e.preventDefault();
+  if (!passcodeEntered) {
+    alert("You must enter the passcode first!");
+    return;
+  }
 
-    const differential = calculateDifferential(score, rating, slope, holeType);
+  const differential = calculateDifferential(score, rating, slope, holeType);
 
-    if (addingNewCourse) {
-      await addCourse({ course: newCourse, rating: parseFloat(rating), slope: parseFloat(slope) });
-      alert("New course added!");
-      setAddingNewCourse(false); // Reset the state after adding a course
-    } else {
-      await addScore({ score: parseFloat(score), course: selectedCourse, rating: parseFloat(rating), slope: parseFloat(slope), player: selectedPlayer, differential });
-      alert("Score added!");
-    }
-
-    setScore('');
-    setNewCourse('');
-    setRating('');
-    setSlope('');
+  if (addingNewCourse) {
+    await addCourse({ course: newCourse, rating: parseFloat(rating), slope: parseFloat(slope) });
+    alert("New course added!");
     setAddingNewCourse(false);
-  };
+  } else {
+    await addScore({
+      score: parseFloat(score),
+      course: selectedCourse,
+      rating: parseFloat(rating),
+      slope: parseFloat(slope),
+      player: selectedPlayer,
+      differential,
+      holeType: holeType
+    });
+    alert("Score added!");
+  }
+
+  // Reset the form fields
+  setScore('');
+  setNewCourse('');
+  setRating('');
+  setSlope('');
+  setAddingNewCourse(false);
+
+  // Refresh the page to reflect the new data
+  window.location.reload();
+};
 
   const filteredScores = selectedPlayer 
     ? scores.filter((score) => score.player === selectedPlayer)
@@ -143,145 +159,184 @@ const Home = () => {
   const totalPages = Math.ceil(filteredScores.length / itemsPerPage);
 
   return (
-    <div>
-      <h1>Handicap Tracking</h1>
+    <div className="container mx-auto px-4 py-6">
+      <h1 className="text-4xl font-semibold text-center mb-8">Guyscorp Handicap Tracking</h1>
 
       {!passcodeEntered ? (
-        <form onSubmit={handlePasscodeSubmit}>
+        <form onSubmit={handlePasscodeSubmit} className="flex flex-col items-center mb-8">
           <input
             type="password"
             placeholder="Enter Passcode"
             value={passcode}
             onChange={(e) => setPasscode(e.target.value)}
+            className="mb-4 p-3 border border-gray-300 rounded-md w-72"
           />
-          <button type="submit">Submit</button>
+          <button type="submit" className="bg-blue-500 text-white py-2 px-6 rounded-md w-72">Submit</button>
         </form>
       ) : (
         <>
-          <form onSubmit={handleSubmit}>
-            <label>Select a Player:</label>
-            <select onChange={(e) => setSelectedPlayer(e.target.value)} value={selectedPlayer}>
-              <option value="">-- Choose a Player --</option>
-              {players
-                .sort((a, b) => a.name.localeCompare(b.name))
-                .map((player) => (
-                  <option key={player.id} value={player.name}>
-                    {player.name}
-                  </option>
+          <form onSubmit={handleSubmit} className="space-y-4 mb-8">
+            <div>
+              <label className="block text-lg text-black">Select a Player:</label>
+              <select 
+                onChange={(e) => setSelectedPlayer(e.target.value)} 
+                value={selectedPlayer} 
+                className="w-full p-3 border border-gray-300 rounded-md text-black"
+              >
+                <option value="">-- Choose a Player --</option>
+                {players.sort((a, b) => a.name.localeCompare(b.name)).map((player) => (
+                  <option key={player.id} value={player.name}>{player.name}</option>
                 ))}
-            </select>
+              </select>
+            </div>
 
             {/* Select or Add New Course */}
-            <label>Select a Course or Add New:</label>
-            <select onChange={handleCourseSelect} value={selectedCourse} disabled={addingNewCourse}>
-              <option value="">-- Choose a Course --</option>
-              {courses.map((course) => (
-                <option key={course.id} value={course.course}>
-                  {course.course}
-                </option>
-              ))}
-            </select>
-            <button type="button" onClick={() => setAddingNewCourse(true)}>Add New Course</button>
+            <div>
+              <label className="block text-lg text-black">Select a Course or Add New:</label>
+              <select 
+                onChange={handleCourseSelect} 
+                value={selectedCourse} 
+                disabled={addingNewCourse} 
+                className="w-full p-3 border border-gray-300 rounded-md text-black"
+              >
+                <option value="">-- Choose a Course --</option>
+                {courses.map((course) => (
+                  <option key={course.id} value={course.course}>{course.course}</option>
+                ))}
+              </select>
+              <button 
+                type="button" 
+                onClick={() => setAddingNewCourse(true)} 
+                className="mt-2 text-blue-500"
+              >
+                Add New Course
+              </button>
+            </div>
 
             {addingNewCourse && (
               <>
-                <label>New Course Name:</label>
-                <input
-                  type="text"
-                  placeholder="Course Name"
-                  value={newCourse}
-                  onChange={(e) => setNewCourse(e.target.value)}
-                />
-                <label>Course Rating:</label>
-                <input
-                  type="number"
-                  placeholder="Rating"
-                  value={rating}
-                  onChange={(e) => setRating(e.target.value)}
-                />
-                <label>Course Slope:</label>
-                <input
-                  type="number"
-                  placeholder="Slope"
-                  value={slope}
-                  onChange={(e) => setSlope(e.target.value)}
-                />
+                <div>
+                  <label className="block text-lg text-black">New Course Name:</label>
+                  <input 
+                    type="text" 
+                    placeholder="Course Name" 
+                    value={newCourse} 
+                    onChange={(e) => setNewCourse(e.target.value)} 
+                    className="w-full p-3 border border-gray-300 rounded-md text-black" 
+                  />
+                </div>
+                <div>
+                  <label className="block text-lg text-black">Course Rating:</label>
+                  <input 
+                    type="number" 
+                    placeholder="Rating" 
+                    value={rating} 
+                    onChange={(e) => setRating(e.target.value)} 
+                    className="w-full p-3 border border-gray-300 rounded-md text-black" 
+                  />
+                </div>
+                <div>
+                  <label className="block text-lg text-black">Course Slope:</label>
+                  <input 
+                    type="number" 
+                    placeholder="Slope" 
+                    value={slope} 
+                    onChange={(e) => setSlope(e.target.value)} 
+                    className="w-full p-3 border border-gray-300 rounded-md text-black" 
+                  />
+                </div>
               </>
             )}
 
-            <label>Score:</label>
-            <input type="number" placeholder="Score" value={score} onChange={(e) => setScore(e.target.value)} />
+            <div>
+              <label className="block text-lg text-black">Score:</label>
+              <input 
+                type="number" 
+                placeholder="Score" 
+                value={score} 
+                onChange={(e) => setScore(e.target.value)} 
+                className="w-full p-3 border border-gray-300 rounded-md text-black" 
+              />
+            </div>
 
-            <label>Hole Type:</label>
-            <select onChange={(e) => setHoleType(e.target.value)} value={holeType}>
-              <option value="18">18 Holes</option>
-              <option value="9">9 Holes</option>
-            </select>
+            <div>
+              <label className="block text-lg text-black">Hole Type:</label>
+              <select 
+                onChange={(e) => setHoleType(e.target.value)} 
+                value={holeType} 
+                className="w-full p-3 border border-gray-300 rounded-md text-black"
+              >
+                <option value="18">18 Holes</option>
+                <option value="9">9 Holes</option>
+              </select>
+            </div>
 
-            <button type="submit">Submit Score</button>
+            <button 
+              type="submit" 
+              className="w-full bg-blue-500 text-white py-3 rounded-md"
+            >
+              Submit Score
+            </button>
           </form>
 
-           {/* Leaderboard Table */}
-           <h2>Leaderboard</h2>
-          <table>
+          {/* Leaderboard Table */}
+          <h2 className="text-2xl font-semibold mb-4">Leaderboard</h2>
+          <table className="w-full table-auto mb-8 border-collapse">
             <thead>
               <tr>
-                <th>Player</th>
-                <th>Handicap</th>
-                <th>Average Score</th>
+                <th className="px-4 py-3 text-left border border-gray-300">Player</th>
+                <th className="px-4 py-3 text-left border border-gray-300">Handicap</th>
+                <th className="px-4 py-3 text-left border border-gray-300">Average 18-Hole Score</th>
               </tr>
             </thead>
             <tbody>
               {leaderboard.map((entry, index) => (
                 <tr key={index}>
-                  <td>{entry.name}</td>
-                  <td>{entry.handicap}</td>
-                  <td>{entry.averageScore}</td>
+                  <td className="px-4 py-3 border border-gray-300">{entry.name}</td>
+                  <td className="px-4 py-3 border border-gray-300">{entry.handicap}</td>
+                  <td className="px-4 py-3 border border-gray-300">{entry.averageScore}</td>
                 </tr>
               ))}
             </tbody>
           </table>
 
           {/* Previous Scores Table */}
-          <h2>Previous Scores</h2>
-          <select onChange={(e) => setSelectedPlayer(e.target.value)} value={selectedPlayer}>
+          <h2 className="text-2xl font-semibold mb-4">Previous Scores</h2>
+          <h3 className="text-lg font-medium">Filter by Player</h3>
+          <select onChange={(e) => setSelectedPlayer(e.target.value)} value={selectedPlayer} className="w-full p-3 border border-gray-300 rounded-md mb-4">
             <option value="">-- Select Player --</option>
             {players.map((player) => (
-              <option key={player.id} value={player.name}>
-                {player.name}
-              </option>
+              <option key={player.id} value={player.name}>{player.name}</option>
             ))}
           </select>
 
-          <table>
+          <table className="w-full table-auto mb-4 border-collapse">
             <thead>
               <tr>
-                <th>Player</th>
-                <th>Course</th>
-                <th>Score</th>
-                <th>Handicap</th> {/* Added Handicap column */}
-                <th>Date</th>
+                <th className="px-4 py-3 text-left border border-gray-300">Player</th>
+                <th className="px-4 py-3 text-left border border-gray-300">Course</th>
+                <th className="px-4 py-3 text-left border border-gray-300">Score</th>
+                <th className="px-4 py-3 text-left border border-gray-300">Handicap</th>
+                <th className="px-4 py-3 text-left border border-gray-300">Date</th>
               </tr>
             </thead>
             <tbody>
-              {filteredScores
-                .slice(currentPage * itemsPerPage, (currentPage + 1) * itemsPerPage)
-                .map((score) => (
-                  <tr key={score.id}>
-                    <td>{score.player}</td>
-                    <td>{score.course}</td>
-                    <td>{score.score}</td>
-                    <td>{score.differential}</td> {/* Showing differential (Handicap) */}
-                    <td>{new Date(score.date.seconds * 1000).toLocaleDateString()}</td>
-                  </tr>
-                ))}
+              {filteredScores.slice(currentPage * itemsPerPage, (currentPage + 1) * itemsPerPage).map((score) => (
+                <tr key={score.id}>
+                  <td className="px-4 py-3 border border-gray-300">{score.player}</td>
+                  <td className="px-4 py-3 border border-gray-300">{score.course}</td>
+                  <td className="px-4 py-3 border border-gray-300">{score.score}</td>
+                  <td className="px-4 py-3 border border-gray-300">{score.differential}</td>
+                  <td className="px-4 py-3 border border-gray-300">{new Date(score.date.seconds * 1000).toLocaleDateString()}</td>
+                </tr>
+              ))}
             </tbody>
           </table>
 
-          <div>
-            <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 0}>Previous</button>
-            <span>Page {currentPage + 1} of {totalPages}</span>
-            <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages - 1}>Next</button>
+          <div className="pagination flex justify-center gap-4">
+            <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 0} className="bg-blue-500 text-white py-2 px-4 rounded-md">Previous</button>
+            <span className="text-lg">Page {currentPage + 1} of {totalPages}</span>
+            <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages - 1} className="bg-blue-500 text-white py-2 px-4 rounded-md">Next</button>
           </div>
         </>
       )}
