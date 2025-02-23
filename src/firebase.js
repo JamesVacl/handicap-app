@@ -42,9 +42,20 @@ const getScores = async () => {
 };
 
 // Function to calculate Handicap Differential
-const calculateDifferential = (score, rating, slope) => {
-  const differential = ((score - rating) * 113) / slope;
-  return parseFloat((differential * 0.96).toFixed(2)); // Apply 0.96 multiplier and round to 2 decimal places
+const calculateDifferential = (score, rating, slope, holeType) => {
+  let differential;
+
+  if (holeType === '18') {
+    // Standard calculation for 18-hole scores
+    differential = ((score - rating) * 113) / slope;
+  } else {
+    // Adjust course rating for 9-hole scores (halve the rating)
+    const adjustedRating = rating / 2;
+    differential = (((score - adjustedRating) * 113) / slope)*2;
+  }
+
+  // Apply the 0.96 multiplier to all differentials
+  return parseFloat((differential * 0.96).toFixed(2));
 };
 
 // Function to add a score to Firestore
