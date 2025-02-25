@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getPlayers, getCourses, getScores, addScore, addCourse } from 'src/firebase';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 const Home = () => {
   const [players, setPlayers] = useState([]);
@@ -17,7 +18,8 @@ const Home = () => {
   const [passcode, setPasscode] = useState('');
   const [holeType, setHoleType] = useState('18');
   const [currentPage, setCurrentPage] = useState(0);
-  const itemsPerPage = 15;
+  const [filterPlayer, setFilterPlayer] = useState(''); // New state for filter selection
+  const itemsPerPage = 10;
 
   useEffect(() => {
     if (sessionStorage.getItem('passcodeVerified')) {
@@ -112,44 +114,44 @@ const Home = () => {
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  if (!passcodeEntered) {
-    alert("You must enter the passcode first!");
-    return;
-  }
+    e.preventDefault();
+    if (!passcodeEntered) {
+      alert("You must enter the passcode first!");
+      return;
+    }
 
-  const differential = calculateDifferential(score, rating, slope, holeType);
+    const differential = calculateDifferential(score, rating, slope, holeType);
 
-  if (addingNewCourse) {
-    await addCourse({ course: newCourse, rating: parseFloat(rating), slope: parseFloat(slope) });
-    alert("New course added!");
+    if (addingNewCourse) {
+      await addCourse({ course: newCourse, rating: parseFloat(rating), slope: parseFloat(slope) });
+      alert("New course added!");
+      setAddingNewCourse(false);
+    } else {
+      await addScore({
+        score: parseFloat(score),
+        course: selectedCourse,
+        rating: parseFloat(rating),
+        slope: parseFloat(slope),
+        player: selectedPlayer,
+        differential,
+        holeType: holeType
+      });
+      alert("Score added!");
+    }
+
+    // Reset the form fields
+    setScore('');
+    setNewCourse('');
+    setRating('');
+    setSlope('');
     setAddingNewCourse(false);
-  } else {
-    await addScore({
-      score: parseFloat(score),
-      course: selectedCourse,
-      rating: parseFloat(rating),
-      slope: parseFloat(slope),
-      player: selectedPlayer,
-      differential,
-      holeType: holeType
-    });
-    alert("Score added!");
-  }
 
-  // Reset the form fields
-  setScore('');
-  setNewCourse('');
-  setRating('');
-  setSlope('');
-  setAddingNewCourse(false);
+    // Refresh the page to reflect the new data
+    window.location.reload();
+  };
 
-  // Refresh the page to reflect the new data
-  window.location.reload();
-};
-
-  const filteredScores = selectedPlayer 
-    ? scores.filter((score) => score.player === selectedPlayer)
+  const filteredScores = filterPlayer 
+    ? scores.filter((score) => score.player === filterPlayer)
     : scores;
 
   const handlePageChange = (newPage) => {
@@ -159,29 +161,29 @@ const Home = () => {
   const totalPages = Math.ceil(filteredScores.length / itemsPerPage);
 
   return (
-    <div className="container mx-auto px-4 py-6">
+    <div className="container mx-auto px-4 py-6 golf-theme">
       <h1 className="text-4xl font-semibold text-center mb-8">Guyscorp Handicap Tracking</h1>
 
       {!passcodeEntered ? (
-        <form onSubmit={handlePasscodeSubmit} className="flex flex-col items-center mb-8">
+        <form onSubmit={handlePasscodeSubmit} className="d-flex flex-column align-items-center mb-8">
           <input
             type="password"
             placeholder="Enter Passcode"
             value={passcode}
             onChange={(e) => setPasscode(e.target.value)}
-            className="mb-4 p-3 border border-gray-300 rounded-md w-72"
+            className="mb-4 p-3 form-control w-50"
           />
-          <button type="submit" className="bg-blue-500 text-white py-2 px-6 rounded-md w-72">Submit</button>
+          <button type="submit" className="btn btn-primary w-50">Submit</button>
         </form>
       ) : (
         <>
           <form onSubmit={handleSubmit} className="space-y-4 mb-8">
-            <div>
-              <label className="block text-lg text-black">Select a Player:</label>
+            <div className="form-group">
+              <label className="form-label">Select a Player:</label>
               <select 
                 onChange={(e) => setSelectedPlayer(e.target.value)} 
                 value={selectedPlayer} 
-                className="w-full p-3 border border-gray-300 rounded-md text-black"
+                className="form-control"
               >
                 <option value="">-- Choose a Player --</option>
                 {players.sort((a, b) => a.name.localeCompare(b.name)).map((player) => (
@@ -191,13 +193,13 @@ const Home = () => {
             </div>
 
             {/* Select or Add New Course */}
-            <div>
-              <label className="block text-lg text-black">Select a Course or Add New:</label>
+            <div className="form-group">
+              <label className="form-label">Select a Course or Add New:</label>
               <select 
                 onChange={handleCourseSelect} 
                 value={selectedCourse} 
                 disabled={addingNewCourse} 
-                className="w-full p-3 border border-gray-300 rounded-md text-black"
+                className="form-control"
               >
                 <option value="">-- Choose a Course --</option>
                 {courses.map((course) => (
@@ -207,7 +209,7 @@ const Home = () => {
               <button 
                 type="button" 
                 onClick={() => setAddingNewCourse(true)} 
-                className="mt-2 text-blue-500"
+                className="btn btn-link mt-2"
               >
                 Add New Course
               </button>
@@ -215,56 +217,56 @@ const Home = () => {
 
             {addingNewCourse && (
               <>
-                <div>
-                  <label className="block text-lg text-black">New Course Name:</label>
+                <div className="form-group">
+                  <label className="form-label">New Course Name:</label>
                   <input 
                     type="text" 
                     placeholder="Course Name" 
                     value={newCourse} 
                     onChange={(e) => setNewCourse(e.target.value)} 
-                    className="w-full p-3 border border-gray-300 rounded-md text-black" 
+                    className="form-control" 
                   />
                 </div>
-                <div>
-                  <label className="block text-lg text-black">Course Rating:</label>
+                <div className="form-group">
+                  <label className="form-label">Course Rating:</label>
                   <input 
                     type="number" 
                     placeholder="Rating" 
                     value={rating} 
                     onChange={(e) => setRating(e.target.value)} 
-                    className="w-full p-3 border border-gray-300 rounded-md text-black" 
+                    className="form-control" 
                   />
                 </div>
-                <div>
-                  <label className="block text-lg text-black">Course Slope:</label>
+                <div className="form-group">
+                  <label className="form-label">Course Slope:</label>
                   <input 
                     type="number" 
                     placeholder="Slope" 
                     value={slope} 
                     onChange={(e) => setSlope(e.target.value)} 
-                    className="w-full p-3 border border-gray-300 rounded-md text-black" 
+                    className="form-control" 
                   />
                 </div>
               </>
             )}
 
-            <div>
-              <label className="block text-lg text-black">Score:</label>
+            <div className="form-group">
+              <label className="form-label">Score:</label>
               <input 
                 type="number" 
                 placeholder="Score" 
                 value={score} 
                 onChange={(e) => setScore(e.target.value)} 
-                className="w-full p-3 border border-gray-300 rounded-md text-black" 
+                className="form-control" 
               />
             </div>
 
-            <div>
-              <label className="block text-lg text-black">Hole Type:</label>
+            <div className="form-group">
+              <label className="form-label">Hole Type:</label>
               <select 
                 onChange={(e) => setHoleType(e.target.value)} 
                 value={holeType} 
-                className="w-full p-3 border border-gray-300 rounded-md text-black"
+                className="form-control"
               >
                 <option value="18">18 Holes</option>
                 <option value="9">9 Holes</option>
@@ -273,7 +275,7 @@ const Home = () => {
 
             <button 
               type="submit" 
-              className="w-full bg-blue-500 text-white py-3 rounded-md"
+              className="btn btn-primary w-100"
             >
               Submit Score
             </button>
@@ -281,20 +283,20 @@ const Home = () => {
 
           {/* Leaderboard Table */}
           <h2 className="text-2xl font-semibold mb-4">Leaderboard</h2>
-          <table className="w-full table-auto mb-8 border-collapse">
+          <table className="table table-bordered mb-8">
             <thead>
               <tr>
-                <th className="px-4 py-3 text-left border border-gray-300">Player</th>
-                <th className="px-4 py-3 text-left border border-gray-300">Handicap</th>
-                <th className="px-4 py-3 text-left border border-gray-300">Average 18-Hole Score</th>
+                <th>Player</th>
+                <th>Handicap</th>
+                <th>Average 18-Hole Score</th>
               </tr>
             </thead>
             <tbody>
               {leaderboard.map((entry, index) => (
                 <tr key={index}>
-                  <td className="px-4 py-3 border border-gray-300">{entry.name}</td>
-                  <td className="px-4 py-3 border border-gray-300">{entry.handicap}</td>
-                  <td className="px-4 py-3 border border-gray-300">{entry.averageScore}</td>
+                  <td>{entry.name}</td>
+                  <td>{entry.handicap}</td>
+                  <td>{entry.averageScore}</td>
                 </tr>
               ))}
             </tbody>
@@ -303,40 +305,40 @@ const Home = () => {
           {/* Previous Scores Table */}
           <h2 className="text-2xl font-semibold mb-4">Previous Scores</h2>
           <h3 className="text-lg font-medium">Filter by Player</h3>
-          <select onChange={(e) => setSelectedPlayer(e.target.value)} value={selectedPlayer} className="w-full p-3 border border-gray-300 rounded-md mb-4">
+          <select onChange={(e) => setFilterPlayer(e.target.value)} value={filterPlayer} className="form-control mb-4">
             <option value="">-- Select Player --</option>
             {players.map((player) => (
               <option key={player.id} value={player.name}>{player.name}</option>
             ))}
           </select>
 
-          <table className="w-full table-auto mb-4 border-collapse">
+          <table className="table table-bordered mb-4">
             <thead>
               <tr>
-                <th className="px-4 py-3 text-left border border-gray-300">Player</th>
-                <th className="px-4 py-3 text-left border border-gray-300">Course</th>
-                <th className="px-4 py-3 text-left border border-gray-300">Score</th>
-                <th className="px-4 py-3 text-left border border-gray-300">Handicap</th>
-                <th className="px-4 py-3 text-left border border-gray-300">Date</th>
+                <th>Player</th>
+                <th>Course</th>
+                <th>Score</th>
+                <th>Handicap</th>
+                <th>Date</th>
               </tr>
             </thead>
             <tbody>
               {filteredScores.slice(currentPage * itemsPerPage, (currentPage + 1) * itemsPerPage).map((score) => (
                 <tr key={score.id}>
-                  <td className="px-4 py-3 border border-gray-300">{score.player}</td>
-                  <td className="px-4 py-3 border border-gray-300">{score.course}</td>
-                  <td className="px-4 py-3 border border-gray-300">{score.score}</td>
-                  <td className="px-4 py-3 border border-gray-300">{score.differential}</td>
-                  <td className="px-4 py-3 border border-gray-300">{new Date(score.date.seconds * 1000).toLocaleDateString()}</td>
+                  <td>{score.player}</td>
+                  <td>{score.course}</td>
+                  <td>{score.score}</td>
+                  <td>{score.differential}</td>
+                  <td>{new Date(score.date.seconds * 1000).toLocaleDateString()}</td>
                 </tr>
               ))}
             </tbody>
           </table>
 
-          <div className="pagination flex justify-center gap-4">
-            <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 0} className="bg-blue-500 text-white py-2 px-4 rounded-md">Previous</button>
+          <div className="pagination d-flex justify-content-center gap-4">
+            <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 0} className="btn btn-primary">Previous</button>
             <span className="text-lg">Page {currentPage + 1} of {totalPages}</span>
-            <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages - 1} className="bg-blue-500 text-white py-2 px-4 rounded-md">Next</button>
+            <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages - 1} className="btn btn-primary">Next</button>
           </div>
         </>
       )}
