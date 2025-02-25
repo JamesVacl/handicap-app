@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getPlayers, getCourses, getScores, addScore, addCourse } from 'src/firebase';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { Modal, Button } from 'react-bootstrap';
 
 const Home = () => {
   const [players, setPlayers] = useState([]);
@@ -13,7 +14,7 @@ const Home = () => {
   const [rating, setRating] = useState('');
   const [slope, setSlope] = useState('');
   const [newCourse, setNewCourse] = useState('');
-  const [addingNewCourse, setAddingNewCourse] = useState(false);
+  const [showAddCourseModal, setShowAddCourseModal] = useState(false);
   const [passcodeEntered, setPasscodeEntered] = useState(false);
   const [passcode, setPasscode] = useState('');
   const [holeType, setHoleType] = useState('18');
@@ -120,34 +121,38 @@ const Home = () => {
       return;
     }
 
-    const differential = calculateDifferential(score, rating, slope, holeType);
-
-    if (addingNewCourse) {
-      await addCourse({ course: newCourse, rating: parseFloat(rating), slope: parseFloat(slope) });
-      alert("New course added!");
-      setAddingNewCourse(false);
-    } else {
-      await addScore({
-        score: parseFloat(score),
-        course: selectedCourse,
-        rating: parseFloat(rating),
-        slope: parseFloat(slope),
-        player: selectedPlayer,
-        differential,
-        holeType: holeType
-      });
-      alert("Score added!");
-    }
+    await addScore({
+      score: parseFloat(score),
+      course: selectedCourse,
+      rating: parseFloat(rating),
+      slope: parseFloat(slope),
+      player: selectedPlayer,
+      holeType: holeType
+    });
+    alert("Score added!");
 
     // Reset the form fields
     setScore('');
-    setNewCourse('');
+    setSelectedCourse('');
     setRating('');
     setSlope('');
-    setAddingNewCourse(false);
 
     // Refresh the page to reflect the new data
     window.location.reload();
+  };
+
+  const handleAddCourseSubmit = async (e) => {
+    e.preventDefault();
+    await addCourse({ course: newCourse, rating: parseFloat(rating), slope: parseFloat(slope) });
+    alert("New course added!");
+    setShowAddCourseModal(false);
+    // Refresh the courses list
+    const courseList = await getCourses();
+    setCourses(courseList);
+    // Reset the form fields
+    setNewCourse('');
+    setRating('');
+    setSlope('');
   };
 
   const filteredScores = filterPlayer 
@@ -198,7 +203,6 @@ const Home = () => {
               <select 
                 onChange={handleCourseSelect} 
                 value={selectedCourse} 
-                disabled={addingNewCourse} 
                 className="form-control"
               >
                 <option value="">-- Choose a Course --</option>
@@ -208,47 +212,12 @@ const Home = () => {
               </select>
               <button 
                 type="button" 
-                onClick={() => setAddingNewCourse(true)} 
+                onClick={() => setShowAddCourseModal(true)} 
                 className="btn btn-link mt-2"
               >
                 Add New Course
               </button>
             </div>
-
-            {addingNewCourse && (
-              <>
-                <div className="form-group">
-                  <label className="form-label">New Course Name:</label>
-                  <input 
-                    type="text" 
-                    placeholder="Course Name" 
-                    value={newCourse} 
-                    onChange={(e) => setNewCourse(e.target.value)} 
-                    className="form-control" 
-                  />
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Course Rating:</label>
-                  <input 
-                    type="number" 
-                    placeholder="Rating" 
-                    value={rating} 
-                    onChange={(e) => setRating(e.target.value)} 
-                    className="form-control" 
-                  />
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Course Slope:</label>
-                  <input 
-                    type="number" 
-                    placeholder="Slope" 
-                    value={slope} 
-                    onChange={(e) => setSlope(e.target.value)} 
-                    className="form-control" 
-                  />
-                </div>
-              </>
-            )}
 
             <div className="form-group">
               <label className="form-label">Score:</label>
@@ -342,6 +311,50 @@ const Home = () => {
           </div>
         </>
       )}
+
+      {/* Add Course Modal */}
+      <Modal show={showAddCourseModal} onHide={() => setShowAddCourseModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Add New Course</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <form onSubmit={handleAddCourseSubmit}>
+            <div className="form-group">
+              <label className="form-label">New Course Name:</label>
+              <input 
+                type="text" 
+                placeholder="Course Name" 
+                value={newCourse} 
+                onChange={(e) => setNewCourse(e.target.value)} 
+                className="form-control" 
+              />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Course Rating:</label>
+              <input 
+                type="number" 
+                placeholder="Rating" 
+                value={rating} 
+                onChange={(e) => setRating(e.target.value)} 
+                className="form-control" 
+              />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Course Slope:</label>
+              <input 
+                type="number" 
+                placeholder="Slope" 
+                value={slope} 
+                onChange={(e) => setSlope(e.target.value)} 
+                className="form-control" 
+              />
+            </div>
+            <Button variant="primary" type="submit">
+              Add Course
+            </Button>
+          </form>
+        </Modal.Body>
+      </Modal>
     </div>
   );
 };
