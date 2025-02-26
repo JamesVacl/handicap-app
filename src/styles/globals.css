@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&display=swap');
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -97,4 +99,8 @@ body {
 .pagination .btn-primary:hover {
   background-color: #3DAA6B; /* Darker emerald green */
   border-color: #3DAA6B;
+}
+
+.cursive-font {
+  font-family: 'Fugaz One'
 }

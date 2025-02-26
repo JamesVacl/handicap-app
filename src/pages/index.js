@@ -173,7 +173,7 @@ const Home = () => {
         <div className="logo-container">
           <Image src="/logo.png" alt="Logo" width={300} height={300} className="rounded-logo" />
         </div>
-        <h1 className="text-4xl font-semibold text-center mb-8">Guyscorp Handicap Tracking</h1>
+        <h1 className="text-4xl font-semibold text-center mb-8 cursive-font">Guyscorp Handicap Tracking</h1>
 
         {!passcodeEntered ? (
           <div className="passcode-container">
@@ -257,6 +257,9 @@ const Home = () => {
                 Submit Score
               </button>
             </form>
+            
+            <br/>
+
 
             {/* Leaderboard Table */}
             <h2 className="text-2xl font-semibold mb-4">Leaderboard</h2>
