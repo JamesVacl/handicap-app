@@ -62,39 +62,42 @@ const Home = () => {
 
   const calculateLeaderboard = (scores) => {
     const playerScores = {};
-  
+
     scores.forEach(score => {
       if (!playerScores[score.player]) {
-        playerScores[score.player] = { differentials: [], totalScore: 0, totalRounds: 0, total18HoleScores: 0 };
+        playerScores[score.player] = [];
       }
-  
-      // Add to differentials for both 9-hole and 18-hole scores
-      playerScores[score.player].differentials.push(score.differential);
-  
-      // Only calculate total score and rounds for 18-hole scores
-      if (score.holeType === '18') {
-        playerScores[score.player].totalScore += score.score;
-        playerScores[score.player].totalRounds += 1;
-        playerScores[score.player].total18HoleScores += 1;
-      }
+      playerScores[score.player].push(score);
     });
-  
+
     const leaderboard = Object.keys(playerScores).map(playerName => {
-      const { differentials, totalScore, totalRounds, total18HoleScores } = playerScores[playerName];
-      const sortedDifferentials = differentials.sort((a, b) => a - b);
-      const lowestDifferentials = sortedDifferentials.slice(0, Math.min(8, differentials.length));
+      const playerScoreList = playerScores[playerName];
+
+      // Sort scores by date in descending order (most recent first)
+      playerScoreList.sort((a, b) => new Date(b.date.seconds * 1000) - new Date(a.date.seconds * 1000));
+
+      // Take the 20 most recent scores
+      const recentScores = playerScoreList.slice(0, 20);
+
+      // Sort the recent scores by differential in ascending order (lowest first)
+      const sortedDifferentials = recentScores.map(score => score.differential).sort((a, b) => a - b);
+
+      // Take the 8 lowest differentials
+      const lowestDifferentials = sortedDifferentials.slice(0, 8);
       const averageHandicap = lowestDifferentials.reduce((acc, diff) => acc + diff, 0) / lowestDifferentials.length;
-  
+
       // Calculate the average 18-hole score (ignore 9-hole scores for this)
-      const averageScore = total18HoleScores > 0 ? totalScore / total18HoleScores : 0;
-  
+      const total18HoleScores = recentScores.filter(score => score.holeType === '18');
+      const totalScore = total18HoleScores.reduce((acc, score) => acc + score.score, 0);
+      const averageScore = total18HoleScores.length > 0 ? totalScore / total18HoleScores.length : 0;
+
       return {
         name: playerName,
         handicap: parseFloat(averageHandicap.toFixed(2)),
         averageScore: parseFloat(averageScore.toFixed(2)),
       };
     });
-  
+
     return leaderboard.sort((a, b) => a.handicap - b.handicap);
   };
 
