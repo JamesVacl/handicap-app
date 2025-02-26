@@ -325,6 +325,7 @@ const Home = () => {
             <Modal.Title>Add New Course</Modal.Title>
           </Modal.Header>
           <Modal.Body>
+            <p>Visit <a href="https://ncrdb.usga.org" target="_blank" rel="noopener noreferrer">USGA</a> for rating and slope information.</p>
             <form onSubmit={handleAddCourseSubmit}>
               <div className="form-group">
                 <label className="form-label">New Course Name:</label>
@@ -356,6 +357,7 @@ const Home = () => {
                   className="form-control" 
                 />
               </div>
+              <br />
               <Button variant="success" type="submit">
                 Add Course
               </Button>
