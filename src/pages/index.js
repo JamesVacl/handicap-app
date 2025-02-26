@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { getPlayers, getCourses, getScores, addScore, addCourse } from 'src/firebase';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Modal, Button } from 'react-bootstrap';
+import Image from 'next/image'; // Import the Image component from Next.js
 
 const Home = () => {
   const [players, setPlayers] = useState([]);
@@ -169,19 +170,24 @@ const Home = () => {
     <div className="home-container">
       <div className="overlay"></div>
       <div className="content">
+        <div className="logo-container">
+          <Image src="/logo.png" alt="Logo" width={300} height={300} className="rounded-logo" />
+        </div>
         <h1 className="text-4xl font-semibold text-center mb-8">Guyscorp Handicap Tracking</h1>
 
         {!passcodeEntered ? (
-          <form onSubmit={handlePasscodeSubmit} className="d-flex flex-column align-items-center mb-8">
-            <input
-              type="password"
-              placeholder="Enter Passcode"
-              value={passcode}
-              onChange={(e) => setPasscode(e.target.value)}
-              className="mb-4 p-3 form-control w-50"
-            />
-            <button type="submit" className="btn btn-primary w-50">Submit</button>
-          </form>
+          <div className="passcode-container">
+            <form onSubmit={handlePasscodeSubmit} className="d-flex flex-column align-items-center mb-8 passcode-form">
+              <input
+                type="password"
+                placeholder="Enter Passcode"
+                value={passcode}
+                onChange={(e) => setPasscode(e.target.value)}
+                className="mb-4 p-3 form-control w-50"
+              />
+              <button type="submit" className="btn btn-success w-50">Submit</button>
+            </form>
+          </div>
         ) : (
           <>
             <form onSubmit={handleSubmit} className="space-y-4 mb-8">
@@ -208,7 +214,7 @@ const Home = () => {
                   className="form-control"
                 >
                   <option value="">-- Choose a Course --</option>
-                  {courses.map((course) => (
+                  {courses.sort((a, b) => a.course.localeCompare(b.course)).map((course) => (
                     <option key={course.id} value={course.course}>{course.course}</option>
                   ))}
                 </select>
@@ -243,10 +249,10 @@ const Home = () => {
                   <option value="9">9 Holes</option>
                 </select>
               </div>
-
+              <br/>
               <button 
                 type="submit" 
-                className="btn btn-primary w-100"
+                className="btn btn-success w-100"
               >
                 Submit Score
               </button>
@@ -275,7 +281,6 @@ const Home = () => {
 
             {/* Previous Scores Table */}
             <h2 className="text-2xl font-semibold mb-4">Previous Scores</h2>
-            <h3 className="text-lg font-medium">Filter by Player</h3>
             <select onChange={(e) => setFilterPlayer(e.target.value)} value={filterPlayer} className="form-control mb-4">
               <option value="">-- Select Player --</option>
               {players.map((player) => (
@@ -307,9 +312,9 @@ const Home = () => {
             </table>
 
             <div className="pagination d-flex justify-content-center gap-4">
-              <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 0} className="btn btn-primary">Previous</button>
+              <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 0} className="btn btn-success">Previous</button>
               <span className="text-lg">Page {currentPage + 1} of {totalPages}</span>
-              <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages - 1} className="btn btn-primary">Next</button>
+              <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages - 1} className="btn btn-success">Next</button>
             </div>
           </>
         )}
@@ -351,7 +356,7 @@ const Home = () => {
                   className="form-control" 
                 />
               </div>
-              <Button variant="primary" type="submit">
+              <Button variant="success" type="submit">
                 Add Course
               </Button>
             </form>
