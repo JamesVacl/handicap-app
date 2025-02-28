@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getPlayers, getCourses, getScores, addScore, addCourse } from 'src/firebase';
+import { getPlayers, getCourses, getScores, addScore, addCourse, signIn, signOutUser } from 'src/firebase';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Modal, Button } from 'react-bootstrap';
 import Image from 'next/image'; // Import the Image component from Next.js
@@ -16,18 +16,13 @@ const Home = () => {
   const [slope, setSlope] = useState('');
   const [newCourse, setNewCourse] = useState('');
   const [showAddCourseModal, setShowAddCourseModal] = useState(false);
-  const [passcodeEntered, setPasscodeEntered] = useState(false);
-  const [passcode, setPasscode] = useState('');
+  const [authenticated, setAuthenticated] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [holeType, setHoleType] = useState('18');
   const [currentPage, setCurrentPage] = useState(0);
   const [filterPlayer, setFilterPlayer] = useState(''); // New state for filter selection
   const itemsPerPage = 10;
-
-  useEffect(() => {
-    if (sessionStorage.getItem('passcodeVerified')) {
-      setPasscodeEntered(true);
-    }
-  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -44,7 +39,7 @@ const Home = () => {
       setLeaderboard(leaderboardData);
     };
     fetchData();
-  }, []);
+  }, [authenticated]);
 
   const calculateDifferential = (score, rating, slope, holeType) => {
     let differential;
@@ -101,14 +96,19 @@ const Home = () => {
     return leaderboard.sort((a, b) => a.handicap - b.handicap);
   };
 
-  const handlePasscodeSubmit = (e) => {
+  const handleSignIn = async (e) => {
     e.preventDefault();
-    if (passcode === process.env.NEXT_PUBLIC_PASSCODE) {
-      sessionStorage.setItem('passcodeVerified', true);
-      setPasscodeEntered(true);
-    } else {
-      alert("Incorrect passcode!");
+    try {
+      await signIn(email, password);
+      setAuthenticated(true);
+    } catch (error) {
+      alert("Authentication failed!");
     }
+  };
+
+  const handleSignOut = async () => {
+    await signOutUser();
+    setAuthenticated(false);
   };
 
   const handleCourseSelect = (e) => {
@@ -120,8 +120,8 @@ const Home = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!passcodeEntered) {
-      alert("You must enter the passcode first!");
+    if (!authenticated) {
+      alert("You must be authenticated first!");
       return;
     }
 
@@ -178,21 +178,29 @@ const Home = () => {
         </div>
         <h1 className="text-4xl font-semibold text-center mb-8 cursive-font">Guyscorp Handicap Tracking</h1>
 
-        {!passcodeEntered ? (
-          <div className="passcode-container">
-            <form onSubmit={handlePasscodeSubmit} className="d-flex flex-column align-items-center mb-8 passcode-form">
+        {!authenticated ? (
+          <div className="auth-container">
+            <form onSubmit={handleSignIn} className="d-flex flex-column align-items-center mb-8 auth-form">
               <input
-                type="password"
-                placeholder="Enter Passcode"
-                value={passcode}
-                onChange={(e) => setPasscode(e.target.value)}
+                type="email"
+                placeholder="Enter Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="mb-4 p-3 form-control w-50"
               />
-              <button type="submit" className="btn btn-success w-50">Submit</button>
+              <input
+                type="password"
+                placeholder="Enter Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="mb-4 p-3 form-control w-50"
+              />
+              <button type="submit" className="btn btn-success w-50">Sign In</button>
             </form>
           </div>
         ) : (
           <>
+            <button onClick={handleSignOut} className="btn btn-danger mb-4">Sign Out</button>
             <form onSubmit={handleSubmit} className="space-y-4 mb-8">
               <div className="form-group">
                 <label className="form-label">Select a Player:</label>

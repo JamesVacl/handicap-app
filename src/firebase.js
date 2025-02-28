@@ -1,5 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getFirestore, collection, addDoc, getDocs, orderBy, query } from 'firebase/firestore';
+import { getAuth, signInWithEmailAndPassword, signOut } from 'firebase/auth';
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -12,6 +13,24 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth(app);
+
+const signIn = async (email, password) => {
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    return userCredential.user;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
+const signOutUser = async () => {
+  try {
+    await signOut(auth);
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
 
 // Fetch the predefined player list from Firestore
 const getPlayers = async () => {
@@ -95,4 +114,4 @@ const addCourse = async ({ course, rating, slope }) => {
 };
 
 // Export all functions
-export { db, getPlayers, getCourses, getScores, addScore, addCourse };
+export { db, getPlayers, getCourses, getScores, addScore, addCourse, signIn, signOutUser };
