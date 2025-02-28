@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getPlayers, getCourses, getScores, addScore, addCourse, signIn, signOutUser } from 'src/firebase';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Modal, Button } from 'react-bootstrap';
 import Image from 'next/image'; // Import the Image component from Next.js
@@ -25,18 +26,33 @@ const Home = () => {
   const itemsPerPage = 10;
 
   useEffect(() => {
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setAuthenticated(true);
+      } else {
+        setAuthenticated(false);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
     const fetchData = async () => {
-      const playerList = await getPlayers();
-      setPlayers(playerList);
+      if (authenticated) {
+        const playerList = await getPlayers();
+        setPlayers(playerList);
 
-      const scoreList = await getScores();
-      setScores(scoreList);
+        const scoreList = await getScores();
+        setScores(scoreList);
 
-      const courseList = await getCourses();
-      setCourses(courseList);
+        const courseList = await getCourses();
+        setCourses(courseList);
 
-      const leaderboardData = calculateLeaderboard(scoreList);
-      setLeaderboard(leaderboardData);
+        const leaderboardData = calculateLeaderboard(scoreList);
+        setLeaderboard(leaderboardData);
+      }
     };
     fetchData();
   }, [authenticated]);
