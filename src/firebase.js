@@ -64,16 +64,19 @@ const getScores = async () => {
 };
 
 // Function to calculate Handicap Differential
-const calculateDifferential = (score, rating, slope, holeType) => {
+const calculateDifferential = (score, rating, slope, holeType, handicapIndex) => {
   let differential;
 
   if (holeType === '18') {
     // Standard calculation for 18-hole scores
     differential = ((score - rating) * 113) / slope;
   } else {
-    // Adjust course rating for 9-hole scores (halve the rating)
-    const adjustedRating = rating / 2;
-    differential = (((score - adjustedRating) * 113) / slope) * 2;
+    // Calculate 9-hole score differential
+    const scoreDifferential = ((score - rating) * 113) / slope;
+    // Calculate estimated score differential
+    const estimatedDifferential = (handicapIndex * 0.52) + 1.197;
+    // Combine both differentials
+    differential = scoreDifferential + estimatedDifferential;
   }
 
   // Apply the 0.96 multiplier to all differentials
@@ -81,9 +84,9 @@ const calculateDifferential = (score, rating, slope, holeType) => {
 };
 
 // Function to add a score to Firestore
-const addScore = async ({ score, course, rating, slope, player, holeType }) => {
+const addScore = async ({ score, course, rating, slope, player, holeType, handicapIndex }) => {
   try {
-    const differential = calculateDifferential(score, rating, slope, holeType);
+    const differential = calculateDifferential(score, rating, slope, holeType, handicapIndex);
     const scoreData = {
       score,
       course,
@@ -93,6 +96,7 @@ const addScore = async ({ score, course, rating, slope, player, holeType }) => {
       player,  // Store player name instead of user
       date: new Date(),
       holeType: holeType,  // Add holeType here
+      handicapIndex: holeType === '9' ? parseFloat(handicapIndex) : null // Add handicapIndex if 9-hole
     };
 
     await addDoc(collection(db, "scores"), scoreData);
