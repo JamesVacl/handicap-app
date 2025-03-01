@@ -102,10 +102,16 @@ const Home = () => {
       const totalScore = total18HoleScores.reduce((acc, score) => acc + score.score, 0);
       const averageScore = total18HoleScores.length > 0 ? totalScore / total18HoleScores.length : 0;
 
+      // Mark the scores used for differential calculation
+      recentScores.forEach(score => {
+        score.isUsedForDifferential = lowestDifferentials.includes(score.differential);
+      });
+
       return {
         name: playerName,
         handicap: parseFloat(averageHandicap.toFixed(2)),
         averageScore: parseFloat(averageScore.toFixed(2)),
+        recentScores: recentScores
       };
     });
 
@@ -336,11 +342,11 @@ const Home = () => {
               <tbody>
                 {filteredScores.slice(currentPage * itemsPerPage, (currentPage + 1) * itemsPerPage).map((score) => (
                   <tr key={score.id}>
-                    <td>{score.player}</td>
-                    <td>{score.course}</td>
-                    <td>{score.score}</td>
-                    <td>{score.differential}</td>
-                    <td>{new Date(score.date.seconds * 1000).toLocaleDateString()}</td>
+                    <td style={{ color: score.isUsedForDifferential ? 'red' : 'black' }}>{score.player}</td>
+                    <td style={{ color: score.isUsedForDifferential ? 'red' : 'black' }}>{score.course}</td>
+                    <td style={{ color: score.isUsedForDifferential ? 'red' : 'black' }}>{score.score}</td>
+                    <td style={{ color: score.isUsedForDifferential ? 'red' : 'black' }}>{score.differential}</td>
+                    <td style={{ color: score.isUsedForDifferential ? 'red' : 'black' }}>{new Date(score.date.seconds * 1000).toLocaleDateString()}</td>
                   </tr>
                 ))}
               </tbody>
