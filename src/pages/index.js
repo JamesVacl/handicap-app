@@ -141,6 +141,11 @@ const Home = () => {
       return;
     }
 
+    if (!selectedPlayer || !selectedCourse || !score || !rating || !slope) {
+      alert("All fields are required!");
+      return;
+    }
+
     await addScore({
       score: parseFloat(score),
       course: selectedCourse,
