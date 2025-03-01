@@ -95,17 +95,24 @@ const Home = () => {
 
       // Take the 8 lowest differentials
       const lowestDifferentials = sortedDifferentials.slice(0, 8);
-      const averageHandicap = lowestDifferentials.reduce((acc, diff) => acc + diff, 0) / lowestDifferentials.length;
+
+      // Mark the scores used for differential calculation
+      recentScores.forEach(score => {
+        if (lowestDifferentials.includes(score.differential)) {
+          score.isUsedForDifferential = true;
+          // Remove the differential from the list to avoid marking more than 8 scores
+          lowestDifferentials.splice(lowestDifferentials.indexOf(score.differential), 1);
+        } else {
+          score.isUsedForDifferential = false;
+        }
+      });
+
+      const averageHandicap = sortedDifferentials.slice(0, 8).reduce((acc, diff) => acc + diff, 0) / 8;
 
       // Calculate the average 18-hole score (ignore 9-hole scores for this)
       const total18HoleScores = recentScores.filter(score => score.holeType === '18');
       const totalScore = total18HoleScores.reduce((acc, score) => acc + score.score, 0);
       const averageScore = total18HoleScores.length > 0 ? totalScore / total18HoleScores.length : 0;
-
-      // Mark the scores used for differential calculation
-      recentScores.forEach(score => {
-        score.isUsedForDifferential = lowestDifferentials.includes(score.differential);
-      });
 
       return {
         name: playerName,
