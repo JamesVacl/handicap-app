@@ -362,11 +362,11 @@ const Home = () => {
               <tbody>
                 {filteredScores.slice(currentPage * itemsPerPage, (currentPage + 1) * itemsPerPage).map((score) => (
                   <tr key={score.id} style={{ color: score.isUsedForDifferential ? 'red' : 'black' }}>
-                    <td>{score.player}</td>
-                    <td>{score.course}</td>
-                    <td>{score.score}</td>
-                    <td>{score.differential}</td>
-                    <td>{new Date(score.date.seconds * 1000).toLocaleDateString()}</td>
+                    <td style={{ color: score.isUsedForDifferential ? 'red' : 'black' }}>{score.player}</td>
+                    <td style={{ color: score.isUsedForDifferential ? 'red' : 'black' }}>{score.course}</td>
+                    <td style={{ color: score.isUsedForDifferential ? 'red' : 'black' }}>{score.score}</td>
+                    <td style={{ color: score.isUsedForDifferential ? 'red' : 'black' }}>{score.differential}</td>
+                    <td style={{ color: score.isUsedForDifferential ? 'red' : 'black' }}>{new Date(score.date.seconds * 1000).toLocaleDateString()}</td>
                   </tr>
                 ))}
               </tbody>
