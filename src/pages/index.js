@@ -64,8 +64,10 @@ const Home = () => {
     if (holeType === '18') {
       differential = ((score - rating) * 113) / slope;
     } else {
+      // Calculate Net Score
+      const netScore = (score -(handicapIndex*0.5))
       // Calculate 9-hole score differential
-      const scoreDifferential = ((score - rating) * 113) / slope;
+      const scoreDifferential = ((netScore - rating) * 113) / slope;
       // Calculate estimated score differential
       const estimatedDifferential = (handicapIndex * 0.52) + 1.197;
       // Combine both differentials
