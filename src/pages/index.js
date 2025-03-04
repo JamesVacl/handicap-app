@@ -74,7 +74,7 @@ const Home = () => {
       differential = scoreDifferential + estimatedDifferential;
     }
 
-    return parseFloat((differential * 0.96).toFixed(2)); // Apply 0.96 multiplier
+    return parseFloat((differential * 0.96).toFixed(1)); // Apply 0.96 multiplier
   };
 
   const calculateLeaderboard = (scores) => {
@@ -115,8 +115,8 @@ const Home = () => {
 
       return {
         name: playerName,
-        handicap: parseFloat(averageHandicap.toFixed(2)),
-        averageScore: parseFloat(averageScore.toFixed(2)),
+        handicap: parseFloat(averageHandicap.toFixed(1)),
+        averageScore: parseFloat(averageScore.toFixed(1)),
         recentScores: recentScores
       };
     });
