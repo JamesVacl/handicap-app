@@ -25,6 +25,7 @@ const Home = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const [filterPlayer, setFilterPlayer] = useState(''); // New state for filter selection
   const [filterCourse, setFilterCourse] = useState(''); // New state for filter selection
+  const [datePlayed, setDatePlayed] = useState(new Date().toISOString().split('T')[0]);
   const itemsPerPage = 10;
 
   useEffect(() => {
@@ -154,7 +155,7 @@ const Home = () => {
       return;
     }
 
-    if (!selectedPlayer || !selectedCourse || !score || !rating || !slope) {
+    if (!selectedPlayer || !selectedCourse || !score || !rating || !slope || !datePlayed) {
       alert("All fields are required!");
       return;
     }
@@ -166,7 +167,8 @@ const Home = () => {
       slope: parseFloat(slope),
       player: selectedPlayer,
       holeType: holeType,
-      handicapIndex: holeType === '9' ? parseFloat(handicapIndex) : null // Add handicapIndex if 9-hole
+      handicapIndex: holeType === '9' ? parseFloat(handicapIndex) : null,
+      date: new Date(datePlayed) // Convert string date to Date object
     });
     alert("Score added!");
 
@@ -175,7 +177,8 @@ const Home = () => {
     setSelectedCourse('');
     setRating('');
     setSlope('');
-    setHandicapIndex(''); // Reset handicapIndex
+    setHandicapIndex('');
+    setDatePlayed(new Date().toISOString().split('T')[0]);
 
     // Refresh the page to reflect the new data
     window.location.reload();
@@ -312,6 +315,16 @@ const Home = () => {
                   />
                 </div>
               )}
+
+              <div className="form-group">
+                <label className="form-label">Date Played:</label>
+                <input 
+                  type="date" 
+                  value={datePlayed} 
+                  onChange={(e) => setDatePlayed(e.target.value)} 
+                  className="form-control" 
+                />
+              </div>
 
               <br/>
               <button 

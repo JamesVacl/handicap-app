@@ -84,7 +84,7 @@ const calculateDifferential = (score, rating, slope, holeType, handicapIndex) =>
 };
 
 // Function to add a score to Firestore
-const addScore = async ({ score, course, rating, slope, player, holeType, handicapIndex }) => {
+const addScore = async ({ score, course, rating, slope, player, holeType, handicapIndex, date }) => {
   try {
     const differential = calculateDifferential(score, rating, slope, holeType, handicapIndex);
     const scoreData = {
@@ -93,10 +93,10 @@ const addScore = async ({ score, course, rating, slope, player, holeType, handic
       rating,
       slope,
       differential: parseFloat(differential.toFixed(2)),
-      player,  // Store player name instead of user
-      date: new Date(),
-      holeType: holeType,  // Add holeType here
-      handicapIndex: holeType === '9' ? parseFloat(handicapIndex) : null // Add handicapIndex if 9-hole
+      player,
+      date: date ? new Date(date) : new Date(), // Use provided date or current date as fallback
+      holeType: holeType,
+      handicapIndex: holeType === '9' ? parseFloat(handicapIndex) : null
     };
 
     await addDoc(collection(db, "scores"), scoreData);
