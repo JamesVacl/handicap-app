@@ -24,6 +24,7 @@ const Home = () => {
   const [handicapIndex, setHandicapIndex] = useState(''); // New state for Handicap Index
   const [currentPage, setCurrentPage] = useState(0);
   const [filterPlayer, setFilterPlayer] = useState(''); // New state for filter selection
+  const [filterCourse, setFilterCourse] = useState(''); // New state for filter selection
   const itemsPerPage = 10;
 
   useEffect(() => {
@@ -194,9 +195,12 @@ const Home = () => {
     setSlope('');
   };
 
-  const filteredScores = filterPlayer 
-    ? scores.filter((score) => score.player === filterPlayer)
-    : scores;
+  const filteredScores = scores.filter((score) => {
+    return (
+      (!filterPlayer || score.player === filterPlayer) &&
+      (!filterCourse || score.course === filterCourse)
+    );
+  });
 
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
@@ -348,6 +352,13 @@ const Home = () => {
               <option value="">-- Select Player --</option>
               {players.map((player) => (
                 <option key={player.id} value={player.name}>{player.name}</option>
+              ))}
+            </select>
+
+            <select onChange={(e) => setFilterCourse(e.target.value)} value={filterCourse} className="form-control mb-4">
+              <option value="">-- Select Course --</option>
+              {courses.map((course) => (
+                <option key={course.id} value={course.course}>{course.course}</option>
               ))}
             </select>
 
