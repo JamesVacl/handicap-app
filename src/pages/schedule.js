@@ -23,15 +23,13 @@ const Schedule = () => {
   }, [router]);
 
   return (
-    <div>
+    <div className="app-wrapper">
       {authenticated && <NavigationMenu />}
-      <div className="app-container">
-        <div className="home-container">
-          <div className="overlay"></div>
-          <div className="content">
-            <h1 className="text-4xl font-semibold mb-8 cursive-font text-center">Schedule</h1>
-            {/* Add your schedule content here */}
-          </div>
+      <div className="home-container">
+        <div className="overlay"></div>
+        <div className="content">
+          <h1 className="text-4xl font-semibold mb-8 cursive-font text-center">Schedule</h1>
+          {/* Add your schedule content here */}
         </div>
       </div>
     </div>

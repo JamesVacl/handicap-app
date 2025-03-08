@@ -15,17 +15,17 @@
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: Helvetica, Arial, sans-serif;
   margin: 0;
   padding: 0;
 }
 
 /* Professional theme styles */
 .home-container {
+  flex: 1;
   position: relative;
   background: url('/grass-texture.jpg') no-repeat center center fixed;
   background-size: cover;
-  min-height: calc(100vh - 56px); /* Subtract navbar height */
   display: flex;
   justify-content: center;
   align-items: flex-start;
@@ -52,7 +52,7 @@ body {
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
   max-width: 800px;
   width: 100%;
-  margin-top: 1rem;
+  margin: 1rem auto;
 }
 
 .logo-container {
@@ -166,4 +166,10 @@ body {
 /* Remove Bootstrap's default margins */
 .mb-4 {
   margin-bottom: 0 !important;
+}
+
+.app-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
