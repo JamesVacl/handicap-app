@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { useRouter } from 'next/router';
 import { Navbar, Nav, Container } from 'react-bootstrap';
-import NavigationMenu from '../components/NavigationMenu'; // Add this import
+import 'bootstrap/dist/css/bootstrap.min.css';
+import NavigationMenu from '../components/NavigationMenu';
 
 const Teams = () => {
   const [authenticated, setAuthenticated] = useState(false);
@@ -19,15 +20,20 @@ const Teams = () => {
     });
 
     return () => unsubscribe();
-  }, [router]); // Add router to the dependency array
+  }, [router]);
 
   return (
     <div>
-      <NavigationMenu />
-      <Container>
-        <h1>Teams</h1>
-        {/* Add your teams content here */}
-      </Container>
+      {authenticated && <NavigationMenu />}
+      <div className="app-container">
+        <div className="home-container">
+          <div className="overlay"></div>
+          <div className="content">
+            <h1 className="text-4xl font-semibold mb-8 cursive-font text-center">Teams</h1>
+            {/* Add your teams content here */}
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
