@@ -213,11 +213,8 @@ const Home = () => {
   const totalPages = Math.ceil(filteredScores.length / itemsPerPage);
 
   return (
-    <div>
-      {/* Navigation menu always at the top */}
+    <div className="app-wrapper">
       {authenticated && <NavigationMenu />}
-      
-      {/* Main content */}
       <div className="home-container">
         <div className="overlay"></div>
         <div className="content">
