@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 import { Navbar, Nav, Container, Button, Form } from 'react-bootstrap';
 import { getTeams, getScores, addTeam, updateTeam, getPlayerHandicaps } from '../firebase';
 import NavigationMenu from '../components/NavigationMenu';
+import 'bootstrap/dist/css/bootstrap.min.css'; 
 import Image from 'next/image'; // Import the Image component from Next.js
 
 const Teams = () => {
