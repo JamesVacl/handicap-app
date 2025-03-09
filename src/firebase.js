@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, addDoc, getDocs, orderBy, query } from 'firebase/firestore';
+import { getFirestore, collection, addDoc, getDocs, orderBy, query, updateDoc, doc } from 'firebase/firestore';
 import { getAuth, signInWithEmailAndPassword, signOut, setPersistence, browserSessionPersistence } from 'firebase/auth';
 
 const firebaseConfig = {
@@ -63,6 +63,55 @@ const getScores = async () => {
   }));
 };
 
+// Add this function after getScores
+const getPlayerHandicaps = async () => {
+  const scores = await getScores();
+  const playerScores = {};
+
+  // Group scores by player
+  scores.forEach(score => {
+    if (!playerScores[score.player]) {
+      playerScores[score.player] = [];
+    }
+    playerScores[score.player].push({
+      differential: score.differential,
+      date: score.date
+    });
+  });
+
+  // Calculate handicap for each player
+  const playerHandicaps = Object.entries(playerScores).map(([playerName, scores]) => {
+    // Sort differentials by date (newest first)
+    const sortedScores = scores.sort((a, b) => b.date - a.date);
+    
+    // Take the most recent 20 scores
+    const recentScores = sortedScores.slice(0, 20);
+    
+    // Sort differentials numerically for handicap calculation
+    const sortedDifferentials = recentScores
+      .map(score => score.differential)
+      .sort((a, b) => a - b);
+
+    // Calculate handicap based on number of scores
+    let handicap = 0;
+    if (sortedDifferentials.length > 0) {
+      const numScores = sortedDifferentials.length;
+      const scoresToUse = Math.min(8, Math.floor(numScores * 0.4));
+      if (scoresToUse > 0) {
+        const sum = sortedDifferentials.slice(0, scoresToUse).reduce((a, b) => a + b, 0);
+        handicap = parseFloat((sum / scoresToUse).toFixed(1));
+      }
+    }
+
+    return {
+      name: playerName,
+      handicap: handicap
+    };
+  });
+
+  return playerHandicaps;
+};
+
 // Function to calculate Handicap Differential
 const calculateDifferential = (score, rating, slope, holeType, handicapIndex) => {
   let differential;
@@ -120,5 +169,62 @@ const addCourse = async ({ course, rating, slope }) => {
   }
 };
 
+// Fetch teams from Firestore
+const getTeams = async () => {
+  const teamsRef = collection(db, 'Teams');
+  const snapshot = await getDocs(teamsRef);
+  const teams = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  
+  // Get current handicaps
+  const playerHandicaps = await getPlayerHandicaps();
+  
+  // Update team players with current handicaps
+  return teams.map(team => {
+    const updatedPlayers = team.players?.map(player => {
+      const currentHandicap = playerHandicaps.find(p => p.name === player.name);
+      return {
+        ...player,
+        handicap: currentHandicap?.handicap || player.handicap
+      };
+    }) || [];
+    
+    // Recalculate team average
+    const averageHandicap = updatedPlayers.length 
+      ? parseFloat((updatedPlayers.reduce((acc, p) => acc + p.handicap, 0) / updatedPlayers.length).toFixed(1))
+      : 0;
+
+    return {
+      ...team,
+      players: updatedPlayers,
+      averageHandicap
+    };
+  });
+};
+
+// Add a new team to Firestore
+const addTeam = async (teamData) => {
+  const teamsRef = collection(db, 'Teams');
+  return await addDoc(teamsRef, teamData);
+};
+
+// Update an existing team in Firestore
+const updateTeam = async (teamId, teamData) => {
+  const teamRef = doc(db, 'Teams', teamId);
+  return await updateDoc(teamRef, teamData);
+};
+
 // Export all functions
-export { db, getPlayers, getCourses, getScores, addScore, addCourse, signIn, signOutUser };
+export { 
+  db, 
+  getPlayers, 
+  getCourses, 
+  getScores, 
+  addScore, 
+  addCourse, 
+  signIn, 
+  signOutUser, 
+  getTeams, 
+  addTeam, 
+  updateTeam,
+  getPlayerHandicaps 
+};

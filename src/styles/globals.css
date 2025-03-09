@@ -201,3 +201,37 @@ body {
   padding: 5px 0;
   color: #333;
 }
+
+.team-section {
+  background: rgba(255, 255, 255, 0.9);
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.player-item {
+  padding: 8px;
+  margin: 4px 0;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 4px;
+}
+
+.team-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.team-logo-container {
+  flex-shrink: 0;
+}
+
+.team-logo {
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.team-info {
+  flex-grow: 1;
+}
