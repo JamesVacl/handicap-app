@@ -173,3 +173,31 @@ body {
   flex-direction: column;
   min-height: 100vh;
 }
+
+.schedule-section {
+  background: rgba(221, 221, 221, 0);
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.tee-time-slot {
+  border-left: 4px solid #198754;
+  padding-left: 15px;
+  margin: 15px 0;
+}
+
+.tee-time-slot h4 {
+  color: #198754;
+}
+
+.list-unstyled {
+  list-style: none;
+  padding-left: 0;
+  margin: 10px 0;
+}
+
+.list-unstyled li {
+  padding: 5px 0;
+  color: #333;
+}

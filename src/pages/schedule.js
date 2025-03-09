@@ -29,7 +29,74 @@ const Schedule = () => {
         <div className="overlay"></div>
         <div className="content">
           <h1 className="text-4xl font-semibold mb-8 cursive-font text-center">Schedule</h1>
-          {/* Add your schedule content here */}
+          
+          <div className="schedule-section">
+            <h2 className="text-3xl font-bold mb-4">May 17, 2025</h2>
+            <h3 className="text-2xl text-success mb-4">Cobble Beach Golf Links</h3>
+            
+            <div className="tee-times">
+              <div className="tee-time-slot mb-4">
+                <h4 className="text-xl font-semibold">12:30 PM</h4>
+                <ul className="list-unstyled">
+                  <li>Player 1: TBD</li>
+                  <li>Player 2: TBD</li>
+                  <li>Player 3: TBD</li>
+                </ul>
+              </div>
+
+              <div className="tee-time-slot mb-4">
+                <h4 className="text-xl font-semibold">12:40 PM</h4>
+                <ul className="list-unstyled">
+                  <li>Player 1: TBD</li>
+                  <li>Player 2: TBD</li>
+                  <li>Player 3: TBD</li>
+                </ul>
+              </div>
+
+              <div className="tee-time-slot mb-4">
+                <h4 className="text-xl font-semibold">12:50 PM</h4>
+                <ul className="list-unstyled">
+                  <li>Player 1: TBD</li>
+                  <li>Player 2: TBD</li>
+                  <li>Player 3: TBD</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div className="schedule-section">
+            <h2 className="text-3xl font-bold mb-4">May 18, 2025</h2>
+            <h3 className="text-2xl text-success mb-4">Lora Bay Golf Course</h3>
+            
+            <div className="tee-times">
+              <div className="tee-time-slot mb-4">
+                <h4 className="text-xl font-semibold">12:30 PM</h4>
+                <ul className="list-unstyled">
+                  <li>Player 1: TBD</li>
+                  <li>Player 2: TBD</li>
+                  <li>Player 3: TBD</li>
+                </ul>
+              </div>
+
+              <div className="tee-time-slot mb-4">
+                <h4 className="text-xl font-semibold">12:40 PM</h4>
+                <ul className="list-unstyled">
+                  <li>Player 1: TBD</li>
+                  <li>Player 2: TBD</li>
+                  <li>Player 3: TBD</li>
+                </ul>
+              </div>
+
+              <div className="tee-time-slot mb-4">
+                <h4 className="text-xl font-semibold">12:50 PM</h4>
+                <ul className="list-unstyled">
+                  <li>Player 1: TBD</li>
+                  <li>Player 2: TBD</li>
+                  <li>Player 3: TBD</li>
+                </ul>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
