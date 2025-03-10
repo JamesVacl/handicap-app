@@ -1,7 +1,7 @@
 import { initializeApp } from 'firebase/app';
 import { getFirestore, collection, addDoc, getDocs, orderBy, query, updateDoc, doc } from 'firebase/firestore';
 import { getAuth, signInWithEmailAndPassword, signOut, setPersistence, browserSessionPersistence } from 'firebase/auth';
-import { getAnalytics } from "firebase/analytics";
+import { getAnalytics, isSupported } from "firebase/analytics";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -15,7 +15,13 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
-const analytics = getAnalytics(app);
+
+// Initialize Analytics only on client side
+let analytics = null;
+if (typeof window !== 'undefined') {
+  // Check if analytics is supported before initializing
+  isSupported().then(yes => yes && (analytics = getAnalytics(app)));
+}
 
 // Set persistence to session
 setPersistence(auth, browserSessionPersistence);

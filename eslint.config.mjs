@@ -9,6 +9,18 @@ const compat = new FlatCompat({
   baseDirectory: __dirname,
 });
 
-const eslintConfig = [...compat.extends("next/core-web-vitals")];
+const eslintConfig = [
+  ...compat.extends("next/core-web-vitals"),
+  {
+    rules: {
+      "no-restricted-globals": ["error", "window", "document"],
+      "no-undef": "error"
+    },
+    env: {
+      browser: true,
+      node: true
+    }
+  }
+];
 
 export default eslintConfig;
