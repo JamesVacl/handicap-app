@@ -80,10 +80,10 @@ const Teams = () => {
               <div className="team-header">
                 <div className="team-logo-container">
                   <Image 
-                    src={team.name === "Putt Pirates" ? "/putt-pirate-logo.png" : "/golden-boys-logo.jpeg"}
+                    src={team.name === "Putt Pirates" ? "/putt-pirates-logo.jpg" : "/golden-boys-logo.jpeg"}
                     alt={`${team.name} Logo`}
-                    width={100} 
-                    height={100} 
+                    width={150} 
+                    height={150} 
                     className="team-logo" 
                   />
                 </div>
