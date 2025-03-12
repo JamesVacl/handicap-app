@@ -16,9 +16,11 @@ const eslintConfig = [
       "no-restricted-globals": ["error", "window", "document"],
       "no-undef": "error"
     },
-    env: {
-      browser: true,
-      node: true
+    languageOptions: {
+      globals: {
+        window: 'readonly',
+        document: 'readonly'
+      }
     }
   }
 ];

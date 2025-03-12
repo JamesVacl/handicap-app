@@ -9,28 +9,49 @@ const WeatherForecast = ({ city = 'Owen Sound,CA' }) => {
   useEffect(() => {
     const fetchWeather = async () => {
       try {
-        // Always fetch weather starting from current date
         const response = await axios.get(
           `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${process.env.NEXT_PUBLIC_OPENWEATHER_API_KEY}&units=metric&cnt=40`
         );
         
-        // Group forecasts by day and keep the highest POP value
+        // Group forecasts by day
         const dailyForecasts = response.data.list.reduce((acc, forecast) => {
           const date = new Date(forecast.dt * 1000).toLocaleDateString();
-          if (!acc[date] || forecast.pop > acc[date].pop) {
-            acc[date] = forecast;
+          
+          if (!acc[date]) {
+            acc[date] = {
+              ...forecast,
+              popCount: 1,
+              popSum: forecast.pop,
+              main: {
+                ...forecast.main,
+                temp_min: forecast.main.temp,
+                temp_max: forecast.main.temp
+              }
+            };
+          } else {
+            acc[date].main.temp_min = Math.min(acc[date].main.temp_min, forecast.main.temp);
+            acc[date].main.temp_max = Math.max(acc[date].main.temp_max, forecast.main.temp);
+            acc[date].popCount += 1;
+            acc[date].popSum += forecast.pop;
           }
           return acc;
         }, {});
 
-        const processedForecasts = Object.values(dailyForecasts).slice(0, 5);
+        const processedForecasts = Object.values(dailyForecasts)
+          .map(forecast => ({
+            ...forecast,
+            pop: forecast.popSum / forecast.popCount
+          }))
+          .slice(0, 5);
+
         setForecasts(processedForecasts);
         setError(null);
       } catch (error) {
         console.error('Error fetching weather:', error);
         setError('Unable to load weather data');
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     fetchWeather();
@@ -55,12 +76,14 @@ const WeatherForecast = ({ city = 'Owen Sound,CA' }) => {
               height={30}
             />
             <div className="forecast-details">
-              <div className="temp">{Math.round(forecast.main.temp)}°C</div>
+              <div className="temp">
+                <span className="high">{Math.round(forecast.main.temp_max)}°</span>
+                <span className="low ms-2">{Math.round(forecast.main.temp_min)}°</span>
+              </div>
               <div className="conditions">
                 <span>{Math.round(forecast.wind.speed * 3.6)}km/h</span>
                 <span className="precipitation ms-2">
-                  {/* Remove conditional rendering and always show POP */}
-                  {Math.round(forecast.pop * 100)}% ☔️
+                  {`${Math.round(forecast.pop * 100)}%`} {forecast.pop > 0 && '☔️'}
                 </span>
               </div>
             </div>

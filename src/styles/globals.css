@@ -344,3 +344,20 @@ body {
     width: 100%;
   }
 }
+
+.temp .high {
+  color: #e53e3e;
+  font-weight: 600;
+}
+
+.temp .low {
+  color: #4299e1;
+  font-weight: 400;
+}
+
+.uv-index {
+  color: #805ad5;
+  font-weight: 500;
+  border-left: 1px solid rgba(0,0,0,0.1);
+  padding-left: 8px;
+}
