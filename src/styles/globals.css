@@ -235,3 +235,112 @@ body {
 .team-info {
   flex-grow: 1;
 }
+
+.weather-forecast {
+  background: rgba(255, 255, 255, 0.95);
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  min-width: 250px; /* Increased min-width */
+  margin-left: 1rem;
+}
+
+.forecast-day {
+  padding: 0.5rem;
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+.forecast-day:last-child {
+  border-bottom: none;
+}
+
+.forecast-header {
+  color: #666;
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+
+.forecast-content {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.forecast-details {
+  flex-grow: 1;
+}
+
+.forecast-details .temp {
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+.forecast-details .conditions {
+  font-size: 0.9rem;
+  color: #666;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.precipitation {
+  display: inline-block;
+  color: #2c5282;
+  font-weight: 500;
+  padding-left: 8px;
+  border-left: 1px solid rgba(0,0,0,0.1);
+}
+
+.conditions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #4a5568;
+  font-size: 0.9rem;
+}
+
+.schedule-layout {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 2rem;
+  align-items: start;
+}
+
+.schedule-content {
+  padding-right: 2rem;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.weather-sidebar {
+  position: sticky;
+  top: 2rem;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 1.5rem;
+  border-radius: 8px;
+  backdrop-filter: blur(10px);
+}
+
+.weather-sidebar h3 {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 0.5rem;
+}
+
+.weather-sidebar > div:last-child {
+  margin-bottom: 0;
+}
+
+@media (max-width: 768px) {
+  .schedule-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .schedule-content {
+    padding-right: 0;
+    border-right: none;
+    margin-bottom: 2rem;
+  }
+
+  .weather-sidebar {
+    position: static;
+    width: 100%;
+  }
+}
