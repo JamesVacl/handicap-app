@@ -182,7 +182,10 @@ const Home = () => {
     setDatePlayed(new Date().toISOString().split('T')[0]);
 
     // Refresh the page to reflect the new data
-    window.location.reload();
+    const updatedScores = await getScores();
+    setScores(updatedScores);
+    const updatedLeaderboard = calculateLeaderboard(updatedScores);
+    setLeaderboard(updatedLeaderboard);
   };
 
   const handleAddCourseSubmit = async (e) => {

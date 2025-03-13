@@ -175,20 +175,58 @@ body {
 }
 
 .schedule-section {
-  background: rgba(221, 221, 221, 0);
-  padding: 20px;
-  border-radius: 8px;
-  margin-bottom: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2rem;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+}
+
+.schedule-info {
+  margin-bottom: 1.5rem;
+}
+
+.schedule-info h2 {
+  color: #1a4731; /* Dark green for dates */
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.schedule-info h3,
+.additional-round h3 {
+  color: #48bb78; /* Keep existing green for course names */
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.schedule-info p,
+.additional-round p {
+  color: #a0aec0;
+  font-style: italic;
+  font-size: 0.95rem;
+  margin-bottom: 1rem;
+  line-height: 1.5;
+}
+
+.tee-times {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
 .tee-time-slot {
-  border-left: 4px solid #198754;
-  padding-left: 15px;
-  margin: 15px 0;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 1rem;
+  border-radius: 8px;
 }
 
-.tee-time-slot h4 {
-  color: #198754;
+.additional-round {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.additional-round .tee-times {
+  margin-top: 1rem;
 }
 
 .list-unstyled {
@@ -328,6 +366,27 @@ body {
   margin-bottom: 0;
 }
 
+.weather-section {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 2rem;
+  backdrop-filter: blur(10px);
+}
+
+.weather-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  align-items: start;
+}
+
+.weather-card {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 1.5rem;
+  border-radius: 8px;
+  backdrop-filter: blur(5px);
+}
+
 @media (max-width: 768px) {
   .schedule-layout {
     grid-template-columns: 1fr;
@@ -342,6 +401,10 @@ body {
   .weather-sidebar {
     position: static;
     width: 100%;
+  }
+
+  .weather-grid {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -360,4 +423,22 @@ body {
   font-weight: 500;
   border-left: 1px solid rgba(0,0,0,0.1);
   padding-left: 8px;
+}
+
+.additional-round {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-top: 2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.additional-round h3 {
+  color: #48bb78;
+  margin-bottom: 1rem !important;
+}
+
+.schedule-info p {
+  font-size: 1.1rem;
+  color: #718096;
 }
