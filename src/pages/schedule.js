@@ -28,9 +28,9 @@ const Schedule = () => {
     },
     {
       date: '2025-05-18',
-      courseName: 'Lora Bay Golf Course',
-      city: 'Thornbury,CA',
-      teeTimes: ['12:30', '12:40', '12:50'],
+      courseName: 'Batteaux Creek Golf Club',
+      city: 'Nottawa,CA',
+      teeTimes: ['9:00', '9:10', '9:20'],
       notes: ''
     },
     {

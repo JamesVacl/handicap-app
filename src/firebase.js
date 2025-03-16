@@ -12,19 +12,26 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
+// Initialize Firebase only once
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
 // Initialize Analytics only on client side
 let analytics = null;
+
+// Use typeof window check instead of process.browser
 if (typeof window !== 'undefined') {
   // Check if analytics is supported before initializing
-  isSupported().then(yes => yes && (analytics = getAnalytics(app)));
+  isSupported().then(yes => {
+    if (yes) {
+      analytics = getAnalytics(app);
+    }
+  });
+  
+  // Set persistence to session
+  setPersistence(auth, browserSessionPersistence).catch(console.error);
 }
-
-// Set persistence to session
-setPersistence(auth, browserSessionPersistence);
 
 const signIn = async (email, password) => {
   try {
