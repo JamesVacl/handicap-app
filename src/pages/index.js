@@ -22,7 +22,6 @@ const Home = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [holeType, setHoleType] = useState('18');
-  const [handicapIndex, setHandicapIndex] = useState(''); // New state for Handicap Index
   const [currentPage, setCurrentPage] = useState(0);
   const [filterPlayer, setFilterPlayer] = useState(''); // New state for filter selection
   const [filterCourse, setFilterCourse] = useState(''); // New state for filter selection
@@ -61,25 +60,6 @@ const Home = () => {
     fetchData();
   }, [authenticated]);
 
-  const calculateDifferential = (score, rating, slope, holeType, handicapIndex) => {
-    let differential;
-
-    if (holeType === '18') {
-      differential = ((score - rating) * 113) / slope;
-    } else {
-      // Calculate Net Score
-      const netScore = (score -(handicapIndex*0.5))
-      // Calculate 9-hole score differential
-      const scoreDifferential = ((netScore - rating) * 113) / slope;
-      // Calculate estimated score differential
-      const estimatedDifferential = (handicapIndex * 0.52) + 1.197;
-      // Combine both differentials
-      differential = scoreDifferential + estimatedDifferential;
-    }
-
-    return parseFloat((differential * 0.96).toFixed(1)); // Apply 0.96 multiplier
-  };
-
   const calculateLeaderboard = (scores) => {
     const playerScores = {};
 
@@ -87,9 +67,13 @@ const Home = () => {
       if (!playerScores[score.player]) {
         playerScores[score.player] = [];
       }
-      playerScores[score.player].push(score);
+      // Only include 18-hole scores and properly combined 9-hole scores
+      if (score.differential !== null && (score.holeType === '18' || score.isComposed)) {
+        playerScores[score.player].push(score);
+      }
     });
 
+    // Update average score calculation to include combined scores
     const leaderboard = Object.keys(playerScores).map(playerName => {
       const playerScoreList = playerScores[playerName];
 
@@ -99,22 +83,36 @@ const Home = () => {
       // Take the 20 most recent scores
       const recentScores = playerScoreList.slice(0, 20);
 
-      // Sort the recent scores by differential in ascending order (lowest first)
-      const sortedDifferentials = recentScores.map(score => score.differential).sort((a, b) => a - b);
+      // Create array of objects with differential and index
+      const differentialsWithIndex = recentScores
+        .map((score, index) => ({ 
+          differential: score.differential,
+          index: index,
+          date: score.date
+        }))
+        .sort((a, b) => {
+          if (a.differential !== b.differential) {
+            return a.differential - b.differential;
+          }
+          return new Date(b.date.seconds * 1000) - new Date(a.date.seconds * 1000);
+        });
 
       // Take the 8 lowest differentials
-      const lowestDifferentials = sortedDifferentials.slice(0, 8);
-      const averageHandicap = lowestDifferentials.reduce((acc, diff) => acc + diff, 0) / lowestDifferentials.length;
+      const lowestDifferentials = differentialsWithIndex.slice(0, 8);
+      const averageHandicap = lowestDifferentials.length > 0 
+        ? lowestDifferentials.reduce((acc, item) => acc + item.differential, 0) / lowestDifferentials.length 
+        : 0;
 
-      // Calculate the average 18-hole score (ignore 9-hole scores for this)
-      const total18HoleScores = recentScores.filter(score => score.holeType === '18');
-      const totalScore = total18HoleScores.reduce((acc, score) => acc + score.score, 0);
-      const averageScore = total18HoleScores.length > 0 ? totalScore / total18HoleScores.length : 0;
-
-      // Mark the scores used for differential calculation
-      recentScores.forEach(score => {
-        score.isUsedForDifferential = lowestDifferentials.includes(score.differential);
+      // Mark which scores are used in handicap calculation
+      const usedIndices = new Set(lowestDifferentials.map(item => item.index));
+      recentScores.forEach((score, index) => {
+        score.isUsedForDifferential = usedIndices.has(index);
       });
+
+      // Calculate average score from full rounds (18-hole and combined 9s)
+      const fullRoundScores = recentScores.filter(score => score.holeType === '18' || score.isComposed);
+      const totalScore = fullRoundScores.reduce((acc, score) => acc + score.score, 0);
+      const averageScore = fullRoundScores.length > 0 ? totalScore / fullRoundScores.length : 0;
 
       return {
         name: playerName,
@@ -168,20 +166,24 @@ const Home = () => {
       slope: parseFloat(slope),
       player: selectedPlayer,
       holeType: holeType,
-      handicapIndex: holeType === '9' ? parseFloat(handicapIndex) : null,
-      date: new Date(datePlayed) // Convert string date to Date object
+      date: new Date(datePlayed)
     });
-    alert("Score added!");
 
-    // Reset the form fields
+    // Customize alert based on hole type
+    if (holeType === '9') {
+      alert("9-hole score added! It will be combined with your next 9-hole score for handicap calculation.");
+    } else {
+      alert("18-hole score added!");
+    }
+
+    // Reset form fields
     setScore('');
     setSelectedCourse('');
     setRating('');
     setSlope('');
-    setHandicapIndex('');
     setDatePlayed(new Date().toISOString().split('T')[0]);
 
-    // Refresh the page to reflect the new data
+    // Refresh data
     const updatedScores = await getScores();
     setScores(updatedScores);
     const updatedLeaderboard = calculateLeaderboard(updatedScores);
@@ -308,19 +310,6 @@ const Home = () => {
                   </select>
                 </div>
 
-                {holeType === '9' && (
-                  <div className="form-group">
-                    <label className="form-label">Handicap Index:</label>
-                    <input 
-                      type="number" 
-                      placeholder="Handicap Index" 
-                      value={handicapIndex} 
-                      onChange={(e) => setHandicapIndex(e.target.value)} 
-                      className="form-control" 
-                    />
-                  </div>
-                )}
-
                 <div className="form-group">
                   <label className="form-label">Date Played:</label>
                   <input 
@@ -386,18 +375,27 @@ const Home = () => {
                     <th>Player</th>
                     <th>Course</th>
                     <th>Score</th>
-                    <th>Handicap</th>
+                    <th>Type</th>
+                    <th>Differential</th>
                     <th>Date</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredScores.slice(currentPage * itemsPerPage, (currentPage + 1) * itemsPerPage).map((score) => (
-                    <tr key={score.id} style={{ color: score.isUsedForDifferential ? 'red' : 'black' }}>
-                      <td style={{ color: score.isUsedForDifferential ? 'red' : 'black' }}>{score.player}</td>
-                      <td style={{ color: score.isUsedForDifferential ? 'red' : 'black' }}>{score.course}</td>
-                      <td style={{ color: score.isUsedForDifferential ? 'red' : 'black' }}>{score.score}</td>
-                      <td style={{ color: score.isUsedForDifferential ? 'red' : 'black' }}>{score.differential}</td>
-                      <td style={{ color: score.isUsedForDifferential ? 'red' : 'black' }}>{new Date(score.date.seconds * 1000).toLocaleDateString()}</td>
+                    <tr 
+                      key={score.id} 
+                      data-used-for-differential={score.isUsedForDifferential}
+                      className={score.isUsedForDifferential ? 'used-for-differential' : ''}
+                    >
+                      <td>{score.player}</td>
+                      <td>{score.course}</td>
+                      <td>{score.score}</td>
+                      <td>
+                        {score.isComposed ? 'Combined 9s' : 
+                         score.holeType === '9' ? '9-Hole' : '18-Hole'}
+                      </td>
+                      <td>{score.differential}</td>
+                      <td>{new Date(score.date.seconds * 1000).toLocaleDateString()}</td>
                     </tr>
                   ))}
                 </tbody>

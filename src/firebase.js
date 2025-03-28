@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, addDoc, getDocs, orderBy, query, updateDoc, doc } from 'firebase/firestore';
+import { getFirestore, collection, addDoc, getDocs, orderBy, query, updateDoc, doc, where } from 'firebase/firestore';
 import { getAuth, signInWithEmailAndPassword, signOut, setPersistence, browserSessionPersistence } from 'firebase/auth';
 import { getAnalytics, isSupported } from "firebase/analytics";
 
@@ -88,10 +88,15 @@ const getPlayerHandicaps = async () => {
     if (!playerScores[score.player]) {
       playerScores[score.player] = [];
     }
-    playerScores[score.player].push({
-      differential: score.differential,
-      date: score.date
-    });
+    // Only include 18-hole scores and combined 9-hole scores that have valid differentials
+    if (score.differential !== null && (score.holeType === '18' || score.isComposed)) {
+      playerScores[score.player].push({
+        id: score.id,
+        differential: score.differential,
+        date: score.date,
+        isUsedForDifferential: false // Initialize flag
+      });
+    }
   });
 
   // Calculate handicap for each player
@@ -102,45 +107,63 @@ const getPlayerHandicaps = async () => {
     // Take the most recent 20 scores
     const recentScores = sortedScores.slice(0, 20);
     
-    // Sort differentials numerically for handicap calculation
-    const sortedDifferentials = recentScores
-      .map(score => score.differential)
-      .sort((a, b) => a - b);
-
-    // Calculate handicap based on number of scores
-    let handicap = 0;
-    if (sortedDifferentials.length > 0) {
-      const numScores = sortedDifferentials.length;
-      const scoresToUse = Math.min(8, Math.floor(numScores * 0.4));
-      if (scoresToUse > 0) {
-        const sum = sortedDifferentials.slice(0, scoresToUse).reduce((a, b) => a + b, 0);
-        handicap = parseFloat((sum / scoresToUse).toFixed(1));
+    // Create array with index to preserve position
+    const differentialsWithIndex = recentScores.map((score, index) => ({
+      ...score,
+      originalIndex: index
+    })).sort((a, b) => {
+      if (a.differential !== b.differential) {
+        return a.differential - b.differential;
       }
-    }
+      // If differentials are equal, use more recent score
+      return b.date - a.date;
+    });
+
+    // Take lowest 8 differentials and mark them
+    const lowestEight = differentialsWithIndex.slice(0, 8);
+    lowestEight.forEach(score => {
+      const originalScore = recentScores[score.originalIndex];
+      originalScore.isUsedForDifferential = true;
+    });
+
+    // Calculate handicap
+    const handicap = lowestEight.length > 0
+      ? parseFloat((lowestEight.reduce((sum, score) => sum + score.differential, 0) / lowestEight.length).toFixed(1))
+      : 0;
 
     return {
       name: playerName,
-      handicap: handicap
+      handicap: handicap,
+      scores: recentScores // Include the marked scores
     };
   });
+
+  // Update the isUsedForDifferential flag in Firestore
+  await Promise.all(
+    playerHandicaps.flatMap(player =>
+      player.scores
+        .filter(score => score.id) // Only process scores with IDs
+        .map(score =>
+          updateDoc(doc(db, "scores", score.id), {
+            isUsedForDifferential: score.isUsedForDifferential
+          })
+        )
+    )
+  );
 
   return playerHandicaps;
 };
 
 // Function to calculate Handicap Differential
-const calculateDifferential = (score, rating, slope, holeType, handicapIndex) => {
+const calculateDifferential = (score, rating, slope, holeType, isComposed = false) => {
   let differential;
 
-  if (holeType === '18') {
-    // Standard calculation for 18-hole scores
+  if (holeType === '18' || isComposed) {
+    // Standard calculation for 18-hole scores and combined 9-hole scores
     differential = ((score - rating) * 113) / slope;
   } else {
-    // Calculate 9-hole score differential
-    const scoreDifferential = ((score - rating) * 113) / slope;
-    // Calculate estimated score differential
-    const estimatedDifferential = (handicapIndex * 0.52) + 1.197;
-    // Combine both differentials
-    differential = scoreDifferential + estimatedDifferential;
+    // For single 9-hole scores, don't calculate differential yet
+    return null;
   }
 
   // Apply the 0.96 multiplier to all differentials
@@ -148,25 +171,122 @@ const calculateDifferential = (score, rating, slope, holeType, handicapIndex) =>
 };
 
 // Function to add a score to Firestore
-const addScore = async ({ score, course, rating, slope, player, holeType, handicapIndex, date }) => {
+const addScore = async ({ score, course, rating, slope, player, holeType, date }) => {
   try {
-    const differential = calculateDifferential(score, rating, slope, holeType, handicapIndex);
-    const scoreData = {
-      score,
-      course,
-      rating,
-      slope,
-      differential: parseFloat(differential.toFixed(2)),
-      player,
-      date: date ? new Date(date) : new Date(), // Use provided date or current date as fallback
-      holeType: holeType,
-      handicapIndex: holeType === '9' ? parseFloat(handicapIndex) : null
-    };
+    if (holeType === '9') {
+      // Add 9-hole score with needsPairing flag
+      const scoreData = {
+        score,
+        course,
+        rating,
+        slope,
+        differential: null,
+        player,
+        date: date ? new Date(date) : new Date(),
+        holeType,
+        needsPairing: true
+      };
+      
+      await addDoc(collection(db, "scores"), scoreData);
+      
+      // Try to pair with another unpaired 9-hole score
+      await tryToPairNineHoleScores(player);
+    } else {
+      // Handle 18-hole score normally
+      const differential = calculateDifferential(score, rating, slope, holeType);
+      const scoreData = {
+        score,
+        course,
+        rating,
+        slope,
+        differential,
+        player,
+        date: date ? new Date(date) : new Date(),
+        holeType
+      };
+      
+      await addDoc(collection(db, "scores"), scoreData);
+    }
 
-    await addDoc(collection(db, "scores"), scoreData);
     console.log("Score added successfully!");
   } catch (e) {
     console.error("Error adding score: ", e);
+  }
+};
+
+// Add new function to pair 9-hole scores
+const tryToPairNineHoleScores = async (player) => {
+  try {
+    // Get all unpaired 9-hole scores for this player
+    const scoresQuery = query(
+      collection(db, "scores"),
+      where("player", "==", player),
+      where("holeType", "==", "9"),
+      where("needsPairing", "==", true),
+      orderBy("date", "asc")  // Keep the oldest scores first
+    );
+    
+    const querySnapshot = await getDocs(scoresQuery);
+    const unpaired = querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+
+    // If we have at least 2 unpaired 9-hole scores
+    if (unpaired.length >= 2) {
+      const score1 = unpaired[0];
+      const score2 = unpaired[1];
+      
+      // Calculate combined values
+      const totalScore = score1.score + score2.score;
+      const totalRating = score1.rating + score2.rating;
+      const avgSlope = Math.round((score1.slope + score2.slope) / 2);
+      
+      // Calculate differential for combined score
+      const differential = calculateDifferential(
+        totalScore, 
+        totalRating, 
+        avgSlope, 
+        '18', 
+        true
+      );
+
+      // Create combined score entry
+      await addDoc(collection(db, "scores"), {
+        score: totalScore,
+        course: `${score1.course} + ${score2.course}`,
+        rating: totalRating,
+        slope: avgSlope,
+        differential,
+        player,
+        date: score2.date,
+        holeType: '18',
+        isComposed: true,
+        composedFrom: [score1.id, score2.id],
+        originalScores: {
+          first: {
+            course: score1.course,
+            score: score1.score,
+            rating: score1.rating,
+            slope: score1.slope,
+            date: score1.date
+          },
+          second: {
+            course: score2.course,
+            score: score2.score,
+            rating: score2.rating,
+            slope: score2.slope,
+            date: score2.date
+          }
+        }
+      });
+
+      // Mark both 9-hole scores as paired
+      await updateDoc(doc(db, "scores", score1.id), { needsPairing: false });
+      await updateDoc(doc(db, "scores", score2.id), { needsPairing: false });
+    }
+  } catch (e) {
+    console.error("Error pairing 9-hole scores:", e);
   }
 };
 

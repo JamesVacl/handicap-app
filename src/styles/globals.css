@@ -442,3 +442,24 @@ body {
   font-size: 1.1rem;
   color: #718096;
 }
+
+/* Add this after your existing styles */
+
+.used-for-differential {
+  color: #e53e3e !important; /* Red color for highlighted scores */
+  font-weight: 500;
+}
+
+/* Update table styles */
+.table tbody tr {
+  transition: all 0.2s ease;
+}
+
+.table tbody tr[data-used-for-differential="true"] {
+  color: #e53e3e !important;
+  background-color: rgba(229, 62, 62, 0.05);
+}
+
+.table tbody tr[data-used-for-differential="true"] td {
+  color: inherit;
+}
