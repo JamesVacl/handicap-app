@@ -42,3 +42,8 @@ next-env.d.ts
 
 # Environment files
 .env.local
+
+# Scripts with sensitive data
+/src/scripts/
+*.backup.json
+scores_backup.json

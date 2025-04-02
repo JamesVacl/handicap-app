@@ -369,41 +369,43 @@ const Home = () => {
                 ))}
               </select>
 
-              <table className="table table-bordered mb-4">
-                <thead>
-                  <tr>
-                    <th>Player</th>
-                    <th>Course</th>
-                    <th>Score</th>
-                    <th>Type</th>
-                    <th>Differential</th>
-                    <th>Date</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredScores.slice(currentPage * itemsPerPage, (currentPage + 1) * itemsPerPage).map((score) => (
-                    <tr 
-                      key={score.id} 
-                      data-used-for-differential={score.isUsedForDifferential}
-                      className={score.isUsedForDifferential ? 'used-for-differential' : ''}
-                    >
-                      <td>{score.player}</td>
-                      <td>{score.course}</td>
-                      <td>{score.score}</td>
-                      <td>
-                        {score.isComposed ? 'Combined 9s' : 
-                         score.holeType === '9' ? '9-Hole' : '18-Hole'}
-                      </td>
-                      <td>
-                        {score.isComposed 
-                          ? parseFloat(score.differential).toFixed(1)
-                          : score.differential}
-                      </td>
-                      <td>{new Date(score.date.seconds * 1000).toLocaleDateString()}</td>
+              <div className="table-responsive-wrapper">
+                <table className="table table-bordered table-hover scores-table mb-4">
+                  <thead>
+                    <tr>
+                      <th className="col-player">Player</th>
+                      <th className="col-course">Course</th>
+                      <th className="col-score text-center">Score</th>
+                      <th className="col-type text-center">Type</th>
+                      <th className="col-differential text-center">Diff</th>
+                      <th className="col-date text-center">Date</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {filteredScores.slice(currentPage * itemsPerPage, (currentPage + 1) * itemsPerPage).map((score) => (
+                      <tr 
+                        key={score.id} 
+                        data-used-for-differential={score.isUsedForDifferential}
+                        className={score.isUsedForDifferential ? 'used-for-differential' : ''}
+                      >
+                        <td className="col-player">{score.player}</td>
+                        <td className="col-course">{score.course}</td>
+                        <td className="col-score text-center">{score.score}</td>
+                        <td className="col-type text-center">
+                          {score.isComposed ? 'Combined 9s' : 
+                          score.holeType === '9' ? '9-Hole' : '18-Hole'}
+                        </td>
+                        <td className="col-differential text-center">
+                          {parseFloat(score.differential).toFixed(2)}
+                        </td>
+                        <td className="col-date text-center">
+                          {new Date(score.date.seconds * 1000).toLocaleDateString()}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
 
               <div className="pagination d-flex justify-content-center gap-4">
                 <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 0} className="btn btn-success">Previous</button>

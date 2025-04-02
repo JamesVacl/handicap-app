@@ -463,3 +463,29 @@ body {
 .table tbody tr[data-used-for-differential="true"] td {
   color: inherit;
 }
+
+/* Scores table styles */
+.scores-table {
+  min-width: 800px;  /* Minimum width for larger screens */
+  width: 100%;
+}
+
+.scores-table th, 
+.scores-table td {
+  padding: 12px 16px !important;  /* More padding for cells */
+}
+
+/* Column width distributions */
+.scores-table .col-player { width: 20%; }
+.scores-table .col-course { width: 25%; }
+.scores-table .col-score { width: 10%; }
+.scores-table .col-type { width: 15%; }
+.scores-table .col-differential { width: 15%; }
+.scores-table .col-date { width: 15%; }
+
+/* Table wrapper for horizontal scrolling on mobile */
+.table-responsive-wrapper {
+  overflow-x: auto;
+  margin: 0 -1rem;  /* Negative margin to allow full-width scrolling */
+  padding: 0 1rem;
+}
