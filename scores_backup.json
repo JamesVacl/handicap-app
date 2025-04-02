@@ -1,0 +1,2844 @@
+[
+  {
+    "slope": 127,
+    "score": 92,
+    "differential": 19.73,
+    "rating": 68.9,
+    "player": "M. Nation",
+    "course": "Pine Knot - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740435971,
+      "_nanoseconds": 306000000
+    },
+    "originalId": "XmkI0ZP1LFJzJarhmiBW"
+  },
+  {
+    "slope": 122,
+    "score": 99,
+    "differential": 25.7,
+    "rating": 70.1,
+    "player": "J. Vaclavek",
+    "course": "Caradoc Sands - Black",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740529497,
+      "_nanoseconds": 700000000
+    },
+    "originalId": "slEuk3WHZ2xEM53zz3IF"
+  },
+  {
+    "slope": 126,
+    "score": 52,
+    "differential": 27.99,
+    "rating": 34.3,
+    "player": "J. Vaclavek",
+    "course": "Guelph Country Club - Red/Blue - Front 9",
+    "holeType": "9",
+    "date": {
+      "_seconds": 1740550017,
+      "_nanoseconds": 498000000
+    },
+    "originalId": "GYe34FpDMqvxuH2WR7gK"
+  },
+  {
+    "slope": 123,
+    "score": 93,
+    "differential": 20.11,
+    "rating": 70.2,
+    "player": "M. Nation",
+    "course": "Tarandowah - Blue",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740574045,
+      "_nanoseconds": 552000000
+    },
+    "originalId": "EtvnohboXlHLdQJyHmAY"
+  },
+  {
+    "slope": 131,
+    "score": 102,
+    "differential": 25.75,
+    "rating": 70.9,
+    "player": "M. Nation",
+    "course": "Forest City National - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740574062,
+      "_nanoseconds": 609000000
+    },
+    "originalId": "Ktvu9Rlyt5YxYIuanBWU"
+  },
+  {
+    "slope": 131,
+    "score": 95,
+    "differential": 19.96,
+    "rating": 70.9,
+    "player": "M. Nation",
+    "course": "Forest City National - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740574076,
+      "_nanoseconds": 976000000
+    },
+    "originalId": "CbRGOOQPSJ2GpM3mcBZo"
+  },
+  {
+    "slope": 121,
+    "score": 44,
+    "differential": 16.85,
+    "rating": 69.2,
+    "player": "M. Nation",
+    "course": "Bluewater - White/Blue",
+    "holeType": "9",
+    "date": {
+      "_seconds": 1740574095,
+      "_nanoseconds": 208000000
+    },
+    "originalId": "ABHjpEQAMV1LN7V2nUCa"
+  },
+  {
+    "slope": 121,
+    "score": 46,
+    "differential": 20.44,
+    "rating": 69.2,
+    "player": "M. Nation",
+    "course": "Bluewater - White/Blue",
+    "holeType": "9",
+    "date": {
+      "_seconds": 1740574106,
+      "_nanoseconds": 720000000
+    },
+    "originalId": "pALKtZATLKd8vYelPV0r"
+  },
+  {
+    "slope": 121,
+    "score": 47,
+    "differential": 22.23,
+    "rating": 69.2,
+    "player": "M. Nation",
+    "course": "Bluewater - White/Blue",
+    "holeType": "9",
+    "date": {
+      "_seconds": 1740574142,
+      "_nanoseconds": 752000000
+    },
+    "originalId": "mCwPMRcW5osKDP6n4f5f"
+  },
+  {
+    "slope": 121,
+    "score": 44,
+    "differential": 16.85,
+    "rating": 69.2,
+    "player": "M. Nation",
+    "course": "Bluewater - White/Blue",
+    "holeType": "9",
+    "date": {
+      "_seconds": 1740574158,
+      "_nanoseconds": 200000000
+    },
+    "originalId": "VlEHutZXmwCYKV8vA9Tn"
+  },
+  {
+    "slope": 139,
+    "score": 91,
+    "differential": 14.67,
+    "rating": 72.2,
+    "player": "M. Nation",
+    "course": "Taboo - Blue",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740574169,
+      "_nanoseconds": 768000000
+    },
+    "originalId": "RYhiuzCJlMyeLFduX7Rc"
+  },
+  {
+    "slope": 136,
+    "score": 96,
+    "differential": 19.62,
+    "rating": 71.4,
+    "player": "M. Nation",
+    "course": "Muskoka Bay - Blue",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740574196,
+      "_nanoseconds": 201000000
+    },
+    "originalId": "7UedRtv96a085S16F1oy"
+  },
+  {
+    "slope": 131,
+    "score": 93,
+    "differential": 18.3,
+    "rating": 70.9,
+    "player": "M. Nation",
+    "course": "Forest City National - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740574294,
+      "_nanoseconds": 768000000
+    },
+    "originalId": "U92H1XLHP12bz0nzXbpZ"
+  },
+  {
+    "slope": 131,
+    "score": 88,
+    "differential": 14.16,
+    "rating": 70.9,
+    "player": "M. Nation",
+    "course": "Forest City National - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740574322,
+      "_nanoseconds": 978000000
+    },
+    "originalId": "DkkfWHH0GrCHjVnDEXn6"
+  },
+  {
+    "slope": 121,
+    "score": 45,
+    "differential": 18.65,
+    "rating": 69.2,
+    "player": "M. Nation",
+    "course": "Bluewater - White/Blue",
+    "holeType": "9",
+    "date": {
+      "_seconds": 1740574424,
+      "_nanoseconds": 96000000
+    },
+    "originalId": "4JIV21qt1TuetlOyX0aq"
+  },
+  {
+    "slope": 128,
+    "score": 95,
+    "differential": 20.85,
+    "rating": 70.4,
+    "player": "M. Nation",
+    "course": "FireRock - Blue",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740574511,
+      "_nanoseconds": 32000000
+    },
+    "originalId": "Y1vG5xo2f7Hzi85n0Yx8"
+  },
+  {
+    "slope": 139,
+    "score": 97,
+    "differential": 19.74,
+    "rating": 71.7,
+    "player": "M. Nation",
+    "course": "Leatherstocking - Green",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740574542,
+      "_nanoseconds": 521000000
+    },
+    "originalId": "L1A0jGFClUsq63N7BTcu"
+  },
+  {
+    "slope": 135,
+    "score": 95,
+    "differential": 19.29,
+    "rating": 71,
+    "player": "M. Nation",
+    "course": "Kaluhyat - White",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740574607,
+      "_nanoseconds": 769000000
+    },
+    "originalId": "yZBRaOwb9KE8RzLCMpvW"
+  },
+  {
+    "slope": 131,
+    "score": 102,
+    "differential": 25.26,
+    "rating": 71.5,
+    "player": "M. Nation",
+    "course": "Shenandoah - Blue",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740574625,
+      "_nanoseconds": 232000000
+    },
+    "originalId": "qySgsFaXZ5CH5QdncNij"
+  },
+  {
+    "slope": 130,
+    "score": 100,
+    "differential": 23.7,
+    "rating": 71.6,
+    "player": "M. Nation",
+    "course": "Atunyote - White",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740574644,
+      "_nanoseconds": 881000000
+    },
+    "originalId": "Kvlbz9ogzTh8gBf44G5A"
+  },
+  {
+    "slope": 132,
+    "score": 99,
+    "differential": 22.02,
+    "rating": 72.2,
+    "player": "M. Nation",
+    "course": "FireRock - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740574711,
+      "_nanoseconds": 161000000
+    },
+    "originalId": "lXaroRLKJAXUVnaIDIWw"
+  },
+  {
+    "slope": 131,
+    "score": 97,
+    "differential": 21.61,
+    "rating": 70.9,
+    "player": "M. Nation",
+    "course": "Forest City National - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740574779,
+      "_nanoseconds": 441000000
+    },
+    "originalId": "xzQIXVqIv35JBT1ymGhy"
+  },
+  {
+    "slope": 138,
+    "score": 108,
+    "differential": 29.64,
+    "rating": 70.3,
+    "player": "O. Wolf",
+    "course": "TPC Toronto: Hoot - Blue",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740574796,
+      "_nanoseconds": 145000000
+    },
+    "originalId": "ksPuO0NAD7qWsSNVb206"
+  },
+  {
+    "slope": 123,
+    "score": 92,
+    "differential": 19.23,
+    "rating": 70.2,
+    "player": "M. Mackie",
+    "course": "Tarandowah - Blue",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740579658,
+      "_nanoseconds": 983000000
+    },
+    "originalId": "gO8EfLXWlgTrnuU1NGGH"
+  },
+  {
+    "slope": 122,
+    "score": 85,
+    "differential": 13.25,
+    "rating": 70.1,
+    "player": "M. Mackie",
+    "course": "Caradoc Sands - Black",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740579765,
+      "_nanoseconds": 343000000
+    },
+    "originalId": "W4246GIx4q3bbWfHb0Vy"
+  },
+  {
+    "slope": 112,
+    "score": 39,
+    "differential": 12.49,
+    "rating": 65.1,
+    "player": "M. Mackie",
+    "course": "Hickory Ridge - Blue",
+    "holeType": "9",
+    "date": {
+      "_seconds": 1740579795,
+      "_nanoseconds": 905000000
+    },
+    "originalId": "Obc0GTyrRGtrkX8wfdwx"
+  },
+  {
+    "slope": 129,
+    "score": 82,
+    "differential": 9.5,
+    "rating": 70.7,
+    "player": "O. Wolf",
+    "course": "Royal Turks & Caicos - Blue",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740580143,
+      "_nanoseconds": 892000000
+    },
+    "originalId": "jJPXqoPYjB36a6wxiQHs"
+  },
+  {
+    "slope": 131,
+    "score": 99,
+    "differential": 23.27,
+    "rating": 70.9,
+    "player": "O. Wolf",
+    "course": "Forest City National - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740580185,
+      "_nanoseconds": 839000000
+    },
+    "originalId": "fsvNp6pmyF1CR8jP1VOp"
+  },
+  {
+    "slope": 132,
+    "score": 97,
+    "differential": 20.38,
+    "rating": 72.2,
+    "player": "O. Wolf",
+    "course": "FireRock - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740580214,
+      "_nanoseconds": 407000000
+    },
+    "originalId": "9F8aII5q9pSh9XyilDIv"
+  },
+  {
+    "slope": 110,
+    "score": 92,
+    "differential": 20.41,
+    "rating": 71.3,
+    "player": "O. Wolf",
+    "course": "Cranberry Golf Course - Blue",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740580232,
+      "_nanoseconds": 177000000
+    },
+    "originalId": "pEUsrRwyCyeKsCZWfBFf"
+  },
+  {
+    "slope": 131,
+    "score": 86,
+    "differential": 12.26,
+    "rating": 71.2,
+    "player": "M. Mackie",
+    "course": "The Fox - Blue",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740580331,
+      "_nanoseconds": 815000000
+    },
+    "originalId": "VxJGABKSb1JLHOG9BJnF"
+  },
+  {
+    "slope": 123,
+    "score": 93,
+    "differential": 20.11,
+    "rating": 70.2,
+    "player": "M. Mackie",
+    "course": "Tarandowah - Blue",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740580490,
+      "_nanoseconds": 420000000
+    },
+    "originalId": "vxDDg5bu2mYTPZszRAD6"
+  },
+  {
+    "slope": 131,
+    "score": 91,
+    "differential": 16.64,
+    "rating": 70.9,
+    "player": "M. Mackie",
+    "course": "Forest City National - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740580607,
+      "_nanoseconds": 535000000
+    },
+    "originalId": "yqIuZb0VSGrRDQadrP5n"
+  },
+  {
+    "slope": 126,
+    "score": 87,
+    "differential": 13.26,
+    "rating": 71.6,
+    "player": "O. Wolf",
+    "course": "Greenhills - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740580751,
+      "_nanoseconds": 102000000
+    },
+    "originalId": "vFyvIX8kk9AwMdFvTM97"
+  },
+  {
+    "slope": 108,
+    "score": 86,
+    "differential": 14.36,
+    "rating": 71.7,
+    "player": "O. Wolf",
+    "course": "Deer Ridge - Silver",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740581504,
+      "_nanoseconds": 224000000
+    },
+    "originalId": "bGIA6sGWEvTWfIBMRQEE"
+  },
+  {
+    "slope": 133,
+    "score": 92,
+    "differential": 16.31,
+    "rating": 72,
+    "player": "O. Wolf",
+    "course": "Lawsonia: Links Course - White",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740581646,
+      "_nanoseconds": 199000000
+    },
+    "originalId": "SDkWfOSRxX2rkeulx3jg"
+  },
+  {
+    "slope": 132,
+    "score": 91,
+    "differential": 15.45,
+    "rating": 72.2,
+    "player": "M. Mackie",
+    "course": "FireRock - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740581745,
+      "_nanoseconds": 106000000
+    },
+    "originalId": "VU3miJNsOrUmNldHji6q"
+  },
+  {
+    "slope": 128,
+    "score": 89,
+    "differential": 16.1,
+    "rating": 70,
+    "player": "O. Wolf",
+    "course": "Lake Arrowhead: The Pines - White",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740582116,
+      "_nanoseconds": 183000000
+    },
+    "originalId": "yn3KJjsNvsskSa1BclXz"
+  },
+  {
+    "slope": 131,
+    "score": 88,
+    "differential": 14.16,
+    "rating": 70.9,
+    "player": "M. Mackie",
+    "course": "Forest City National - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740582177,
+      "_nanoseconds": 903000000
+    },
+    "originalId": "NioNUMdI2thfRIsED5v7"
+  },
+  {
+    "slope": 131,
+    "score": 92,
+    "differential": 17.47,
+    "rating": 70.9,
+    "player": "M. Mackie",
+    "course": "Forest City National - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740582398,
+      "_nanoseconds": 98000000
+    },
+    "originalId": "uypzRYtPaiJKEyUe9tn8"
+  },
+  {
+    "slope": 131,
+    "score": 43,
+    "differential": 12.5,
+    "rating": 70.9,
+    "player": "M. Mackie",
+    "course": "Forest City National - Gold",
+    "holeType": "9",
+    "date": {
+      "_seconds": 1740583626,
+      "_nanoseconds": 389000000
+    },
+    "originalId": "nbuZS5Xi8E8R8yrntaxx"
+  },
+  {
+    "slope": 130,
+    "score": 102,
+    "differential": 25.53,
+    "rating": 71.4,
+    "player": "O. Wolf",
+    "course": "Sand Valley Golf Resort: Sand Valley - Orange",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740583655,
+      "_nanoseconds": 257000000
+    },
+    "originalId": "AePWKag5SMoenhRTBpY0"
+  },
+  {
+    "slope": 124,
+    "score": 91,
+    "differential": 17.93,
+    "rating": 70.5,
+    "player": "O. Wolf",
+    "course": "Sand Valley Golf Resort: Mammoth Dunes - Orange",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740583705,
+      "_nanoseconds": 950000000
+    },
+    "originalId": "EO4Q4tGpMFes2Y8sxH5C"
+  },
+  {
+    "slope": 95,
+    "score": 45,
+    "differential": 20.61,
+    "rating": 34.2,
+    "player": "M. Mackie",
+    "course": "Markdale Golf and Curling Club - Blue - Front 9",
+    "holeType": "9",
+    "date": {
+      "_seconds": 1740586086,
+      "_nanoseconds": 995000000
+    },
+    "originalId": "l04HzdQD8R8Ee0HXKpQb"
+  },
+  {
+    "slope": 128,
+    "score": 95,
+    "differential": 21.19,
+    "rating": 70,
+    "player": "M. Mackie",
+    "course": "Lake Arrowhead: The Pines - White",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740586355,
+      "_nanoseconds": 54000000
+    },
+    "originalId": "MbhCyRqQ4caPsfgfXsar"
+  },
+  {
+    "slope": 133,
+    "score": 98,
+    "differential": 21.21,
+    "rating": 72,
+    "player": "M. Mackie",
+    "course": "Lawsonia: Links Course - White",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740586408,
+      "_nanoseconds": 534000000
+    },
+    "originalId": "tJpOTVGKOLCXv5CefM0j"
+  },
+  {
+    "slope": 117,
+    "score": 91,
+    "differential": 16.78,
+    "rating": 72.9,
+    "player": "O. Wolf",
+    "course": "Otter Creek - Blue/White",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740586493,
+      "_nanoseconds": 678000000
+    },
+    "originalId": "SdcPrem1JAYc9U6xzVCy"
+  },
+  {
+    "slope": 130,
+    "score": 94,
+    "differential": 18.86,
+    "rating": 71.4,
+    "player": "M. Mackie",
+    "course": "Sand Valley Golf Resort: Sand Valley - Orange",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740586520,
+      "_nanoseconds": 678000000
+    },
+    "originalId": "ScycshXQd4PNZHLQH8da"
+  },
+  {
+    "slope": 124,
+    "score": 93,
+    "differential": 19.68,
+    "rating": 70.5,
+    "player": "M. Mackie",
+    "course": "Sand Valley Golf Resort: Mammoth Dunes - Orange",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740586538,
+      "_nanoseconds": 214000000
+    },
+    "originalId": "kuwV0kTJEV3KIoIU6WNu"
+  },
+  {
+    "slope": 131,
+    "score": 99,
+    "differential": 23.27,
+    "rating": 70.9,
+    "player": "O. Wolf",
+    "course": "Forest City National - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740586618,
+      "_nanoseconds": 118000000
+    },
+    "originalId": "RAknBVZvRp2Q0ttT8fCS"
+  },
+  {
+    "slope": 110,
+    "score": 86,
+    "differential": 14.79,
+    "rating": 71,
+    "player": "O. Wolf",
+    "course": "Stone Ridge at Elliot Lake - Blue",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740586635,
+      "_nanoseconds": 158000000
+    },
+    "originalId": "9rifxa14NaVYJh6ENQzu"
+  },
+  {
+    "slope": 127,
+    "score": 93,
+    "differential": 20.59,
+    "rating": 68.9,
+    "player": "M. Mackie",
+    "course": "Pine Knot - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740586673,
+      "_nanoseconds": 565000000
+    },
+    "originalId": "3zOk1FEp6jHlJA3PrEAO"
+  },
+  {
+    "slope": 126,
+    "score": 97,
+    "differential": 21.87,
+    "rating": 71.6,
+    "player": "M. Mackie",
+    "course": "Greenhills - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740586715,
+      "_nanoseconds": 373000000
+    },
+    "originalId": "s6eLUCgkKGqX3DxxKtRK"
+  },
+  {
+    "slope": 131,
+    "score": 94,
+    "differential": 19.13,
+    "rating": 70.9,
+    "player": "M. Mackie",
+    "course": "Forest City National - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740586735,
+      "_nanoseconds": 470000000
+    },
+    "originalId": "AMk2RhIpSCbrHTsHjm4l"
+  },
+  {
+    "slope": 126,
+    "score": 86,
+    "differential": 12.4,
+    "rating": 71.6,
+    "player": "O. Wolf",
+    "course": "Greenhills - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740586795,
+      "_nanoseconds": 101000000
+    },
+    "originalId": "b4kpOuZs5r6pASd0qXv4"
+  },
+  {
+    "slope": 131,
+    "score": 98,
+    "differential": 22.44,
+    "rating": 70.9,
+    "player": "M. Mackie",
+    "course": "Forest City National - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740586827,
+      "_nanoseconds": 807000000
+    },
+    "originalId": "QkjC7p2YLHLLgd90mcKm"
+  },
+  {
+    "slope": 131,
+    "score": 98,
+    "differential": 22.44,
+    "rating": 70.9,
+    "player": "M. Mackie",
+    "course": "Forest City National - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740586897,
+      "_nanoseconds": 14000000
+    },
+    "originalId": "KPvq0MDcsqehDXAzTBQn"
+  },
+  {
+    "slope": 129,
+    "score": 89,
+    "differential": 16.15,
+    "rating": 69.8,
+    "player": "O. Wolf",
+    "course": "Falls at Barber Creek - Blue",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740587001,
+      "_nanoseconds": 77000000
+    },
+    "originalId": "HNb6CR2n2br03rcnBqFC"
+  },
+  {
+    "slope": 137,
+    "score": 93,
+    "differential": 16.63,
+    "rating": 72,
+    "player": "O. Wolf",
+    "course": "Pilgrim's Run - Tee 2",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740587025,
+      "_nanoseconds": 879000000
+    },
+    "originalId": "zwc755ABRBIogWGjLfgi"
+  },
+  {
+    "slope": 105,
+    "score": 89,
+    "differential": 18.7,
+    "rating": 70.9,
+    "player": "O. Wolf",
+    "course": "Ingersoll Golf Club - White",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740587045,
+      "_nanoseconds": 429000000
+    },
+    "originalId": "88454EkrrpwT7IKgjkyi"
+  },
+  {
+    "slope": 131,
+    "score": 86,
+    "differential": 12.5,
+    "rating": 70.9,
+    "player": "O. Wolf",
+    "course": "Forest City National - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740587446,
+      "_nanoseconds": 782000000
+    },
+    "originalId": "wvDbBu7t7HkQuf7MbOqG"
+  },
+  {
+    "slope": 133,
+    "score": 88,
+    "differential": 14.19,
+    "rating": 70.6,
+    "player": "J. DiFruscia",
+    "course": "Lionhead (Legends) - White",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740587792,
+      "_nanoseconds": 711000000
+    },
+    "originalId": "lKviv4GqyeghtqCgLA7a"
+  },
+  {
+    "slope": 136,
+    "score": 91,
+    "differential": 14.92,
+    "rating": 72.3,
+    "player": "J. DiFruscia",
+    "course": "The Oaks - Blue",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740587947,
+      "_nanoseconds": 664000000
+    },
+    "originalId": "G8koPWGTguCb6P3a7bMR"
+  },
+  {
+    "slope": 123,
+    "score": 86,
+    "differential": 13.93,
+    "rating": 70.2,
+    "player": "J. DiFruscia",
+    "course": "Tarandowah - Blue",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740587962,
+      "_nanoseconds": 710000000
+    },
+    "originalId": "rDI9LPMb9tckNHKHlUsp"
+  },
+  {
+    "slope": 121,
+    "score": 40,
+    "differential": 10.94,
+    "rating": 67.8,
+    "player": "J. DiFruscia",
+    "course": "Echo Valley - White",
+    "holeType": "9",
+    "date": {
+      "_seconds": 1740588092,
+      "_nanoseconds": 78000000
+    },
+    "originalId": "bCQkL21vD5PLsyPR11qK"
+  },
+  {
+    "slope": 134,
+    "score": 89,
+    "differential": 14.81,
+    "rating": 70.7,
+    "player": "J. DiFruscia",
+    "course": "Dorchester GC - Blue",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740588200,
+      "_nanoseconds": 126000000
+    },
+    "originalId": "Ru1eQwPVHGmZoZ055bFZ"
+  },
+  {
+    "slope": 137,
+    "score": 95,
+    "differential": 18.37,
+    "rating": 71.8,
+    "player": "J. DiFruscia",
+    "course": "Stonehenge - Blue",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740588285,
+      "_nanoseconds": 318000000
+    },
+    "originalId": "fg3mnMgeuQiFirtYoWWm"
+  },
+  {
+    "slope": 128,
+    "score": 87,
+    "differential": 13.48,
+    "rating": 71.1,
+    "player": "J. DiFruscia",
+    "course": "Druid Hills - Blue",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740588328,
+      "_nanoseconds": 614000000
+    },
+    "originalId": "ELVDIYHpAyB7c9ZUVBsX"
+  },
+  {
+    "slope": 128,
+    "score": 43,
+    "differential": 12.63,
+    "rating": 71.1,
+    "player": "J. DiFruscia",
+    "course": "Druid Hills - Blue",
+    "holeType": "9",
+    "date": {
+      "_seconds": 1740588458,
+      "_nanoseconds": 366000000
+    },
+    "originalId": "0UHArGBjBHX83Hke5se9"
+  },
+  {
+    "slope": 121,
+    "score": 92,
+    "differential": 20.98,
+    "rating": 68.6,
+    "player": "J. DiFruscia",
+    "course": "Heatherhurst (Crag) - Blue",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740588511,
+      "_nanoseconds": 950000000
+    },
+    "originalId": "NHpi0ImHsGmb0es3CVGG"
+  },
+  {
+    "slope": 137,
+    "score": 43,
+    "differential": 11.24,
+    "rating": 71.8,
+    "player": "J. DiFruscia",
+    "course": "Stonehenge - Blue",
+    "holeType": "9",
+    "date": {
+      "_seconds": 1740588526,
+      "_nanoseconds": 783000000
+    },
+    "originalId": "Jw3VhHLmtqPv8xqnaVEQ"
+  },
+  {
+    "slope": 121,
+    "score": 92,
+    "differential": 21.7,
+    "rating": 67.8,
+    "player": "J. DiFruscia",
+    "course": "Echo Valley - White",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740588545,
+      "_nanoseconds": 879000000
+    },
+    "originalId": "ugqV8PdubmxWFHKrLhfF"
+  },
+  {
+    "slope": 124,
+    "score": 39,
+    "differential": 6.47,
+    "rating": 70.6,
+    "player": "J. DiFruscia",
+    "course": "Batteaux Creek - White",
+    "holeType": "9",
+    "date": {
+      "_seconds": 1740588567,
+      "_nanoseconds": 607000000
+    },
+    "originalId": "2gax6yMJVdT5cMVVY4gP"
+  },
+  {
+    "slope": 128,
+    "score": 81,
+    "differential": 8.98,
+    "rating": 70.4,
+    "player": "J. DiFruscia",
+    "course": "FireRock - Blue",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740588611,
+      "_nanoseconds": 406000000
+    },
+    "originalId": "hPS3VYLx0HA07wiVXtc1"
+  },
+  {
+    "slope": 131,
+    "score": 88,
+    "differential": 14.16,
+    "rating": 70.9,
+    "player": "J. DiFruscia",
+    "course": "Forest City National - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740588622,
+      "_nanoseconds": 167000000
+    },
+    "originalId": "wsPZOJaaNph1lAsAm1wC"
+  },
+  {
+    "slope": 116,
+    "score": 82,
+    "differential": 13.65,
+    "rating": 67.4,
+    "player": "J. DiFruscia",
+    "course": "Maple Ridge - Blue",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740588644,
+      "_nanoseconds": 7000000
+    },
+    "originalId": "Tkc2dXKKfuySGUwAv1Xk"
+  },
+  {
+    "slope": 128,
+    "score": 81,
+    "differential": 8.98,
+    "rating": 70.4,
+    "player": "J. DiFruscia",
+    "course": "FireRock - Blue",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740588660,
+      "_nanoseconds": 735000000
+    },
+    "originalId": "ej90npDA05f4pNvjQMal"
+  },
+  {
+    "slope": 142,
+    "score": 46,
+    "differential": 15.58,
+    "rating": 71.6,
+    "player": "J. DiFruscia",
+    "course": "River Strand (Estuary/Sanctuary) - Blue/White",
+    "holeType": "9",
+    "date": {
+      "_seconds": 1740588677,
+      "_nanoseconds": 126000000
+    },
+    "originalId": "wFKrEmVZ96DrmeeXphNm"
+  },
+  {
+    "slope": 93.09,
+    "score": 83,
+    "differential": 13.98,
+    "rating": 71,
+    "player": "C. Dashford",
+    "course": "Caradoc Sands - Black",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740588700,
+      "_nanoseconds": 263000000
+    },
+    "originalId": "2W2zvDUBGRau2LFS8IJi"
+  },
+  {
+    "slope": 142,
+    "score": 45,
+    "differential": 14.06,
+    "rating": 71.6,
+    "player": "J. DiFruscia",
+    "course": "River Strand (Estuary/Sanctuary) - Blue/White",
+    "holeType": "9",
+    "date": {
+      "_seconds": 1740589103,
+      "_nanoseconds": 151000000
+    },
+    "originalId": "1ja2aha2qze07UYVlPmG"
+  },
+  {
+    "slope": 142,
+    "score": 93,
+    "differential": 16.35,
+    "rating": 71.6,
+    "player": "J. DiFruscia",
+    "course": "River Strand (Estuary/Sanctuary) - Blue/White",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740589183,
+      "_nanoseconds": 87000000
+    },
+    "originalId": "PxL3UAWYKeXwgXXbioQH"
+  },
+  {
+    "slope": 142,
+    "score": 43,
+    "differential": 11,
+    "rating": 71.6,
+    "player": "J. DiFruscia",
+    "course": "River Strand (Estuary/Sanctuary) - Blue/White",
+    "holeType": "9",
+    "date": {
+      "_seconds": 1740589557,
+      "_nanoseconds": 638000000
+    },
+    "originalId": "vO4kOGwc07idcRiFb7e1"
+  },
+  {
+    "slope": 131,
+    "score": 102,
+    "differential": 25.26,
+    "rating": 71.5,
+    "player": "C. Dashford",
+    "course": "Shenandoah - Blue",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740589582,
+      "_nanoseconds": 447000000
+    },
+    "originalId": "Q5g79VNZyZbQA1bJrdsw"
+  },
+  {
+    "slope": 130,
+    "score": 102,
+    "differential": 25.37,
+    "rating": 71.6,
+    "player": "C. Dashford",
+    "course": "Atunyote - White",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740589616,
+      "_nanoseconds": 207000000
+    },
+    "originalId": "Sg8QsUdNGwSsYGFb4LW9"
+  },
+  {
+    "slope": 131,
+    "score": 85,
+    "differential": 11.43,
+    "rating": 71.2,
+    "player": "C. Dashford",
+    "course": "The Fox - Blue",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740589629,
+      "_nanoseconds": 824000000
+    },
+    "originalId": "JU8XL8IJoo19XkaFbUSw"
+  },
+  {
+    "slope": 129,
+    "score": 83,
+    "differential": 11.18,
+    "rating": 69.7,
+    "player": "C. Dashford",
+    "course": "Echo Valley - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740589767,
+      "_nanoseconds": 527000000
+    },
+    "originalId": "ONr4lPRraCsV1ecOR9TL"
+  },
+  {
+    "slope": 131,
+    "score": 104,
+    "differential": 27.41,
+    "rating": 70.9,
+    "player": "C. Dashford",
+    "course": "Forest City National - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740589813,
+      "_nanoseconds": 135000000
+    },
+    "originalId": "F3vHXO2BhQ02B2WBrAGV"
+  },
+  {
+    "slope": 132,
+    "score": 103,
+    "differential": 25.31,
+    "rating": 72.2,
+    "player": "C. Dashford",
+    "course": "FireRock - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740589872,
+      "_nanoseconds": 71000000
+    },
+    "originalId": "RMaS4UZC04xg3eNCmbgV"
+  },
+  {
+    "slope": 131,
+    "score": 94,
+    "differential": 19.13,
+    "rating": 70.9,
+    "player": "C. Dashford",
+    "course": "Forest City National - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740589941,
+      "_nanoseconds": 159000000
+    },
+    "originalId": "Zk8LHW8aCTwI9al6euPd"
+  },
+  {
+    "slope": 131,
+    "score": 99,
+    "differential": 23.27,
+    "rating": 70.9,
+    "player": "C. Dashford",
+    "course": "Forest City National - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740589965,
+      "_nanoseconds": 239000000
+    },
+    "originalId": "HmjlAXgIrajii8McvAZ1"
+  },
+  {
+    "slope": 128,
+    "score": 101,
+    "differential": 26.27,
+    "rating": 70,
+    "player": "C. Dashford",
+    "course": "Lake Arrowhead: The Pines - White",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740590180,
+      "_nanoseconds": 143000000
+    },
+    "originalId": "U7Mpb3wF3Xnxo6dFeUfz"
+  },
+  {
+    "slope": 133,
+    "score": 98,
+    "differential": 21.21,
+    "rating": 72,
+    "player": "C. Dashford",
+    "course": "Lawsonia: Links Course - White",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740590241,
+      "_nanoseconds": 327000000
+    },
+    "originalId": "7AQ342gQGdkym0pnqI6O"
+  },
+  {
+    "slope": 130,
+    "score": 87,
+    "differential": 13.02,
+    "rating": 71.4,
+    "player": "C. Dashford",
+    "course": "Sand Valley Golf Resort: Sand Valley - Orange",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740590430,
+      "_nanoseconds": 328000000
+    },
+    "originalId": "MSWIzUo4UuiqBXe1jLKa"
+  },
+  {
+    "slope": 124,
+    "score": 92,
+    "differential": 18.81,
+    "rating": 70.5,
+    "player": "C. Dashford",
+    "course": "Sand Valley Golf Resort: Mammoth Dunes - Orange",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740590520,
+      "_nanoseconds": 679000000
+    },
+    "originalId": "AZQwqeMBUNaEDvIImnH4"
+  },
+  {
+    "slope": 127,
+    "score": 96,
+    "differential": 20.24,
+    "rating": 72.3,
+    "player": "C. Dashford",
+    "course": "Tarandowah - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740590617,
+      "_nanoseconds": 847000000
+    },
+    "originalId": "Pd6z5LhINh31O6UBjqiK"
+  },
+  {
+    "slope": 131,
+    "score": 93,
+    "differential": 18.3,
+    "rating": 70.9,
+    "player": "C. Dashford",
+    "course": "Forest City National - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740590642,
+      "_nanoseconds": 999000000
+    },
+    "originalId": "wfa2a2GMSedR22F7qEay"
+  },
+  {
+    "slope": 127,
+    "score": 81,
+    "differential": 10.25,
+    "rating": 69,
+    "player": "C. Dashford",
+    "course": "Innerkip Highlands - Orange",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740590676,
+      "_nanoseconds": 535000000
+    },
+    "originalId": "vanYQc5SXkKZnvV3JhvQ"
+  },
+  {
+    "slope": 131,
+    "score": 90,
+    "differential": 15.82,
+    "rating": 70.9,
+    "player": "C. Dashford",
+    "course": "Forest City National - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740590737,
+      "_nanoseconds": 15000000
+    },
+    "originalId": "NANxoP8O6Mk2ELTITSwK"
+  },
+  {
+    "slope": 136,
+    "score": 100,
+    "differential": 20.5,
+    "rating": 74.3,
+    "player": "C. Dashford",
+    "course": "Rebel Creek - Titanium",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740590759,
+      "_nanoseconds": 983000000
+    },
+    "originalId": "JclgyMAWEKlLkPvZczX5"
+  },
+  {
+    "slope": 128,
+    "score": 91,
+    "differential": 17.46,
+    "rating": 70.4,
+    "player": "C. Dashford",
+    "course": "FireRock - Blue",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740590829,
+      "_nanoseconds": 399000000
+    },
+    "originalId": "B0nGcfFuixHSRpGptkcf"
+  },
+  {
+    "slope": 131,
+    "score": 91,
+    "differential": 16.64,
+    "rating": 70.9,
+    "player": "C. Dashford",
+    "course": "Forest City National - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740590944,
+      "_nanoseconds": 495000000
+    },
+    "originalId": "Sxr7ogPS7lDxjgdYapmI"
+  },
+  {
+    "slope": 131,
+    "score": 88,
+    "differential": 14.16,
+    "rating": 70.9,
+    "player": "D. McCullough",
+    "course": "Forest City National - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740590957,
+      "_nanoseconds": 201000000
+    },
+    "originalId": "17R7DtiiZt1Z63bKNzhU"
+  },
+  {
+    "slope": 131,
+    "score": 89,
+    "differential": 14.99,
+    "rating": 70.9,
+    "player": "D. McCullough",
+    "course": "Forest City National - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740591607,
+      "_nanoseconds": 0
+    },
+    "originalId": "xO0hIyc77rlbtssnmDQj"
+  },
+  {
+    "slope": 131,
+    "score": 84,
+    "differential": 10.85,
+    "rating": 70.9,
+    "player": "D. McCullough",
+    "course": "Forest City National - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740592926,
+      "_nanoseconds": 528000000
+    },
+    "originalId": "Ylj7oOcqGfTzJyrsX3MR"
+  },
+  {
+    "slope": 131,
+    "score": 80,
+    "differential": 7.54,
+    "rating": 70.9,
+    "player": "D. McCullough",
+    "course": "Forest City National - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740592939,
+      "_nanoseconds": 775000000
+    },
+    "originalId": "KzNvdPffSw4s2mzsVSre"
+  },
+  {
+    "slope": 127,
+    "score": 82,
+    "differential": 9.82,
+    "rating": 70.5,
+    "player": "D. McCullough",
+    "course": "Saugeen (Sunrise/Legacy) - Black",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740592953,
+      "_nanoseconds": 872000000
+    },
+    "originalId": "xOFXuXLHaF0PGXVjgIXw"
+  },
+  {
+    "slope": 131,
+    "score": 82,
+    "differential": 9.19,
+    "rating": 70.9,
+    "player": "D. McCullough",
+    "course": "Forest City National - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740592968,
+      "_nanoseconds": 808000000
+    },
+    "originalId": "T7PMiEkd1WczBnvU3QU2"
+  },
+  {
+    "slope": 127,
+    "score": 88,
+    "differential": 13.41,
+    "rating": 72.3,
+    "player": "D. McCullough",
+    "course": "Tarandowah - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740592982,
+      "_nanoseconds": 495000000
+    },
+    "originalId": "b6vtOWWJZWCUuYVuaipQ"
+  },
+  {
+    "slope": 131,
+    "score": 83,
+    "differential": 10.02,
+    "rating": 70.9,
+    "player": "D. McCullough",
+    "course": "Forest City National - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740593038,
+      "_nanoseconds": 831000000
+    },
+    "originalId": "2NsaZnPBLf7rhT8mpniE"
+  },
+  {
+    "slope": 131,
+    "score": 90,
+    "differential": 15.82,
+    "rating": 70.9,
+    "player": "D. McCullough",
+    "course": "Forest City National - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740593054,
+      "_nanoseconds": 224000000
+    },
+    "originalId": "9xL4QoMq8lFX6xo7fLxc"
+  },
+  {
+    "slope": 131,
+    "score": 80,
+    "differential": 7.54,
+    "rating": 70.9,
+    "player": "D. McCullough",
+    "course": "Forest City National - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740593075,
+      "_nanoseconds": 303000000
+    },
+    "originalId": "3REflXO3QIZcp8Hk9DQA"
+  },
+  {
+    "slope": 131,
+    "score": 80,
+    "differential": 7.54,
+    "rating": 70.9,
+    "player": "D. McCullough",
+    "course": "Forest City National - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740593092,
+      "_nanoseconds": 776000000
+    },
+    "originalId": "iJs604ijgA9voZc52dye"
+  },
+  {
+    "slope": 131,
+    "score": 87,
+    "differential": 13.33,
+    "rating": 70.9,
+    "player": "D. McCullough",
+    "course": "Forest City National - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740593150,
+      "_nanoseconds": 904000000
+    },
+    "originalId": "aczyWDArfLtjbjqzMV1J"
+  },
+  {
+    "slope": 139,
+    "score": 87,
+    "differential": 11.63,
+    "rating": 72.1,
+    "player": "D. McCullough",
+    "course": "Mid South - Blue",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740593166,
+      "_nanoseconds": 775000000
+    },
+    "originalId": "By0mxT0HwemjFCJ8H7X2"
+  },
+  {
+    "slope": 138,
+    "score": 85,
+    "differential": 9.98,
+    "rating": 72.3,
+    "player": "D. McCullough",
+    "course": "Mid Pines - Blue",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740593184,
+      "_nanoseconds": 544000000
+    },
+    "originalId": "jQRiz5JXgVv5zpfGErix"
+  },
+  {
+    "slope": 138,
+    "score": 87,
+    "differential": 11.87,
+    "rating": 71.9,
+    "player": "D. McCullough",
+    "course": "Pine Needles - Ross",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740593204,
+      "_nanoseconds": 560000000
+    },
+    "originalId": "PURoLYMFnVTtVuGgN7AT"
+  },
+  {
+    "slope": 143,
+    "score": 75,
+    "differential": 2.81,
+    "rating": 71.3,
+    "player": "D. McCullough",
+    "course": "Tobacco Road - Disc",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740593238,
+      "_nanoseconds": 639000000
+    },
+    "originalId": "S1W3753BDbfLYkdqFsTE"
+  },
+  {
+    "slope": 133,
+    "score": 81,
+    "differential": 7.42,
+    "rating": 71.9,
+    "player": "D. McCullough",
+    "course": "Golden Bear - Blue",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740593322,
+      "_nanoseconds": 760000000
+    },
+    "originalId": "FczSf3pEY5RZC3BSa7mn"
+  },
+  {
+    "slope": 137,
+    "score": 87,
+    "differential": 11.24,
+    "rating": 72.8,
+    "player": "D. McCullough",
+    "course": "Palmetto Dunes (Jones) - Blue",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740593668,
+      "_nanoseconds": 288000000
+    },
+    "originalId": "wQnEiNSu3zk3apNur8bg"
+  },
+  {
+    "slope": 135,
+    "score": 84,
+    "differential": 9.96,
+    "rating": 71.6,
+    "player": "D. McCullough",
+    "course": "Atlantic Dunes - Blue",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740593749,
+      "_nanoseconds": 400000000
+    },
+    "originalId": "4jt1XSjKq4tKEsHz6bcd"
+  },
+  {
+    "slope": 146,
+    "score": 80,
+    "differential": 5.87,
+    "rating": 72.1,
+    "player": "D. McCullough",
+    "course": "Harbour Town - White",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740593773,
+      "_nanoseconds": 72000000
+    },
+    "originalId": "TZCahVSEEHxTzk9m61kc"
+  },
+  {
+    "slope": 131,
+    "score": 105,
+    "differential": 28.24,
+    "rating": 70.9,
+    "player": "J. Zinck",
+    "course": "Forest City National - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740593794,
+      "_nanoseconds": 287000000
+    },
+    "originalId": "GzhHH3IbYeCU6I1re0Y1"
+  },
+  {
+    "slope": 131,
+    "score": 106,
+    "differential": 29.07,
+    "rating": 70.9,
+    "player": "J. Zinck",
+    "course": "Forest City National - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740593809,
+      "_nanoseconds": 73000000
+    },
+    "originalId": "Tn8F2CYEfhHMnC4gdt9s"
+  },
+  {
+    "slope": 129,
+    "score": 100,
+    "differential": 25.48,
+    "rating": 69.7,
+    "player": "J. Zinck",
+    "course": "Echo Valley - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740593844,
+      "_nanoseconds": 898000000
+    },
+    "originalId": "cnfZVnU260qkb5CpHnf3"
+  },
+  {
+    "slope": 131,
+    "score": 106,
+    "differential": 28.82,
+    "rating": 71.2,
+    "player": "J. Zinck",
+    "course": "The Fox - Blue",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740593867,
+      "_nanoseconds": 835000000
+    },
+    "originalId": "K8MCj5bOuhXrPtCFosYO"
+  },
+  {
+    "slope": 119,
+    "score": 44,
+    "differential": 22.39,
+    "rating": 33.9,
+    "player": "J. Zinck",
+    "course": "Westminster Trails - White - Front 9",
+    "holeType": "9",
+    "date": {
+      "_seconds": 1740593893,
+      "_nanoseconds": 485000000
+    },
+    "originalId": "eJmvtZxeaRxEElN0LK0a"
+  },
+  {
+    "slope": 130,
+    "score": 110,
+    "differential": 34.38,
+    "rating": 68.8,
+    "player": "J. Zinck",
+    "course": "Osprey Ridge - White",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740593912,
+      "_nanoseconds": 262000000
+    },
+    "originalId": "i7Vqn9DbVBjQRB5ghTBI"
+  },
+  {
+    "slope": 128,
+    "score": 113,
+    "differential": 36.1,
+    "rating": 70.4,
+    "player": "J. Zinck",
+    "course": "FireRock - Blue",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740593930,
+      "_nanoseconds": 64000000
+    },
+    "originalId": "mcqx7M4WKgbMPThJUS86"
+  },
+  {
+    "slope": 115,
+    "score": 96,
+    "differential": 29.24,
+    "rating": 65,
+    "player": "J. Zinck",
+    "course": "Belmont - White",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740593941,
+      "_nanoseconds": 727000000
+    },
+    "originalId": "r3Fqfw3BN0FTknojKnqP"
+  },
+  {
+    "slope": 131,
+    "score": 107,
+    "differential": 29.89,
+    "rating": 70.9,
+    "player": "J. Zinck",
+    "course": "Forest City National - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740593957,
+      "_nanoseconds": 400000000
+    },
+    "originalId": "yzRP3pibvcTl2b2aLjLP"
+  },
+  {
+    "slope": 121,
+    "score": 98,
+    "differential": 27.88,
+    "rating": 66.9,
+    "player": "J. Zinck",
+    "course": "Iron Creek - White",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740593977,
+      "_nanoseconds": 592000000
+    },
+    "originalId": "CGuzUYctPgJ11FmYJ3OQ"
+  },
+  {
+    "slope": 129,
+    "score": 106,
+    "differential": 30.44,
+    "rating": 69.8,
+    "player": "J. Zinck",
+    "course": "Falls at Barber Creek - Blue",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740593995,
+      "_nanoseconds": 88000000
+    },
+    "originalId": "DQmbMG76AbSWonfzjGWb"
+  },
+  {
+    "slope": 137,
+    "score": 108,
+    "differential": 28.51,
+    "rating": 72,
+    "player": "J. Zinck",
+    "course": "Pilgrim's Run - Tee 2",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740594057,
+      "_nanoseconds": 320000000
+    },
+    "originalId": "JEdhRHPu1z3S4ViXjubR"
+  },
+  {
+    "slope": 131,
+    "score": 106,
+    "differential": 29.07,
+    "rating": 70.9,
+    "player": "J. Zinck",
+    "course": "Forest City National - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740594092,
+      "_nanoseconds": 958000000
+    },
+    "originalId": "NxYqE7dPOIGBEBxqcMX7"
+  },
+  {
+    "slope": 128,
+    "score": 94,
+    "differential": 20.68,
+    "rating": 69.6,
+    "player": "J. Zinck",
+    "course": "The Fox - White",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740594112,
+      "_nanoseconds": 987000000
+    },
+    "originalId": "w3IrjPvCSle57nsaIYjL"
+  },
+  {
+    "slope": 131,
+    "score": 109,
+    "differential": 31.55,
+    "rating": 70.9,
+    "player": "J. Zinck",
+    "course": "Forest City National - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740594124,
+      "_nanoseconds": 401000000
+    },
+    "originalId": "rbJMJSKuxKeC3F0MD59y"
+  },
+  {
+    "slope": 114,
+    "score": 45,
+    "differential": 26.06,
+    "rating": 31.1,
+    "player": "J. Zinck",
+    "course": "Iron Creek - White - Front 9",
+    "holeType": "9",
+    "date": {
+      "_seconds": 1740594141,
+      "_nanoseconds": 817000000
+    },
+    "originalId": "jbcpn61jaYReABDnFZVc"
+  },
+  {
+    "slope": 109,
+    "score": 95,
+    "differential": 29.96,
+    "rating": 64.9,
+    "player": "J. Zinck",
+    "course": "Burford - White",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740594165,
+      "_nanoseconds": 973000000
+    },
+    "originalId": "buXTdtSmA9xHDSHWHkqn"
+  },
+  {
+    "slope": 121,
+    "score": 103,
+    "differential": 32.36,
+    "rating": 66.9,
+    "player": "J. Zinck",
+    "course": "Iron Creek - White",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740594173,
+      "_nanoseconds": 608000000
+    },
+    "originalId": "EEmkCRRLPJGAlXaxFc4S"
+  },
+  {
+    "slope": 131,
+    "score": 102,
+    "differential": 25.75,
+    "rating": 70.9,
+    "player": "J. Zinck",
+    "course": "Forest City National - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740594194,
+      "_nanoseconds": 225000000
+    },
+    "originalId": "jRepbl82FmPkA9uDbzPd"
+  },
+  {
+    "slope": 131,
+    "score": 96,
+    "differential": 20.54,
+    "rating": 71.2,
+    "player": "J. Vaclavek",
+    "course": "The Fox - Blue",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740594195,
+      "_nanoseconds": 448000000
+    },
+    "originalId": "D3iNeMiMwZ5Fer92gy8q"
+  },
+  {
+    "slope": 132,
+    "score": 110,
+    "differential": 31.06,
+    "rating": 72.2,
+    "player": "J. Vaclavek",
+    "course": "FireRock - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740594220,
+      "_nanoseconds": 664000000
+    },
+    "originalId": "T5dcFetELtcU39mfiATV"
+  },
+  {
+    "slope": 132,
+    "score": 102,
+    "differential": 24.49,
+    "rating": 72.2,
+    "player": "J. Vaclavek",
+    "course": "FireRock - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740594226,
+      "_nanoseconds": 680000000
+    },
+    "originalId": "HDhIsuFkBdAQCY6vSO6j"
+  },
+  {
+    "slope": 131,
+    "score": 102,
+    "differential": 25.75,
+    "rating": 70.9,
+    "player": "J. Vaclavek",
+    "course": "Forest City National - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740594243,
+      "_nanoseconds": 471000000
+    },
+    "originalId": "WhgP2wrx2iQQXHatK3a3"
+  },
+  {
+    "slope": 131,
+    "score": 109,
+    "differential": 31.3,
+    "rating": 71.2,
+    "player": "J. Vaclavek",
+    "course": "TPC Toronto: North - Blue",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740594260,
+      "_nanoseconds": 457000000
+    },
+    "originalId": "QblawBF7OJFjR9D0SEu8"
+  },
+  {
+    "slope": 131,
+    "score": 94,
+    "differential": 19.13,
+    "rating": 70.9,
+    "player": "J. Zinck",
+    "course": "Forest City National - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740594261,
+      "_nanoseconds": 876000000
+    },
+    "originalId": "91tPyjsern2aqaZMIxyV"
+  },
+  {
+    "slope": 128,
+    "score": 116,
+    "differential": 38.98,
+    "rating": 70,
+    "player": "J. Vaclavek",
+    "course": "Lake Arrowhead: The Pines - White",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740594275,
+      "_nanoseconds": 561000000
+    },
+    "originalId": "0kaLCGC2drdClKRbGR4L"
+  },
+  {
+    "slope": 130,
+    "score": 49,
+    "differential": 24.76,
+    "rating": 34.7,
+    "player": "J. Vaclavek",
+    "course": "Ariss Valley Pines/Willows - Blue - Front 9",
+    "holeType": "9",
+    "date": {
+      "_seconds": 1740594275,
+      "_nanoseconds": 302000000
+    },
+    "originalId": "VU0IAAlecuZ881igejdD"
+  },
+  {
+    "slope": 133,
+    "score": 110,
+    "differential": 30.99,
+    "rating": 72,
+    "player": "J. Vaclavek",
+    "course": "Lawsonia: Links Course - White",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740594304,
+      "_nanoseconds": 326000000
+    },
+    "originalId": "5Th8so3DrhlLAlLxtDDR"
+  },
+  {
+    "slope": 130,
+    "score": 110,
+    "differential": 32.21,
+    "rating": 71.4,
+    "player": "J. Vaclavek",
+    "course": "Sand Valley Golf Resort: Sand Valley - Orange",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740594337,
+      "_nanoseconds": 97000000
+    },
+    "originalId": "ZqOI3Nn5yYEwwvBKZOPz"
+  },
+  {
+    "slope": 124,
+    "score": 104,
+    "differential": 29.31,
+    "rating": 70.5,
+    "player": "J. Vaclavek",
+    "course": "Sand Valley Golf Resort: Mammoth Dunes - Orange",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740594354,
+      "_nanoseconds": 344000000
+    },
+    "originalId": "2fthPSe0PwSdVeykLUcz"
+  },
+  {
+    "slope": 110,
+    "score": 98,
+    "differential": 33.04,
+    "rating": 64.5,
+    "player": "J. Vaclavek",
+    "course": "Hickory Ridge Golf & Country Club - White",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740594392,
+      "_nanoseconds": 512000000
+    },
+    "originalId": "hwzr8U9wwnkdhInAExaN"
+  },
+  {
+    "slope": 131,
+    "score": 100,
+    "differential": 24.1,
+    "rating": 70.9,
+    "player": "J. Vaclavek",
+    "course": "Forest City National - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740594437,
+      "_nanoseconds": 559000000
+    },
+    "originalId": "h25OeLM0o76bj7Y0q0Gp"
+  },
+  {
+    "slope": 126,
+    "score": 45,
+    "differential": 22.07,
+    "rating": 34.3,
+    "player": "J. Vaclavek",
+    "course": "Guelph Country Club - Red/Blue - Front 9",
+    "holeType": "9",
+    "date": {
+      "_seconds": 1740594455,
+      "_nanoseconds": 346000000
+    },
+    "originalId": "GlUaUWUPg6LVckTAUMtm"
+  },
+  {
+    "slope": 95,
+    "score": 45,
+    "differential": 25.21,
+    "rating": 34.2,
+    "player": "J. Vaclavek",
+    "course": "Markdale Golf and Curling Club - Blue - Front 9",
+    "holeType": "9",
+    "date": {
+      "_seconds": 1740594455,
+      "_nanoseconds": 833000000
+    },
+    "originalId": "i31uwsMo4BGqyvy3W3HG"
+  },
+  {
+    "slope": 138,
+    "score": 111,
+    "differential": 31.99,
+    "rating": 70.3,
+    "player": "J. Vaclavek",
+    "course": "TPC Toronto: Hoot - Blue",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740594469,
+      "_nanoseconds": 760000000
+    },
+    "originalId": "skBCAeMcwOBoGwSr20Xp"
+  },
+  {
+    "slope": 111,
+    "score": 94,
+    "differential": 27.76,
+    "rating": 65.6,
+    "player": "J. Vaclavek",
+    "course": "Nottawasaga Inn Green Briar/Valley - White",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740594495,
+      "_nanoseconds": 209000000
+    },
+    "originalId": "FDLFzS5ZEgKI0tb0SgBM"
+  },
+  {
+    "slope": 131,
+    "score": 109,
+    "differential": 31.55,
+    "rating": 70.9,
+    "player": "J. Vaclavek",
+    "course": "Forest City National - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740594543,
+      "_nanoseconds": 960000000
+    },
+    "originalId": "2c2o2k1OvNitOsJN6BHe"
+  },
+  {
+    "slope": 131,
+    "score": 83,
+    "differential": 10.02,
+    "rating": 70.9,
+    "player": "M. Tasker",
+    "course": "Forest City National - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740594581,
+      "_nanoseconds": 10000000
+    },
+    "originalId": "AgLtajSqjgrgfLKPWHUq"
+  },
+  {
+    "slope": 126,
+    "score": 89,
+    "differential": 14.98,
+    "rating": 71.6,
+    "player": "M. Tasker",
+    "course": "Greenhills - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740594716,
+      "_nanoseconds": 185000000
+    },
+    "originalId": "q1Zt85A0hZxM9cYlBktm"
+  },
+  {
+    "slope": 128,
+    "score": 93,
+    "differential": 19.15,
+    "rating": 70.4,
+    "player": "M. Tasker",
+    "course": "FireRock - Blue",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740594743,
+      "_nanoseconds": 143000000
+    },
+    "originalId": "wnDvae8YfU0DtjLZ0CcH"
+  },
+  {
+    "slope": 131,
+    "score": 89,
+    "differential": 14.99,
+    "rating": 70.9,
+    "player": "M. Tasker",
+    "course": "Forest City National - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740594783,
+      "_nanoseconds": 418000000
+    },
+    "originalId": "mq8m60DhsGKdrjuYaxFY"
+  },
+  {
+    "slope": 131,
+    "score": 88,
+    "differential": 14.16,
+    "rating": 70.9,
+    "player": "M. Tasker",
+    "course": "Forest City National - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740594807,
+      "_nanoseconds": 208000000
+    },
+    "originalId": "4ZUnAGiQJBPdxaYqpDPY"
+  },
+  {
+    "slope": 138,
+    "score": 96,
+    "differential": 20.2,
+    "rating": 70.3,
+    "player": "M. Tasker",
+    "course": "TPC Toronto: Hoot - Blue",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740594872,
+      "_nanoseconds": 616000000
+    },
+    "originalId": "nHl1JkBdcuaSGCe1k7B2"
+  },
+  {
+    "slope": 131,
+    "score": 90,
+    "differential": 15.82,
+    "rating": 70.9,
+    "player": "M. Tasker",
+    "course": "Forest City National - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740594936,
+      "_nanoseconds": 288000000
+    },
+    "originalId": "WENZNcrHXm1jJgT8PAAW"
+  },
+  {
+    "slope": 129,
+    "score": 87,
+    "differential": 14.46,
+    "rating": 69.8,
+    "player": "M. Tasker",
+    "course": "Falls at Barber Creek - Blue",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740594993,
+      "_nanoseconds": 232000000
+    },
+    "originalId": "LSk44IRil6dzVfxzprMw"
+  },
+  {
+    "slope": 137,
+    "score": 89,
+    "differential": 13.46,
+    "rating": 72,
+    "player": "M. Tasker",
+    "course": "Pilgrim's Run - Tee 2",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740595283,
+      "_nanoseconds": 320000000
+    },
+    "originalId": "kRRiNXCwCkHB7j4CCvL9"
+  },
+  {
+    "slope": 131,
+    "score": 89,
+    "differential": 14.99,
+    "rating": 70.9,
+    "player": "M. Tasker",
+    "course": "Forest City National - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740595309,
+      "_nanoseconds": 344000000
+    },
+    "originalId": "V247NqxjBUNq9NgRL0LK"
+  },
+  {
+    "slope": 127,
+    "score": 85,
+    "differential": 10.85,
+    "rating": 72.3,
+    "player": "M. Tasker",
+    "course": "Tarandowah - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740595329,
+      "_nanoseconds": 624000000
+    },
+    "originalId": "c74Uzp8W3Gh0MopyBuLv"
+  },
+  {
+    "slope": 131,
+    "score": 86,
+    "differential": 12.5,
+    "rating": 70.9,
+    "player": "M. Tasker",
+    "course": "Forest City National - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740595416,
+      "_nanoseconds": 648000000
+    },
+    "originalId": "j6WeMG7ayZMecggkS2Xz"
+  },
+  {
+    "slope": 131,
+    "score": 82,
+    "differential": 9.19,
+    "rating": 70.9,
+    "player": "M. Tasker",
+    "course": "Forest City National - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740595495,
+      "_nanoseconds": 73000000
+    },
+    "originalId": "QBgovFKhcwdjW0TbHipG"
+  },
+  {
+    "slope": 131,
+    "score": 88,
+    "differential": 14.16,
+    "rating": 70.9,
+    "player": "M. Tasker",
+    "course": "Forest City National - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740595654,
+      "_nanoseconds": 282000000
+    },
+    "originalId": "PZvAffnR7gXb57YBEGrw"
+  },
+  {
+    "slope": 131,
+    "score": 96,
+    "differential": 20.79,
+    "rating": 70.9,
+    "player": "M. Tasker",
+    "course": "Forest City National - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740595684,
+      "_nanoseconds": 840000000
+    },
+    "originalId": "xyjsm0g2ZmunKH7ZxR3y"
+  },
+  {
+    "slope": 131,
+    "score": 88,
+    "differential": 14.16,
+    "rating": 70.9,
+    "player": "M. Tasker",
+    "course": "Forest City National - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740595705,
+      "_nanoseconds": 338000000
+    },
+    "originalId": "YmRkBTYTWl31WiyxkGR2"
+  },
+  {
+    "slope": 131,
+    "score": 88,
+    "differential": 14.16,
+    "rating": 70.9,
+    "player": "M. Tasker",
+    "course": "Forest City National - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740595752,
+      "_nanoseconds": 641000000
+    },
+    "originalId": "cri3tIfWBbugTAw9TlZN"
+  },
+  {
+    "slope": 131,
+    "score": 87,
+    "differential": 13.33,
+    "rating": 70.9,
+    "player": "M. Tasker",
+    "course": "Forest City National - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740595771,
+      "_nanoseconds": 873000000
+    },
+    "originalId": "kLak4lCO4xVrUxi9TKXK"
+  },
+  {
+    "slope": 131,
+    "score": 86,
+    "differential": 12.5,
+    "rating": 70.9,
+    "player": "M. Tasker",
+    "course": "Forest City National - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740595798,
+      "_nanoseconds": 232000000
+    },
+    "originalId": "kGxLvrr3USpsYWkuZR5x"
+  },
+  {
+    "slope": 131,
+    "score": 88,
+    "differential": 14.16,
+    "rating": 70.9,
+    "player": "M. Tasker",
+    "course": "Forest City National - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740595827,
+      "_nanoseconds": 561000000
+    },
+    "originalId": "bqfwUf5K2RVLh3WepyGa"
+  },
+  {
+    "slope": 129,
+    "score": 83,
+    "differential": 10.34,
+    "rating": 70.7,
+    "player": "O. Wolf",
+    "course": "Royal Turks & Caicos - Blue Tees",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740595841,
+      "_nanoseconds": 257000000
+    },
+    "originalId": "nXW8djxZNJ2QParyx5BR"
+  },
+  {
+    "slope": 131,
+    "score": 96,
+    "differential": 20.79,
+    "rating": 70.9,
+    "player": "J. Vaclavek",
+    "course": "Forest City National - Gold",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1740788628,
+      "_nanoseconds": 173000000
+    },
+    "originalId": "GJ9bV72N8vErJgzQwbjX"
+  },
+  {
+    "slope": 125,
+    "score": 52,
+    "differential": 27.32,
+    "rating": 34.5,
+    "player": "L. Schinkel",
+    "course": "Bridgewater (Front 9) - White",
+    "holeType": "9",
+    "date": {
+      "_seconds": 1740850963,
+      "_nanoseconds": 851000000
+    },
+    "originalId": "diCMpvOY5sBGrJQgc2ls"
+  },
+  {
+    "slope": 124,
+    "score": 49,
+    "differential": 24.29,
+    "rating": 35.1,
+    "player": "L. Schinkel",
+    "course": "Sawmill (Front 9) - White",
+    "holeType": "9",
+    "date": {
+      "_seconds": 1740850999,
+      "_nanoseconds": 496000000
+    },
+    "originalId": "yxtMGfVEYoiIG8hZJfIj"
+  },
+  {
+    "slope": 124,
+    "score": 53,
+    "differential": 29.69,
+    "rating": 35.1,
+    "player": "L. Schinkel",
+    "course": "Sawmill (Front 9) - White",
+    "holeType": "9",
+    "date": {
+      "_seconds": 1740852094,
+      "_nanoseconds": 267000000
+    },
+    "originalId": "AVH0NRlRxRsFGIBWQEof"
+  },
+  {
+    "slope": 124,
+    "score": 47,
+    "differential": 25.54,
+    "rating": 35.1,
+    "player": "L. Schinkel",
+    "course": "Sawmill (Front 9) - White",
+    "holeType": "9",
+    "date": {
+      "_seconds": 1740852136,
+      "_nanoseconds": 212000000
+    },
+    "originalId": "aCSdt3owCUcCEWnQvaQO"
+  },
+  {
+    "slope": 128,
+    "score": 51,
+    "differential": 29.14,
+    "rating": 33.7,
+    "player": "L. Schinkel",
+    "course": "Twenty Valley (Front 9) - White",
+    "holeType": "9",
+    "date": {
+      "_seconds": 1740852168,
+      "_nanoseconds": 563000000
+    },
+    "originalId": "SNhh5257mxXe55qekJfx"
+  },
+  {
+    "slope": 124,
+    "score": 48,
+    "differential": 27.33,
+    "rating": 33.6,
+    "player": "L. Schinkel",
+    "course": "Scenic Woods (Front 9) - White",
+    "holeType": "9",
+    "date": {
+      "_seconds": 1740852193,
+      "_nanoseconds": 914000000
+    },
+    "originalId": "hsnLjQ9jIFBdMBnkeCqH"
+  },
+  {
+    "slope": 123,
+    "score": 45,
+    "differential": 24.08,
+    "rating": 34.4,
+    "player": "L. Schinkel",
+    "course": "Rockway Vineyards (Front 9) - White",
+    "holeType": "9",
+    "date": {
+      "_seconds": 1740852235,
+      "_nanoseconds": 28000000
+    },
+    "originalId": "xti9snkcaEpwIG8hrAQr"
+  },
+  {
+    "slope": 124,
+    "score": 46,
+    "differential": 25.38,
+    "rating": 33.6,
+    "player": "L. Schinkel",
+    "course": "Scenic Woods (Front 9) - White",
+    "holeType": "9",
+    "date": {
+      "_seconds": 1740852267,
+      "_nanoseconds": 529000000
+    },
+    "originalId": "Dp5QfItJTPy2lEm2Wuu7"
+  },
+  {
+    "slope": 124,
+    "score": 45,
+    "differential": 23.09,
+    "rating": 35.1,
+    "player": "L. Schinkel",
+    "course": "Sawmill (Front 9) - White",
+    "holeType": "9",
+    "date": {
+      "_seconds": 1740852298,
+      "_nanoseconds": 45000000
+    },
+    "originalId": "uSKXtJBFLnv03IQss1UW"
+  },
+  {
+    "slope": 124,
+    "score": 47,
+    "differential": 24.44,
+    "rating": 35.1,
+    "player": "L. Schinkel",
+    "course": "Sawmill (Front 9) - White",
+    "holeType": "9",
+    "date": {
+      "_seconds": 1740852322,
+      "_nanoseconds": 891000000
+    },
+    "originalId": "cW5ru72Rpm0QLelnXlOy"
+  },
+  {
+    "slope": 124,
+    "score": 49,
+    "differential": 29.28,
+    "rating": 35.1,
+    "player": "L. Schinkel",
+    "course": "Sawmill (Front 9) - White",
+    "holeType": "9",
+    "date": {
+      "_seconds": 1740852356,
+      "_nanoseconds": 776000000
+    },
+    "originalId": "W7pir8MJlAc8kgNnJEkH"
+  },
+  {
+    "slope": 124,
+    "score": 46,
+    "differential": 23.26,
+    "rating": 35.1,
+    "player": "L. Schinkel",
+    "course": "Sawmill (Front 9) - White",
+    "holeType": "9",
+    "date": {
+      "_seconds": 1740852383,
+      "_nanoseconds": 916000000
+    },
+    "originalId": "wjb23172ynTDo9bC7uB3"
+  },
+  {
+    "slope": 123,
+    "score": 49,
+    "differential": 26.8,
+    "rating": 33.9,
+    "player": "L. Schinkel",
+    "course": "Lake St. George (N/S Front 9) - White",
+    "holeType": "9",
+    "date": {
+      "_seconds": 1740852429,
+      "_nanoseconds": 0
+    },
+    "originalId": "f787rDMUhAoqN70ngORZ"
+  },
+  {
+    "slope": 123,
+    "score": 42,
+    "differential": 20.13,
+    "rating": 34.4,
+    "player": "L. Schinkel",
+    "course": "Rockway Vineyards (Front 9) - White",
+    "holeType": "9",
+    "date": {
+      "_seconds": 1740852456,
+      "_nanoseconds": 309000000
+    },
+    "originalId": "K2w5llGjdOeAkm2S90jW"
+  },
+  {
+    "slope": 133,
+    "score": 47,
+    "differential": 21.92,
+    "rating": 36.1,
+    "player": "L. Schinkel",
+    "course": "Niagara National (Front 9) - White",
+    "holeType": "9",
+    "date": {
+      "_seconds": 1740852482,
+      "_nanoseconds": 859000000
+    },
+    "originalId": "dbZYOuephwA9yQe7LBVi"
+  },
+  {
+    "slope": 125,
+    "score": 47,
+    "differential": 23.63,
+    "rating": 34.5,
+    "player": "L. Schinkel",
+    "course": "Bridgewater (Front 9) - White",
+    "holeType": "9",
+    "date": {
+      "_seconds": 1740852517,
+      "_nanoseconds": 610000000
+    },
+    "originalId": "hyRYnRtKVfQZ7fHvRzjX"
+  },
+  {
+    "slope": 125,
+    "score": 56,
+    "differential": 31.34,
+    "rating": 34.5,
+    "player": "L. Schinkel",
+    "course": "Bridgewater (Front 9) - White",
+    "holeType": "9",
+    "date": {
+      "_seconds": 1740852545,
+      "_nanoseconds": 315000000
+    },
+    "originalId": "mIylVmtsISv64K69QRVF"
+  },
+  {
+    "slope": 124,
+    "score": 48,
+    "differential": 23.97,
+    "rating": 35.1,
+    "player": "L. Schinkel",
+    "course": "Sawmill (Front 9) - White",
+    "holeType": "9",
+    "date": {
+      "_seconds": 1740852574,
+      "_nanoseconds": 232000000
+    },
+    "originalId": "PEVu6VP1Ny58PBJdTzUr"
+  },
+  {
+    "slope": 124,
+    "score": 47,
+    "differential": 23.09,
+    "rating": 35.1,
+    "player": "L. Schinkel",
+    "course": "Sawmill (Front 9) - White",
+    "holeType": "9",
+    "date": {
+      "_seconds": 1740852601,
+      "_nanoseconds": 262000000
+    },
+    "originalId": "ez5aFjo2Mobajk2hUsbw"
+  },
+  {
+    "slope": 125,
+    "score": 48,
+    "differential": 24.3,
+    "rating": 34.5,
+    "player": "L. Schinkel",
+    "course": "Bridgewater (Front 9) - White",
+    "holeType": "9",
+    "date": {
+      "_seconds": 1740852622,
+      "_nanoseconds": 523000000
+    },
+    "originalId": "tjS3kbPIRJ2qI5Bmz17R"
+  },
+  {
+    "slope": 123,
+    "score": 88,
+    "differential": 15.7,
+    "rating": 70.2,
+    "player": "D. McCullough",
+    "course": "Tarandowah - Blue",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1741996800,
+      "_nanoseconds": 0
+    },
+    "originalId": "c1Kezk4fS1Z24MKIv5ec"
+  },
+  {
+    "slope": 123,
+    "score": 91,
+    "differential": 18.34,
+    "rating": 70.2,
+    "player": "O. Wolf",
+    "course": "Tarandowah - Blue",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1741996800,
+      "_nanoseconds": 0
+    },
+    "originalId": "vdgxuvuUsMbFvSLWuSW3"
+  },
+  {
+    "slope": 123,
+    "score": 92,
+    "differential": 19.23,
+    "rating": 70.2,
+    "player": "M. Tasker",
+    "course": "Tarandowah - Blue",
+    "holeType": "18",
+    "date": {
+      "_seconds": 1741996800,
+      "_nanoseconds": 0
+    },
+    "originalId": "znixLlO3iIIbAMhPiphu"
+  }
+]

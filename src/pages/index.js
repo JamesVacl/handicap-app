@@ -394,7 +394,11 @@ const Home = () => {
                         {score.isComposed ? 'Combined 9s' : 
                          score.holeType === '9' ? '9-Hole' : '18-Hole'}
                       </td>
-                      <td>{score.differential}</td>
+                      <td>
+                        {score.isComposed 
+                          ? parseFloat(score.differential).toFixed(1)
+                          : score.differential}
+                      </td>
                       <td>{new Date(score.date.seconds * 1000).toLocaleDateString()}</td>
                     </tr>
                   ))}
