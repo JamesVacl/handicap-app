@@ -12,12 +12,15 @@ const NavigationMenu = () => {
   };
 
   return (
-    <Navbar expand="lg" className="navbar-custom">
+    <Navbar bg="dark" variant="dark" expand="lg" className="navbar-custom">
       <Container fluid>
         <Link href="/" passHref legacyBehavior>
           <Navbar.Brand>Guyscorp Golf</Navbar.Brand>
         </Link>
-        <Navbar.Toggle aria-controls="basic-navbar-nav" />
+        <Navbar.Toggle 
+          aria-controls="basic-navbar-nav" 
+          className="custom-toggler"
+        />
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="me-auto">
             <Link href="/" passHref legacyBehavior>

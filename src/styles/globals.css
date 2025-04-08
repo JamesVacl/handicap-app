@@ -466,26 +466,37 @@ body {
 
 /* Scores table styles */
 .scores-table {
-  min-width: 800px;  /* Minimum width for larger screens */
+  min-width: 800px;
   width: 100%;
 }
 
 .scores-table th, 
 .scores-table td {
-  padding: 12px 16px !important;  /* More padding for cells */
+  padding: 0.75rem !important;
 }
 
 /* Column width distributions */
-.scores-table .col-player { width: 20%; }
-.scores-table .col-course { width: 25%; }
-.scores-table .col-score { width: 10%; }
-.scores-table .col-type { width: 15%; }
-.scores-table .col-differential { width: 15%; }
-.scores-table .col-date { width: 15%; }
+.col-player { width: 18%; }
+.col-course { width: 30%; }
+.col-score { width: 12%; }
+.col-type { width: 15%; }
+.col-differential { width: 12%; }
+.col-date { width: 13%; }
 
 /* Table wrapper for horizontal scrolling on mobile */
 .table-responsive-wrapper {
   overflow-x: auto;
-  margin: 0 -1rem;  /* Negative margin to allow full-width scrolling */
+  margin: 0 -1rem;
   padding: 0 1rem;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Navigation menu button style */
+.navbar-dark .navbar-toggler {
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.navbar-toggler-icon {
+  filter: brightness(2);
 }
