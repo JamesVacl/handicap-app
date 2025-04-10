@@ -500,3 +500,22 @@ body {
 .navbar-toggler-icon {
   filter: brightness(2);
 }
+
+.player-slots {
+  max-width: 250px;
+}
+
+.player-slots select {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: white;
+}
+
+.player-slots select:focus {
+  border-color: #28a745;
+  box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+  outline: none;
+}

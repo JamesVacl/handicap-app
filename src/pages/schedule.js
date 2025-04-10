@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { getFirestore, doc, setDoc, onSnapshot, collection, getDocs } from 'firebase/firestore'; // Add this import
 import { useRouter } from 'next/router';
 import { Navbar, Nav, Container } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';  // Add this if not already in _app.js
@@ -9,6 +10,8 @@ import WeatherForecast from '../components/WeatherForecast';
 const Schedule = () => {
   const [authenticated, setAuthenticated] = useState(false);
   const router = useRouter();
+  const [players, setPlayers] = useState([]); // Remove the hardcoded players array
+  const [teeTimeAssignments, setTeeTimeAssignments] = useState({});
 
   const formatTime = (timeString) => {
     const [hours, minutes] = timeString.split(':');
@@ -93,6 +96,54 @@ const Schedule = () => {
     return () => unsubscribe();
   }, [router]);
 
+  useEffect(() => {
+    if (authenticated) {
+      const db = getFirestore();
+      const assignmentsRef = doc(db, 'teeTimeAssignments', '2025-schedule');
+      
+      const unsubscribe = onSnapshot(assignmentsRef, (doc) => {
+        if (doc.exists()) {
+          setTeeTimeAssignments(doc.data());
+        }
+      }, (error) => {
+        console.error("Error fetching tee times:", error);
+      });
+
+      return () => unsubscribe();
+    }
+  }, [authenticated]);
+
+  useEffect(() => {
+    const fetchPlayers = async () => {
+      if (authenticated) {
+        const db = getFirestore();
+        const playersSnapshot = await getDocs(collection(db, 'players'));
+        const playersList = playersSnapshot.docs
+          .map(doc => doc.data().name)
+          .sort(); // Sort alphabetically
+        setPlayers(playersList);
+      }
+    };
+
+    fetchPlayers();
+  }, [authenticated]);
+
+  const handlePlayerAssignment = async (eventIndex, timeIndex, playerSlot, player) => {
+    if (!authenticated) return;
+    
+    const db = getFirestore();
+    const key = `${eventIndex}-${timeIndex}-${playerSlot}`;
+    
+    try {
+      await setDoc(doc(db, 'teeTimeAssignments', '2025-schedule'), {
+        ...teeTimeAssignments,
+        [key]: player
+      }, { merge: true });
+    } catch (error) {
+      console.error('Error saving assignment:', error);
+    }
+  };
+
   const formatDate = (dateString) => {
     // Create date with explicit timezone handling
     const date = new Date(dateString + 'T12:00:00'); // Add noon time to avoid timezone issues
@@ -131,11 +182,31 @@ const Schedule = () => {
                   {event.teeTimes.map((time, timeIndex) => (
                     <div key={timeIndex} className="tee-time-slot mb-4">
                       <h4 className="text-xl font-semibold">{formatTime(time)}</h4>
-                      <ul className="list-unstyled">
-                        <li>Player 1: TBD</li>
-                        <li>Player 2: TBD</li>
-                        <li>Player 3: TBD</li>
-                      </ul>
+                      <div className="player-slots">
+                        {[0, 1, 2].map((playerSlot) => (
+                          <select
+                            key={playerSlot}
+                            className="form-select mb-2"
+                            value={teeTimeAssignments[`${index}-${timeIndex}-${playerSlot}`] || ''}
+                            onChange={(e) => handlePlayerAssignment(index, timeIndex, playerSlot, e.target.value)}
+                          >
+                            <option value="">-- Select Player --</option>
+                            {players
+                              .filter(player => {
+                                const teeTimePlayers = Object.entries(teeTimeAssignments)
+                                  .filter(([key]) => key.startsWith(`${index}-${timeIndex}`))
+                                  .map(([_, value]) => value);
+                                return !teeTimePlayers.includes(player) || 
+                                       teeTimeAssignments[`${index}-${timeIndex}-${playerSlot}`] === player;
+                              })
+                              .map((player) => (
+                                <option key={player} value={player}>
+                                  {player}
+                                </option>
+                              ))}
+                          </select>
+                        ))}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -151,11 +222,23 @@ const Schedule = () => {
                       {event.additionalRound.teeTimes.map((time, timeIndex) => (
                         <div key={timeIndex} className="tee-time-slot mb-4">
                           <h4 className="text-xl font-semibold">{formatTime(time)}</h4>
-                          <ul className="list-unstyled">
-                            <li>Player 1: TBD</li>
-                            <li>Player 2: TBD</li>
-                            <li>Player 3: TBD</li>
-                          </ul>
+                          <div className="player-slots">
+                            {[0, 1, 2].map((playerSlot) => (
+                              <select
+                                key={playerSlot}
+                                className="form-select mb-2"
+                                value={teeTimeAssignments[`${index}-additional-${timeIndex}-${playerSlot}`] || ''}
+                                onChange={(e) => handlePlayerAssignment(index, `additional-${timeIndex}`, playerSlot, e.target.value)}
+                              >
+                                <option value="">-- Select Player --</option>
+                                {players.map((player) => (
+                                  <option key={player} value={player}>
+                                    {player}
+                                  </option>
+                                ))}
+                              </select>
+                            ))}
+                          </div>
                         </div>
                       ))}
                     </div>
