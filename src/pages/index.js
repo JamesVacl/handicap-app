@@ -25,7 +25,11 @@ const Home = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const [filterPlayer, setFilterPlayer] = useState(''); // New state for filter selection
   const [filterCourse, setFilterCourse] = useState(''); // New state for filter selection
-  const [datePlayed, setDatePlayed] = useState(new Date().toISOString().split('T')[0]);
+  const [datePlayed, setDatePlayed] = useState(() => {
+    const today = new Date();
+    today.setMinutes(today.getMinutes() - today.getTimezoneOffset());
+    return today.toISOString().split('T')[0];
+  });
   const itemsPerPage = 10;
 
   useEffect(() => {
@@ -166,7 +170,7 @@ const Home = () => {
       slope: parseFloat(slope),
       player: selectedPlayer,
       holeType: holeType,
-      date: new Date(datePlayed)
+      date: new Date(`${datePlayed}T12:00:00`) // Add noon time to prevent timezone issues
     });
 
     // Customize alert based on hole type
