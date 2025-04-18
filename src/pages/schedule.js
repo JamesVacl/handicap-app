@@ -31,9 +31,9 @@ const Schedule = () => {
     },
     {
       date: '2025-05-18',
-      courseName: 'Batteaux Creek Golf Club',
-      city: 'Nottawa,CA',
-      teeTimes: ['9:00', '9:10', '9:20'],
+      courseName: 'Lora Bay Golf Course',
+      city: 'Thorbury,CA',
+      teeTimes: ['10:20', '10:30', '10:40'],
       notes: ''
     },
     {
@@ -183,7 +183,7 @@ const Schedule = () => {
                     <div key={timeIndex} className="tee-time-slot mb-4">
                       <h4 className="text-xl font-semibold">{formatTime(time)}</h4>
                       <div className="player-slots">
-                        {[0, 1, 2].map((playerSlot) => (
+                        {[0, 1, 2, 3].map((playerSlot) => (    // Changed from [0, 1, 2]
                           <select
                             key={playerSlot}
                             className="form-select mb-2"
@@ -223,7 +223,7 @@ const Schedule = () => {
                         <div key={timeIndex} className="tee-time-slot mb-4">
                           <h4 className="text-xl font-semibold">{formatTime(time)}</h4>
                           <div className="player-slots">
-                            {[0, 1, 2].map((playerSlot) => (
+                            {[0, 1, 2, 3].map((playerSlot) => (    // Changed from [0, 1, 2]
                               <select
                                 key={playerSlot}
                                 className="form-select mb-2"
