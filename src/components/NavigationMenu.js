@@ -2,6 +2,7 @@ import { Navbar, Nav, Container } from 'react-bootstrap';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { signOutUser } from 'src/firebase';
+import CountdownTimer from './CountdownTimer';
 
 const NavigationMenu = () => {
   const router = useRouter();
@@ -32,6 +33,11 @@ const NavigationMenu = () => {
             <Link href="/teams" passHref legacyBehavior>
               <Nav.Link active={router.pathname === "/teams"}>Teams</Nav.Link>
             </Link>
+          </Nav>
+          <Nav className="position-absolute start-50 translate-middle-x">
+            <Nav.Link className="text-white">
+              <CountdownTimer />
+            </Nav.Link>
           </Nav>
           <Nav>
             <Nav.Link onClick={handleSignOut}>Sign Out</Nav.Link>
