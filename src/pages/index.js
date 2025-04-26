@@ -67,53 +67,81 @@ const Home = () => {
   const calculateLeaderboard = (scores) => {
     const playerScores = {};
 
+    // First group scores by player
     scores.forEach(score => {
       if (!playerScores[score.player]) {
         playerScores[score.player] = [];
       }
-      // Only include 18-hole scores and properly combined 9-hole scores
+      // Set ALL scores' isUsedForDifferential to false initially
+      score.isUsedForDifferential = false;
+      
       if (score.differential !== null && (score.holeType === '18' || score.isComposed)) {
         playerScores[score.player].push(score);
       }
     });
 
-    // Update average score calculation to include combined scores
     const leaderboard = Object.keys(playerScores).map(playerName => {
       const playerScoreList = playerScores[playerName];
 
-      // Sort scores by date in descending order (most recent first)
+      // Sort ALL scores by date first
       playerScoreList.sort((a, b) => new Date(b.date.seconds * 1000) - new Date(a.date.seconds * 1000));
 
-      // Take the 20 most recent scores
+      // Take ONLY the 20 most recent scores BEFORE grouping differentials
       const recentScores = playerScoreList.slice(0, 20);
 
-      // Create array of objects with differential and index
-      const differentialsWithIndex = recentScores
-        .map((score, index) => ({ 
-          differential: score.differential,
-          index: index,
-          date: score.date
-        }))
-        .sort((a, b) => {
-          if (a.differential !== b.differential) {
-            return a.differential - b.differential;
-          }
-          return new Date(b.date.seconds * 1000) - new Date(a.date.seconds * 1000);
-        });
-
-      // Take the 8 lowest differentials
-      const lowestDifferentials = differentialsWithIndex.slice(0, 8);
-      const averageHandicap = lowestDifferentials.length > 0 
-        ? lowestDifferentials.reduce((acc, item) => acc + item.differential, 0) / lowestDifferentials.length 
-        : 0;
-
-      // Mark which scores are used in handicap calculation
-      const usedIndices = new Set(lowestDifferentials.map(item => item.index));
-      recentScores.forEach((score, index) => {
-        score.isUsedForDifferential = usedIndices.has(index);
+      // Initialize all scores as not used for differential
+      recentScores.forEach(score => {
+        score.isUsedForDifferential = false;
       });
 
-      // Calculate average score from full rounds (18-hole and combined 9s)
+      // Group differentials by value to handle ties
+      const differentialGroups = {};
+      recentScores.forEach((score, index) => {
+        const key = score.differential.toFixed(1);
+        if (!differentialGroups[key]) {
+          differentialGroups[key] = [];
+        }
+        differentialGroups[key].push({ score, index });
+      });
+
+      // Sort differential groups by value (lowest to highest)
+      const sortedDifferentials = Object.entries(differentialGroups)
+        .sort(([a], [b]) => parseFloat(a) - parseFloat(b));
+
+      // Select exactly 8 best differentials
+      let selectedIndices = new Set();
+      let selectedCount = 0;
+
+      for (const [, group] of sortedDifferentials) {
+        if (selectedCount >= 8) break;
+
+        if (selectedCount + group.length <= 8) {
+          // Include all scores in this group
+          group.forEach(({ index }) => selectedIndices.add(index));
+          selectedCount += group.length;
+        } else {
+          // Only take the most recent scores needed to complete 8
+          group.sort((a, b) => 
+            new Date(b.score.date.seconds * 1000) - new Date(a.score.date.seconds * 1000)
+          );
+          const remaining = 8 - selectedCount;
+          group.slice(0, remaining).forEach(({ index }) => selectedIndices.add(index));
+          selectedCount = 8;
+        }
+      }
+
+      // Mark only the selected scores as used for differential
+      recentScores.forEach((score, index) => {
+        score.isUsedForDifferential = selectedIndices.has(index);
+      });
+
+      // Calculate average handicap from selected scores
+      const selectedScores = Array.from(selectedIndices).map(index => recentScores[index]);
+      const averageHandicap = selectedScores.length > 0
+        ? selectedScores.reduce((acc, score) => acc + score.differential, 0) / selectedScores.length
+        : 0;
+
+      // Calculate average score from full rounds only
       const fullRoundScores = recentScores.filter(score => score.holeType === '18' || score.isComposed);
       const totalScore = fullRoundScores.reduce((acc, score) => acc + score.score, 0);
       const averageScore = fullRoundScores.length > 0 ? totalScore / fullRoundScores.length : 0;

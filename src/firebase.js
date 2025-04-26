@@ -78,7 +78,7 @@ const getScores = async () => {
   }));
 };
 
-// Add this function after getScores
+// Update the getPlayerHandicaps function
 const getPlayerHandicaps = async () => {
   const scores = await getScores();
   const playerScores = {};
@@ -88,13 +88,14 @@ const getPlayerHandicaps = async () => {
     if (!playerScores[score.player]) {
       playerScores[score.player] = [];
     }
-    // Only include 18-hole scores and combined 9-hole scores that have valid differentials
+    // Include both 18-hole scores and properly combined 9-hole scores
     if (score.differential !== null && (score.holeType === '18' || score.isComposed)) {
       playerScores[score.player].push({
         id: score.id,
         differential: score.differential,
         date: score.date,
-        isUsedForDifferential: false // Initialize flag
+        isUsedForDifferential: false,
+        isComposed: score.isComposed || false // Track if it's a combined score
       });
     }
   });
@@ -154,20 +155,18 @@ const getPlayerHandicaps = async () => {
   return playerHandicaps;
 };
 
-// Function to calculate Handicap Differential
+// Update the calculateDifferential function
 const calculateDifferential = (score, rating, slope, holeType, isComposed = false) => {
   let differential;
 
+  // Handle both 18-hole and combined 9-hole scores
   if (holeType === '18' || isComposed) {
-    // Standard calculation for 18-hole scores and combined 9-hole scores
     differential = ((score - rating) * 113) / slope;
-  } else {
-    // For single 9-hole scores, don't calculate differential yet
-    return null;
+    return parseFloat((differential * 0.96).toFixed(2));
   }
 
-  // Apply the 0.96 multiplier to all differentials
-  return parseFloat((differential * 0.96).toFixed(2));
+  // For single 9-hole scores, return null
+  return null;
 };
 
 // Function to add a score to Firestore
@@ -214,7 +213,7 @@ const addScore = async ({ score, course, rating, slope, player, holeType, date }
   }
 };
 
-// Add new function to pair 9-hole scores
+// Update the tryToPairNineHoleScores function
 const tryToPairNineHoleScores = async (player) => {
   try {
     // Get all unpaired 9-hole scores for this player
@@ -242,16 +241,16 @@ const tryToPairNineHoleScores = async (player) => {
       const totalRating = score1.rating + score2.rating;
       const avgSlope = Math.round((score1.slope + score2.slope) / 2);
       
-      // Calculate differential for combined score
+      // Calculate differential for combined score using isComposed flag
       const differential = calculateDifferential(
         totalScore, 
         totalRating, 
         avgSlope, 
         '18', 
-        true
+        true  // Mark as composed score
       );
 
-      // Create combined score entry
+      // Create combined score entry with clear isComposed flag
       await addDoc(collection(db, "scores"), {
         score: totalScore,
         course: `${score1.course} + ${score2.course}`,
