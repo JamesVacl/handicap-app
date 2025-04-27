@@ -565,3 +565,30 @@ body {
                  0 0 40px #28a745;
   }
 }
+
+.tee-time-header {
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+}
+
+.match-details {
+  font-size: 0.875rem;
+  text-align: right;
+}
+
+.match-details small {
+  opacity: 0.9;
+}
+
+.match-info {
+  border-left: 3px solid #28a745;
+}
+
+.match-info span {
+  font-weight: 500;
+}
+
+.match-info small.text-success {
+  font-weight: 600;
+}

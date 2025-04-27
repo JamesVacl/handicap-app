@@ -1,17 +1,24 @@
 import { useState, useEffect } from 'react';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
-import { getFirestore, doc, setDoc, onSnapshot, collection, getDocs } from 'firebase/firestore'; // Add this import
+import { getFirestore, doc, setDoc, onSnapshot, collection, getDocs, deleteField } from 'firebase/firestore'; // Add this import
 import { useRouter } from 'next/router';
 import { Navbar, Nav, Container } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';  // Add this if not already in _app.js
 import NavigationMenu from '../components/NavigationMenu';
 import WeatherForecast from '../components/WeatherForecast';
+import MatchSetupModal from '../components/MatchSetupModal'; // Add this import
+import { calculateLeaderboard } from '../firebase'; // Add this import at the top
 
 const Schedule = () => {
   const [authenticated, setAuthenticated] = useState(false);
   const router = useRouter();
   const [players, setPlayers] = useState([]); // Remove the hardcoded players array
   const [teeTimeAssignments, setTeeTimeAssignments] = useState({});
+  const [matches, setMatches] = useState({});
+  const [showMatchModal, setShowMatchModal] = useState(false);
+  const [selectedEventIndex, setSelectedEventIndex] = useState(null);
+  const [selectedTimeIndex, setSelectedTimeIndex] = useState(null);
+  const [playerHandicaps, setPlayerHandicaps] = useState({});
 
   const formatTime = (timeString) => {
     const [hours, minutes] = timeString.split(':');
@@ -40,7 +47,7 @@ const Schedule = () => {
       date: '2025-08-08',
       courseName: 'Forest Dunes (The Loop)',
       city: 'Roscommon,US',
-      teeTimes: ['14:00', '14:10', '14:20'],
+      teeTimes: ['13:33', '13:44',],
       notes: 'Sneaky Friday round - 4 hour drive from London'
     },
     {
@@ -48,7 +55,27 @@ const Schedule = () => {
       courseName: 'Treetops (Smith Signature)',
       city: 'Gaylord,US',
       teeTimes: ['7:30', '7:40', '7:50'],
-      notes: 'Blue tees - Modified strokeplay - 8 minutes from hotel'
+      notes: 'Blue tees - Modified strokeplay - 8 minutes from hotel',
+      matches: [
+        {
+          teeTime: '7:30',
+          format: 'Singles Match Play',
+          stakes: '5-3-2',
+          allowance: '100%'
+        },
+        {
+          teeTime: '7:40',
+          format: 'Singles Match Play',
+          stakes: '5-3-2',
+          allowance: '100%'
+        },
+        {
+          teeTime: '7:50',
+          format: 'Singles Match Play',
+          stakes: '5-3-2',
+          allowance: '100%'
+        }
+      ]
     },
     {
       courseName: 'Treetops (Jones Masterpiece)',
@@ -128,6 +155,52 @@ const Schedule = () => {
     fetchPlayers();
   }, [authenticated]);
 
+  useEffect(() => {
+    const fetchHandicaps = async () => {
+      if (authenticated) {
+        try {
+          const db = getFirestore();
+          const scoresRef = collection(db, 'scores');
+          const scoresSnap = await getDocs(scoresRef);
+          const scores = scoresSnap.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+          }));
+
+          // Calculate handicaps using the imported calculation function
+          const leaderboard = calculateLeaderboard(scores);
+          const handicaps = {};
+          leaderboard.forEach(entry => {
+            handicaps[entry.name] = entry.handicap;
+          });
+          setPlayerHandicaps(handicaps);
+        } catch (error) {
+          console.error("Error fetching handicaps:", error);
+        }
+      }
+    };
+
+    fetchHandicaps();
+  }, [authenticated]);
+
+  // Add this useEffect to fetch matches
+  useEffect(() => {
+    if (authenticated) {
+      const db = getFirestore();
+      const matchesRef = doc(db, 'matches', '2025-schedule');
+      
+      const unsubscribe = onSnapshot(matchesRef, (doc) => {
+        if (doc.exists()) {
+          setMatches(doc.data());
+        }
+      }, (error) => {
+        console.error("Error fetching matches:", error);
+      });
+
+      return () => unsubscribe();
+    }
+  }, [authenticated]);
+  
   const handlePlayerAssignment = async (eventIndex, timeIndex, playerSlot, player) => {
     if (!authenticated) return;
     
@@ -143,6 +216,52 @@ const Schedule = () => {
       console.error('Error saving assignment:', error);
     }
   };
+
+  // Modify handleMatchSetup to save to Firebase
+  const handleMatchSetup = async (eventIndex, timeIndex, matchData) => {
+    if (!authenticated) return;
+    
+    const db = getFirestore();
+    const key = `${eventIndex}-${timeIndex}`;
+    
+    // Calculate strokes given
+    const player1Handicap = playerHandicaps[matchData.player1] || 0;
+    const player2Handicap = playerHandicaps[matchData.player2] || 0;
+    const strokesGiven = Math.abs(player1Handicap - player2Handicap);
+    
+    try {
+      await setDoc(doc(db, 'matches', '2025-schedule'), {
+        ...matches,
+        [key]: {
+          player1: matchData.player1,
+          player2: matchData.player2,
+          format: 'Singles Match Play',
+          strokesGiven: Math.round(strokesGiven), // Round to nearest whole number
+          receivingStrokes: player1Handicap > player2Handicap ? matchData.player1 : matchData.player2,
+          createdAt: new Date()
+        }
+      }, { merge: true });
+    } catch (error) {
+      console.error('Error saving match:', error);
+    }
+  };
+
+// Add this new function after handleMatchSetup
+const handleDeleteMatch = async (eventIndex, timeIndex) => {
+  if (!authenticated) return;
+  
+  const db = getFirestore();
+  const key = `${eventIndex}-${timeIndex}`;
+  
+  try {
+    await setDoc(doc(db, 'matches', '2025-schedule'), {
+      ...matches,
+      [key]: deleteField()
+    }, { merge: true });
+  } catch (error) {
+    console.error('Error deleting match:', error);
+  }
+};
 
   const formatDate = (dateString) => {
     // Create date with explicit timezone handling
@@ -181,9 +300,55 @@ const Schedule = () => {
                 <div className="tee-times">
                   {event.teeTimes.map((time, timeIndex) => (
                     <div key={timeIndex} className="tee-time-slot mb-4">
-                      <h4 className="text-xl font-semibold">{formatTime(time)}</h4>
+                      <div className="tee-time-header d-flex justify-content-between align-items-center mb-3">
+                        <h4 className="text-xl font-semibold mb-0">{formatTime(time)}</h4>
+                        <button 
+                          className="btn btn-sm btn-outline-success"
+                          onClick={() => {
+                            setSelectedEventIndex(index);
+                            setSelectedTimeIndex(timeIndex);
+                            setShowMatchModal(true);
+                          }}
+                        >
+                          Set Match
+                        </button>
+                      </div>
+                      {matches[`${index}-${timeIndex}`] && (
+  <div className="match-info mb-3 p-2 bg-success bg-opacity-10 rounded">
+    <div className="d-flex justify-content-between align-items-center">
+      <div className="text-center">
+        <span className="d-block">{matches[`${index}-${timeIndex}`].player1}</span>
+        <small className="text-muted">
+          ({playerHandicaps[matches[`${index}-${timeIndex}`].player1]?.toFixed(1) || 'N/A'})
+        </small>
+      </div>
+      <small className="text-success mx-2">vs</small>
+      <div className="text-center">
+        <span className="d-block">{matches[`${index}-${timeIndex}`].player2}</span>
+        <small className="text-muted">
+          ({playerHandicaps[matches[`${index}-${timeIndex}`].player2]?.toFixed(1) || 'N/A'})
+        </small>
+      </div>
+      <button 
+        className="btn btn-sm btn-outline-danger ms-3"
+        onClick={() => handleDeleteMatch(index, timeIndex)}
+        title="Delete Match"
+      >
+        ×
+      </button>
+    </div>
+    <small className="d-block text-muted mt-1">
+      Format: {matches[`${index}-${timeIndex}`].format} | 
+      {matches[`${index}-${timeIndex}`].strokesGiven > 0 ? (
+        `${matches[`${index}-${timeIndex}`].receivingStrokes} receives ${matches[`${index}-${timeIndex}`].strokesGiven}`
+      ) : (
+        'Even Match'
+      )}
+    </small>
+  </div>
+)}
                       <div className="player-slots">
-                        {[0, 1, 2, 3].map((playerSlot) => (    // Changed from [0, 1, 2]
+                        {[0, 1, 2, 3].map((playerSlot) => (
                           <select
                             key={playerSlot}
                             className="form-select mb-2"
@@ -262,6 +427,12 @@ const Schedule = () => {
           </div>
         </div>
       </div>
+      <MatchSetupModal 
+        show={showMatchModal}
+        onHide={() => setShowMatchModal(false)}
+        players={players}
+        onSave={(matchData) => handleMatchSetup(selectedEventIndex, selectedTimeIndex, matchData)}
+      />
     </div>
   );
 };

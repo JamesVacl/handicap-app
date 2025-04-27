@@ -347,7 +347,50 @@ const updateTeam = async (teamId, teamData) => {
   return await updateDoc(teamRef, teamData);
 };
 
-// Export all functions
+// Remove the separate export and add the function definition here
+const calculateLeaderboard = (scores) => {
+  const playerScores = {};
+
+  scores.forEach(score => {
+    if (!playerScores[score.player]) {
+      playerScores[score.player] = [];
+    }
+    if (score.differential !== null && (score.holeType === '18' || score.isComposed)) {
+      playerScores[score.player].push(score);
+    }
+  });
+
+  const leaderboard = Object.keys(playerScores).map(playerName => {
+    const playerScoreList = playerScores[playerName];
+    playerScoreList.sort((a, b) => new Date(b.date.seconds * 1000) - new Date(a.date.seconds * 1000));
+    const recentScores = playerScoreList.slice(0, 20);
+
+    // Sort by differential and date for ties
+    const sortedScores = recentScores
+      .sort((a, b) => {
+        if (a.differential === b.differential) {
+          return new Date(b.date.seconds * 1000) - new Date(a.date.seconds * 1000);
+        }
+        return a.differential - b.differential;
+      });
+
+    // Take best 8
+    const bestEight = sortedScores.slice(0, 8);
+    const handicap = bestEight.length > 0
+      ? bestEight.reduce((sum, score) => sum + score.differential, 0) / bestEight.length
+      : 0;
+
+    return {
+      name: playerName,
+      handicap: parseFloat(handicap.toFixed(1)),
+      recentScores: recentScores
+    };
+  });
+
+  return leaderboard;
+};
+
+// Update the exports section to only include it once
 export { 
   db, 
   getPlayers, 
@@ -361,5 +404,6 @@ export {
   addTeam, 
   updateTeam,
   getPlayerHandicaps,
-  analytics 
+  analytics,
+  calculateLeaderboard  // Include it only here
 };
