@@ -8,6 +8,7 @@ import NavigationMenu from '../components/NavigationMenu';
 import WeatherForecast from '../components/WeatherForecast';
 import MatchSetupModal from '../components/MatchSetupModal'; // Add this import
 import { calculateLeaderboard } from '../firebase'; // Add this import at the top
+import ChampionshipFormat from '../components/ChampionshipFormat';
 
 const Schedule = () => {
   const [authenticated, setAuthenticated] = useState(false);
@@ -101,7 +102,22 @@ const Schedule = () => {
       courseName: 'Forest Dunes',
       city: 'Roscommon,US',
       teeTimes: ['9:20', '9:31', '9:42'],
-      notes: 'Championship Matchplay - 45 minutes from Gaylord to Forest Dunes - 4 hour drive home to London'
+      notes: 'Championship Matchplay - 45 minutes from Gaylord to Forest Dunes - 4 hour drive home to London',
+      specialFormat: {
+        type: 'Championship',
+        teams: {
+          team1: {
+            name: 'Team 1',
+            players: [],
+            holeAssignments: {}
+          },
+          team2: {
+            name: 'Team 2',
+            players: [],
+            holeAssignments: {}
+          }
+        }
+      }
     }
   ];
 
@@ -298,82 +314,138 @@ const handleDeleteMatch = async (eventIndex, timeIndex) => {
                 </div>
                 
                 <div className="tee-times">
-                  {event.teeTimes.map((time, timeIndex) => (
-                    <div key={timeIndex} className="tee-time-slot mb-4">
-                      <div className="tee-time-header d-flex justify-content-between align-items-center mb-3">
-                        <h4 className="text-xl font-semibold mb-0">{formatTime(time)}</h4>
-                        <button 
-                          className="btn btn-sm btn-outline-success"
-                          onClick={() => {
-                            setSelectedEventIndex(index);
-                            setSelectedTimeIndex(timeIndex);
-                            setShowMatchModal(true);
-                          }}
-                        >
-                          Set Match
-                        </button>
-                      </div>
-                      {matches[`${index}-${timeIndex}`] && (
-  <div className="match-info mb-3 p-2 bg-success bg-opacity-10 rounded">
-    <div className="d-flex justify-content-between align-items-center">
-      <div className="text-center">
-        <span className="d-block">{matches[`${index}-${timeIndex}`].player1}</span>
-        <small className="text-muted">
-          ({playerHandicaps[matches[`${index}-${timeIndex}`].player1]?.toFixed(1) || 'N/A'})
-        </small>
-      </div>
-      <small className="text-success mx-2">vs</small>
-      <div className="text-center">
-        <span className="d-block">{matches[`${index}-${timeIndex}`].player2}</span>
-        <small className="text-muted">
-          ({playerHandicaps[matches[`${index}-${timeIndex}`].player2]?.toFixed(1) || 'N/A'})
-        </small>
-      </div>
-      <button 
-        className="btn btn-sm btn-outline-danger ms-3"
-        onClick={() => handleDeleteMatch(index, timeIndex)}
-        title="Delete Match"
-      >
-        ×
-      </button>
+                  {event.specialFormat?.type === 'Championship' ? (
+  <>
+    {/* Championship format above tee times */}
+    <div className="mb-4 pb-4 border-bottom">
+      <ChampionshipFormat 
+        event={event}
+        players={players}
+        index={index}
+        date={event.date}
+        onSave={async (formatData) => {
+          const db = getFirestore();
+          try {
+            await setDoc(doc(db, 'specialFormats', '2025-schedule'), {
+              [`${event.date}`]: formatData  // Changed from index to event.date
+            }, { merge: true });
+          } catch (error) {
+            console.error('Error saving format:', error);
+          }
+        }}
+      />
     </div>
-    <small className="d-block text-muted mt-1">
-      Format: {matches[`${index}-${timeIndex}`].format} | 
-      {matches[`${index}-${timeIndex}`].strokesGiven > 0 ? (
-        `${matches[`${index}-${timeIndex}`].receivingStrokes} receives ${matches[`${index}-${timeIndex}`].strokesGiven}`
-      ) : (
-        'Even Match'
-      )}
-    </small>
+
+    {/* Regular tee time slots below */}
+    <div className="tee-times">
+      <h4 className="mb-3">Tee Times</h4>
+      {event.teeTimes.map((time, timeIndex) => (
+        <div key={timeIndex} className="tee-time-slot mb-4">
+          <div className="tee-time-header d-flex justify-content-between align-items-center mb-3">
+            <h4 className="text-xl font-semibold mb-0">{formatTime(time)}</h4>
+          </div>
+          <div className="player-slots">
+            {[0, 1, 2, 3].map((playerSlot) => (
+              <select
+                key={playerSlot}
+                className="form-select mb-2"
+                value={teeTimeAssignments[`${index}-${timeIndex}-${playerSlot}`] || ''}
+                onChange={(e) => handlePlayerAssignment(index, timeIndex, playerSlot, e.target.value)}
+              >
+                <option value="">-- Select Player --</option>
+                {players.map((player) => (
+                  <option key={player} value={player}>
+                    {player}
+                  </option>
+                ))}
+              </select>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  </>
+) : (
+  <div>
+    {event.teeTimes.map((time, timeIndex) => (
+      <div key={timeIndex} className="tee-time-slot mb-4">
+        <div className="tee-time-header d-flex justify-content-between align-items-center mb-3">
+          <h4 className="text-xl font-semibold mb-0">{formatTime(time)}</h4>
+          <button 
+            className="btn btn-sm btn-outline-success"
+            onClick={() => {
+              setSelectedEventIndex(index);
+              setSelectedTimeIndex(timeIndex);
+              setShowMatchModal(true);
+            }}
+          >
+            Set Match
+          </button>
+        </div>
+        {matches[`${index}-${timeIndex}`] && (
+<div className="match-info mb-3 p-2 bg-success bg-opacity-10 rounded">
+  <div className="d-flex justify-content-between align-items-center">
+    <div className="text-center">
+      <span className="d-block">{matches[`${index}-${timeIndex}`].player1}</span>
+      <small className="text-muted">
+        ({playerHandicaps[matches[`${index}-${timeIndex}`].player1]?.toFixed(1) || 'N/A'})
+      </small>
+    </div>
+    <small className="text-success mx-2">vs</small>
+    <div className="text-center">
+      <span className="d-block">{matches[`${index}-${timeIndex}`].player2}</span>
+      <small className="text-muted">
+        ({playerHandicaps[matches[`${index}-${timeIndex}`].player2]?.toFixed(1) || 'N/A'})
+      </small>
+    </div>
+    <button 
+      className="btn btn-sm btn-outline-danger ms-3"
+      onClick={() => handleDeleteMatch(index, timeIndex)}
+      title="Delete Match"
+    >
+      ×
+    </button>
+  </div>
+  <small className="d-block text-muted mt-1">
+    Format: {matches[`${index}-${timeIndex}`].format} | 
+    {matches[`${index}-${timeIndex}`].strokesGiven > 0 ? (
+      `${matches[`${index}-${timeIndex}`].receivingStrokes} receives ${matches[`${index}-${timeIndex}`].strokesGiven}`
+    ) : (
+      'Even Match'
+    )}
+  </small>
+</div>
+)}
+        <div className="player-slots">
+          {[0, 1, 2, 3].map((playerSlot) => (
+            <select
+              key={playerSlot}
+              className="form-select mb-2"
+              value={teeTimeAssignments[`${index}-${timeIndex}-${playerSlot}`] || ''}
+              onChange={(e) => handlePlayerAssignment(index, timeIndex, playerSlot, e.target.value)}
+            >
+              <option value="">-- Select Player --</option>
+              {players
+                .filter(player => {
+                  const teeTimePlayers = Object.entries(teeTimeAssignments)
+                    .filter(([key]) => key.startsWith(`${index}-${timeIndex}`))
+                    .map(([_, value]) => value);
+                  return !teeTimePlayers.includes(player) || 
+                         teeTimeAssignments[`${index}-${timeIndex}-${playerSlot}`] === player;
+                })
+                .map((player) => (
+                  <option key={player} value={player}>
+                    {player}
+                  </option>
+                ))}
+            </select>
+          ))}
+        </div>
+      </div>
+    ))}
   </div>
 )}
-                      <div className="player-slots">
-                        {[0, 1, 2, 3].map((playerSlot) => (
-                          <select
-                            key={playerSlot}
-                            className="form-select mb-2"
-                            value={teeTimeAssignments[`${index}-${timeIndex}-${playerSlot}`] || ''}
-                            onChange={(e) => handlePlayerAssignment(index, timeIndex, playerSlot, e.target.value)}
-                          >
-                            <option value="">-- Select Player --</option>
-                            {players
-                              .filter(player => {
-                                const teeTimePlayers = Object.entries(teeTimeAssignments)
-                                  .filter(([key]) => key.startsWith(`${index}-${timeIndex}`))
-                                  .map(([_, value]) => value);
-                                return !teeTimePlayers.includes(player) || 
-                                       teeTimeAssignments[`${index}-${timeIndex}-${playerSlot}`] === player;
-                              })
-                              .map((player) => (
-                                <option key={player} value={player}>
-                                  {player}
-                                </option>
-                              ))}
-                          </select>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
+
                 </div>
 
                 {/* Additional Round for Same Day */}

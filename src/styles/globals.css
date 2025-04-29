@@ -592,3 +592,24 @@ body {
 .match-info small.text-success {
   font-weight: 600;
 }
+
+.championship-format .hole-assignments {
+  font-size: 0.9rem;
+}
+
+.championship-format .hole-assignments small {
+  display: block;
+  padding: 0.25rem;
+  background-color: rgba(40, 167, 69, 0.1);
+  border-radius: 4px;
+}
+
+.championship-format .teams-display {
+  background-color: rgba(40, 167, 69, 0.05);
+  padding: 1rem;
+  border-radius: 4px;
+}
+
+.championship-format .form-check {
+  margin-bottom: 0.5rem;
+}
