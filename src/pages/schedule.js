@@ -35,7 +35,7 @@ const Schedule = () => {
       courseName: 'Cobble Beach Golf Links',
       city: 'Owen Sound,CA',
       teeTimes: ['12:30', '12:40', '12:50'],
-      notes: 'Skins rules: lowest net score on a hole wins a "skin". If the hole is tied, the skin is carried over to the next hole and the next hole is now worth 2 skins. Pretty simple'
+      notes: 'Skins rules: lowest net score on a hole wins a "skin". If the hole is tied, the skin is carried over to the next hole and the next hole is now worth 2 skins.'
     },
     {
       date: '2025-05-18',

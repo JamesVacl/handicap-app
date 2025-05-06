@@ -12,6 +12,11 @@ const NavigationMenu = () => {
     router.push('/');
   };
 
+  // Add handleTimerClick function
+  const handleTimerClick = () => {
+    router.push('/schedule');
+  };
+
   return (
     <Navbar bg="dark" variant="dark" expand="lg" className="navbar-custom">
       <Container fluid>
@@ -35,7 +40,11 @@ const NavigationMenu = () => {
             </Link>
           </Nav>
           <Nav className="position-absolute start-50 translate-middle-x">
-            <Nav.Link className="text-white">
+            <Nav.Link 
+              className="text-white" 
+              onClick={handleTimerClick}
+              style={{ cursor: 'pointer' }}
+            >
               <CountdownTimer />
             </Nav.Link>
           </Nav>
