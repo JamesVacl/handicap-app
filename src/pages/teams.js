@@ -108,7 +108,7 @@ const Teams = () => {
                   <Form.Select 
                     onChange={(e) => setSelectedPlayer(e.target.value)}
                     className="w-75"
-                  >
+                    >
                     <option value="">Select Player</option>
                     {players.map(player => (
                       <option key={player.name} value={player.name}>
