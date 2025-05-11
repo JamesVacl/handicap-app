@@ -240,19 +240,20 @@ const Schedule = () => {
     const db = getFirestore();
     const key = `${eventIndex}-${timeIndex}`;
     
-    // Calculate strokes given
-    const player1Handicap = playerHandicaps[matchData.player1] || 0;
-    const player2Handicap = playerHandicaps[matchData.player2] || 0;
-    const strokesGiven = Math.abs(player1Handicap - player2Handicap);
-    
+    // Round handicaps for match play strokes
+    // For match play, we round the decimal handicaps - numbers of 0.5 and above round up
+    const player1Handicap = Math.round(playerHandicaps[matchData.player1] || 0);  // 23.2 rounds to 23
+    const player2Handicap = Math.round(playerHandicaps[matchData.player2] || 0);  // 11.3 rounds to 11
+    const strokesGiven = Math.abs(player1Handicap - player2Handicap);  // |23 - 11| = 12
+
     try {
       await setDoc(doc(db, 'matches', '2025-schedule'), {
         ...matches,
         [key]: {
           player1: matchData.player1,
           player2: matchData.player2,
-          format: 'Singles Match Play',
-          strokesGiven: Math.round(strokesGiven), // Round to nearest whole number
+          format: 'Singles Match Play ',
+          strokesGiven: strokesGiven,
           receivingStrokes: player1Handicap > player2Handicap ? matchData.player1 : matchData.player2,
           createdAt: new Date()
         }
