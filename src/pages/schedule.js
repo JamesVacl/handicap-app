@@ -122,8 +122,8 @@ const Schedule = () => {
   ];
 
   const weatherCities = [
-    'London,CA',
-    'Guelph,CA',
+    'Owen Sound,CA',
+    'Thornbury,CA',
   ];
 
   useEffect(() => {
@@ -238,13 +238,19 @@ const Schedule = () => {
     if (!authenticated) return;
     
     const db = getFirestore();
-    const key = `${eventIndex}-${timeIndex}`;
+    const baseKey = `${eventIndex}-${timeIndex}`;
+    
+    // Find the next available match number for this tee time
+    const existingMatches = Object.keys(matches)
+      .filter(key => key.startsWith(baseKey))
+      .length;
+    
+    const key = `${baseKey}-match${existingMatches + 1}`;
     
     // Round handicaps for match play strokes
-    // For match play, we round the decimal handicaps - numbers of 0.5 and above round up
-    const player1Handicap = Math.round(playerHandicaps[matchData.player1] || 0);  // 23.2 rounds to 23
-    const player2Handicap = Math.round(playerHandicaps[matchData.player2] || 0);  // 11.3 rounds to 11
-    const strokesGiven = Math.abs(player1Handicap - player2Handicap);  // |23 - 11| = 12
+    const player1Handicap = Math.round(playerHandicaps[matchData.player1] || 0);
+    const player2Handicap = Math.round(playerHandicaps[matchData.player2] || 0);
+    const strokesGiven = Math.abs(player1Handicap - player2Handicap);
 
     try {
       await setDoc(doc(db, 'matches', '2025-schedule'), {
@@ -263,22 +269,24 @@ const Schedule = () => {
     }
   };
 
-// Add this new function after handleMatchSetup
-const handleDeleteMatch = async (eventIndex, timeIndex) => {
-  if (!authenticated) return;
-  
-  const db = getFirestore();
-  const key = `${eventIndex}-${timeIndex}`;
-  
-  try {
-    await setDoc(doc(db, 'matches', '2025-schedule'), {
-      ...matches,
-      [key]: deleteField()
-    }, { merge: true });
-  } catch (error) {
-    console.error('Error deleting match:', error);
-  }
-};
+  // Also update the delete function to handle numbered matches
+  const handleDeleteMatch = async (eventIndex, timeIndex, matchNumber) => {
+    if (!authenticated) return;
+    
+    const db = getFirestore();
+    const key = `${eventIndex}-${timeIndex}-match${matchNumber}`;
+    
+    try {
+      // Create a new object without the match to be deleted
+      const updatedMatches = { ...matches };
+      delete updatedMatches[key];
+      
+      // Save the updated matches object
+      await setDoc(doc(db, 'matches', '2025-schedule'), updatedMatches);
+    } catch (error) {
+      console.error('Error deleting match:', error);
+    }
+  };
 
   const formatDate = (dateString) => {
     // Create date with explicit timezone handling
@@ -383,40 +391,43 @@ const handleDeleteMatch = async (eventIndex, timeIndex) => {
             Set Match
           </button>
         </div>
-        {matches[`${index}-${timeIndex}`] && (
-<div className="match-info mb-3 p-2 bg-success bg-opacity-10 rounded">
-  <div className="d-flex justify-content-between align-items-center">
-    <div className="text-center">
-      <span className="d-block">{matches[`${index}-${timeIndex}`].player1}</span>
-      <small className="text-muted">
-        ({playerHandicaps[matches[`${index}-${timeIndex}`].player1]?.toFixed(1) || 'N/A'})
+        {Object.entries(matches)
+  .filter(([key]) => key.startsWith(`${index}-${timeIndex}`))
+  .sort(([keyA], [keyB]) => keyA.localeCompare(keyB))
+  .map(([key, match], matchIndex) => (
+    <div key={key} className="match-info mb-3 p-2 bg-success bg-opacity-10 rounded">
+      <div className="d-flex justify-content-between align-items-center">
+        <div className="text-center">
+          <span className="d-block">{match.player1}</span>
+          <small className="text-muted">
+            ({playerHandicaps[match.player1]?.toFixed(1) || 'N/A'})
+          </small>
+        </div>
+        <small className="text-success mx-2">vs</small>
+        <div className="text-center">
+          <span className="d-block">{match.player2}</span>
+          <small className="text-muted">
+            ({playerHandicaps[match.player2]?.toFixed(1) || 'N/A'})
+          </small>
+        </div>
+        <button 
+          className="btn btn-sm btn-outline-danger ms-3"
+          onClick={() => handleDeleteMatch(index, timeIndex, key.split('-match')[1])}
+          title="Delete Match"
+        >
+          ×
+        </button>
+      </div>
+      <small className="d-block text-muted mt-1">
+        Format: {match.format} | 
+        {match.strokesGiven > 0 ? (
+          `${match.receivingStrokes} receives ${match.strokesGiven}`
+        ) : (
+          'Even Match'
+        )}
       </small>
     </div>
-    <small className="text-success mx-2">vs</small>
-    <div className="text-center">
-      <span className="d-block">{matches[`${index}-${timeIndex}`].player2}</span>
-      <small className="text-muted">
-        ({playerHandicaps[matches[`${index}-${timeIndex}`].player2]?.toFixed(1) || 'N/A'})
-      </small>
-    </div>
-    <button 
-      className="btn btn-sm btn-outline-danger ms-3"
-      onClick={() => handleDeleteMatch(index, timeIndex)}
-      title="Delete Match"
-    >
-      ×
-    </button>
-  </div>
-  <small className="d-block text-muted mt-1">
-    Format: {matches[`${index}-${timeIndex}`].format} | 
-    {matches[`${index}-${timeIndex}`].strokesGiven > 0 ? (
-      `${matches[`${index}-${timeIndex}`].receivingStrokes} receives ${matches[`${index}-${timeIndex}`].strokesGiven}`
-    ) : (
-      'Even Match'
-    )}
-  </small>
-</div>
-)}
+  ))}
         <div className="player-slots">
           {[0, 1, 2, 3].map((playerSlot) => (
             <select
