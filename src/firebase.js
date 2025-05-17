@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, addDoc, getDocs, orderBy, query, updateDoc, doc, where } from 'firebase/firestore';
+import { getFirestore, collection, addDoc, getDocs, orderBy, query, updateDoc, doc, where, setDoc } from 'firebase/firestore';
 import { getAuth, signInWithEmailAndPassword, signOut, setPersistence, browserSessionPersistence } from 'firebase/auth';
 import { getAnalytics, isSupported } from "firebase/analytics";
 
@@ -388,6 +388,35 @@ const calculateLeaderboard = (scores) => {
   });
 
   return leaderboard;
+};
+
+// Add these functions to handle match results
+export const updateMatchResult = async (matchKey, resultData) => {
+  const db = getFirestore();
+  await setDoc(doc(db, 'matchResults', '2025-results'), {
+    [matchKey]: {
+      winner: resultData.winner,
+      status: resultData.status, // e.g., "4&3", "2UP", etc.
+      timestamp: new Date()
+    }
+  }, { merge: true });
+};
+
+export const archiveMatch = async (match, result) => {
+  const db = getFirestore();
+  const matchHistoryRef = doc(db, 'matchHistory', '2025-matches');
+
+  try {
+    await setDoc(matchHistoryRef, {
+      [`${match.date}-${match.courseName}-${match.player1}-${match.player2}`]: {
+        ...match,
+        result: result,
+        archivedAt: new Date()
+      }
+    }, { merge: true });
+  } catch (error) {
+    console.error('Error archiving match:', error);
+  }
 };
 
 // Update the exports section to only include it once

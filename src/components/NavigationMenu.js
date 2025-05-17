@@ -38,6 +38,9 @@ const NavigationMenu = () => {
             <Link href="/teams" passHref legacyBehavior>
               <Nav.Link active={router.pathname === "/teams"}>Teams</Nav.Link>
             </Link>
+            <Link href="/results" passHref legacyBehavior>
+              <Nav.Link active={router.pathname === "/results"}>Results</Nav.Link>
+            </Link>
           </Nav>
           <Nav className="position-absolute start-50 translate-middle-x">
             <Nav.Link 

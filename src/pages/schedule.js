@@ -269,20 +269,25 @@ const Schedule = () => {
     }
   };
 
-  // Also update the delete function to handle numbered matches
-  const handleDeleteMatch = async (eventIndex, timeIndex, matchNumber) => {
+  // Modify the handleDeleteMatch function
+  const handleDeleteMatch = async (eventIndex, timeIndex, key) => {
     if (!authenticated) return;
     
     const db = getFirestore();
-    const key = `${eventIndex}-${timeIndex}-match${matchNumber}`;
     
     try {
-      // Create a new object without the match to be deleted
+      // Create a new object without the deleted match
       const updatedMatches = { ...matches };
       delete updatedMatches[key];
       
       // Save the updated matches object
       await setDoc(doc(db, 'matches', '2025-schedule'), updatedMatches);
+
+      // Delete the result if it exists
+      await setDoc(doc(db, 'matchResults', '2025-results'), {
+        [key]: deleteField()
+      }, { merge: true });
+
     } catch (error) {
       console.error('Error deleting match:', error);
     }
@@ -412,7 +417,7 @@ const Schedule = () => {
         </div>
         <button 
           className="btn btn-sm btn-outline-danger ms-3"
-          onClick={() => handleDeleteMatch(index, timeIndex, key.split('-match')[1])}
+          onClick={() => handleDeleteMatch(index, timeIndex, key)}
           title="Delete Match"
         >
           ×
