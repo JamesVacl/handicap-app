@@ -31,20 +31,6 @@ const Schedule = () => {
 
   const scheduleData = [
     {
-      date: '2025-05-17',
-      courseName: 'Cobble Beach Golf Links',
-      city: 'Owen Sound,CA',
-      teeTimes: ['12:30', '12:40', '12:50'],
-      notes: 'Skins rules: lowest net score on a hole wins a "skin". If the hole is tied, the skin is carried over to the next hole and the next hole is now worth 2 skins.'
-    },
-    {
-      date: '2025-05-18',
-      courseName: 'Lora Bay Golf Course',
-      city: 'Thorbury,CA',
-      teeTimes: ['10:20', '10:30', '10:40'],
-      notes: 'the 3 winners from each group will pair up for the winner of the Dolcetto Invitational.'
-    },
-    {
       date: '2025-08-08',
       courseName: 'Forest Dunes (The Loop)',
       city: 'Roscommon,US',
