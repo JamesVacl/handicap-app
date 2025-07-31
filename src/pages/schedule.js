@@ -108,8 +108,8 @@ const Schedule = () => {
   ];
 
   const weatherCities = [
-    'Owen Sound,CA',
-    'Thornbury,CA',
+    'Gaylord, US',
+    'Roscommon, US',
   ];
 
   useEffect(() => {
