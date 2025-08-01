@@ -613,3 +613,41 @@ body {
 .championship-format .form-check {
   margin-bottom: 0.5rem;
 }
+
+/* Persistent matches section styles */
+.persistent-matches-section {
+  background: linear-gradient(135deg, #f8fff8 0%, #e8f5e8 100%);
+  border: 2px solid #50C878 !important;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.round-matches {
+  background: white;
+  border: 1px solid #50C878;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.main-match {
+  background: linear-gradient(135deg, #50C878 0%, #3DAA6B 100%) !important;
+  border: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.alt-match {
+  background: linear-gradient(135deg, #50C878 0%, #3DAA6B 100%) !important;
+  border: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.hole-assignments {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 0.375rem;
+  padding: 0.5rem;
+}
+
+.hole-assignments .badge {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  color: #50C878 !important;
+}
