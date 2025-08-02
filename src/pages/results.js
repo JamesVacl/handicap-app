@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { useRouter } from 'next/router';
+import Head from 'next/head';
 import { Navbar, Nav, Container, Button, Form, Badge, Card, Row, Col } from 'react-bootstrap';
 import { getFirestore, doc, setDoc, onSnapshot, collection, getDocs, query, orderBy } from 'firebase/firestore';
 import { getPlayerHandicaps } from '../firebase';
@@ -197,6 +198,21 @@ const Results = () => {
     });
   };
 
+  const formatTeeTime = (time24) => {
+    if (!time24) return '';
+    
+    // Handle times like "7:30", "14:53", etc.
+    const [hours, minutes] = time24.split(':').map(Number);
+    const date = new Date();
+    date.setHours(hours, minutes, 0, 0);
+    
+    return date.toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    });
+  };
+
   const handleCompleteMatch = async (match) => {
     if (!confirm('Are you sure you want to complete this match?')) return;
 
@@ -297,7 +313,7 @@ const Results = () => {
                     </Badge>
                   </div>
                   <small className="text-muted">
-                    {match.teeTime} • {match.date}
+                    {formatTeeTime(match.teeTime)} • {match.date}
                   </small>
                 </Card.Header>
                 <Card.Body>
@@ -424,7 +440,7 @@ const Results = () => {
                   <div className="match-info">
                     <h5 className="mb-1">{match.courseName}</h5>
                     <p className="text-muted mb-2">
-                      {match.date} • {match.teeTime}
+                      {match.date} • {formatTeeTime(match.teeTime)}
                     </p>
                     <div className="match-result">
                       <span className="winner">{match.winner}</span>
@@ -1097,12 +1113,17 @@ const Results = () => {
   };
 
   return (
-    <div className="app-wrapper">
-      {authenticated && <NavigationMenu />}
-      <div className="home-container">
-        <div className="overlay"></div>
-        <div className="content">
-          <h1 className="text-4xl font-semibold mb-8 cursive-font text-center">Match Results</h1>
+    <>
+      <Head>
+        <title>Match Results - Guyscorp</title>
+        <meta name="description" content="Live match results and scoring" />
+      </Head>
+      <div className="app-wrapper">
+        {authenticated && <NavigationMenu />}
+        <div className="home-container">
+          <div className="overlay"></div>
+          <div className="content">
+            <h1 className="text-4xl font-semibold mb-8 cursive-font text-center">Match Results</h1>
           
           {/* Navigation Tabs */}
           <div className="results-navigation mb-4">
@@ -1178,6 +1199,7 @@ const Results = () => {
         }}
       />
     </div>
+    </>
   );
 };
 
