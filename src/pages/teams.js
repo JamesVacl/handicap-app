@@ -173,23 +173,21 @@ const Teams = () => {
         courseName: 'Treetops (Jones Masterpiece)',
         teeTimes: ['14:53', '15:04', '15:15'],
         notes: 'Blue tees - Team Match Format',
-        format: `Each group of 3 players will have one 1v1 match and one alternating match. 
-                Team selections for this round.`
+        format: `Each group of 3 players will have one 1v1 match and one alternating match.`
       },
       {
         date: '2025-08-10',
         courseName: 'Belvedere Golf Club',
         teeTimes: ['10:10', '10:20', '10:30'],
         notes: 'White tees - Team Match Format - Final Round',
-        format: 'Any ties from Saturday matches will be settled at Threetops'
+        format: 'Each group of 3 players will have one 1v1 match and one alternating match.'
       },
       {
         date: '2025-08-10',
         courseName: 'Threetops',
         teeTimes: ['18:40', '18:50', '19:00'],
-        notes: '$5 per hole skins game - Team Match Format',
-        format: `Each group of 3 players will have one 1v1 match and one alternating match. 
-                Team selections for this round.`
+        notes: 'socks off time, par 3 course',
+        format: `Any ties will be determined at the Threetops`
       },
       {
         date: '2025-08-11',
@@ -345,6 +343,7 @@ const Teams = () => {
     const time = scheduleData.find(e => e.date === date)?.teeTimes[timeIndex];
     const round = getRound(time);
     const roundKey = `${date}-${round}`;
+    const event = scheduleData.find(e => e.date === date);
     
     const updatedSelections = { ...roundSelections };
 
@@ -368,9 +367,67 @@ const Teams = () => {
 
     const db = getFirestore();
     try {
+      // Save to team matches
       await setDoc(doc(db, 'teamMatches', '2025-rounds'), {
         [roundKey]: updatedSelections[roundKey]
       }, { merge: true });
+
+      // Create live match for results page
+      const matchId = `${date}-${round}-${timeIndex}`;
+      const liveMatch = {
+        id: matchId,
+        courseName: event?.courseName || 'Unknown Course',
+        date: date,
+        teeTime: time,
+        round: round,
+        status: 'not_started',
+        lastUpdate: new Date(),
+        currentScore: {
+          player1Score: 0,
+          player2Score: 0,
+          holesPlayed: 0,
+          holeResults: {},
+          recentHoles: []
+        }
+      };
+
+      if (timeIndex === selectedTeeTime) {
+        // 1v1 Match
+        liveMatch.player1 = players[0];
+        liveMatch.player2 = players[1];
+        liveMatch.matchType = '1v1';
+        liveMatch.sittingOut = players[2];
+        
+        // Add team affiliations for 1v1 matches
+        const player1Team = teams.find(team => team.players?.some(p => p.name === players[0]))?.name || 'Unknown';
+        const player2Team = teams.find(team => team.players?.some(p => p.name === players[1]))?.name || 'Unknown';
+        console.log('1v1 Match Team Assignment:', { player1: players[0], player1Team, player2: players[1], player2Team, teams });
+        liveMatch.player1Team = player1Team;
+        liveMatch.player2Team = player2Team;
+      } else {
+        // Alternating Match
+        liveMatch.player1 = players[0]; // solo player
+        liveMatch.player2 = players.slice(1).join(' & '); // team players
+        liveMatch.matchType = 'alternating';
+        liveMatch.soloPlayer = players[0];
+        liveMatch.team2Players = players.slice(1);
+        liveMatch.holeAssignments = holeAssignments;
+        
+        // Add team affiliations for alternating matches
+        const soloPlayerTeam = teams.find(team => team.players?.some(p => p.name === players[0]))?.name || 'Unknown';
+        const team2PlayerTeams = players.slice(1).map(player => {
+          const team = teams.find(team => team.players?.some(p => p.name === player));
+          return team?.name || 'Unknown';
+        });
+        console.log('Alternating Match Team Assignment:', { soloPlayer: players[0], soloPlayerTeam, team2Players: players.slice(1), team2PlayerTeams, teams });
+        liveMatch.soloPlayerTeam = soloPlayerTeam;
+        liveMatch.team2PlayerTeams = team2PlayerTeams;
+      }
+
+      await setDoc(doc(db, 'liveMatches', '2025'), {
+        [matchId]: liveMatch
+      }, { merge: true });
+
     } catch (error) {
       console.error('Error saving round setup:', error);
     }

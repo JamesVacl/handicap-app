@@ -651,3 +651,287 @@ body {
   background-color: rgba(255, 255, 255, 0.9) !important;
   color: #50C878 !important;
 }
+
+/* Live Results Page Styles */
+.results-navigation {
+  background: linear-gradient(135deg, #f8fff8 0%, #e8f5e8 100%);
+  border: 2px solid #50C878;
+  border-radius: 10px;
+  padding: 1rem;
+  margin-bottom: 2rem;
+}
+
+.nav-tabs-container {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.nav-tab {
+  border-radius: 25px;
+  padding: 0.5rem 1.5rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.nav-tab:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(80, 200, 120, 0.2);
+}
+
+/* Match Cards */
+.match-card {
+  border: 2px solid #50C878;
+  border-radius: 15px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fff8 100%);
+}
+
+.match-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(80, 200, 120, 0.15);
+}
+
+.match-header {
+  background: linear-gradient(135deg, #50C878 0%, #3DAA6B 100%);
+  color: white;
+  border-radius: 13px 13px 0 0;
+  border: none;
+}
+
+.match-players {
+  background: rgba(80, 200, 120, 0.1);
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.player-row {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid rgba(80, 200, 120, 0.2);
+}
+
+.player-row:last-child {
+  border-bottom: none;
+}
+
+.player-name {
+  font-weight: 600;
+  color: #2c5530;
+}
+
+.player-score {
+  font-weight: bold;
+  color: #50C878;
+  font-size: 1.1rem;
+}
+
+.match-score {
+  background: rgba(80, 200, 120, 0.05);
+  border-radius: 8px;
+  padding: 1rem;
+  border: 2px solid rgba(80, 200, 120, 0.2);
+}
+
+.hole-progress {
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 8px;
+  padding: 1rem;
+  border: 1px solid rgba(80, 200, 120, 0.3);
+}
+
+.hole-badge {
+  font-size: 0.7rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+}
+
+.match-footer {
+  background: rgba(80, 200, 120, 0.05);
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+/* History Cards */
+.history-card {
+  border: 2px solid #50C878;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fff8 100%);
+  transition: all 0.3s ease;
+}
+
+.history-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(80, 200, 120, 0.1);
+}
+
+.match-result {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.winner {
+  color: #50C878;
+  font-weight: bold;
+}
+
+.loser {
+  color: #6c757d;
+}
+
+.result-text {
+  color: #6c757d;
+}
+
+/* Leaderboard Cards */
+.leaderboard-card {
+  border: 2px solid #50C878;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fff8 100%);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.leaderboard-card .card-header {
+  background: linear-gradient(135deg, #50C878 0%, #3DAA6B 100%);
+  color: white;
+  border-radius: 10px 10px 0 0;
+  border: none;
+}
+
+.team-row, .player-row {
+  transition: all 0.2s ease;
+}
+
+.team-row:hover, .player-row:hover {
+  background: rgba(80, 200, 120, 0.05);
+  border-radius: 6px;
+}
+
+.team-name, .player-name {
+  font-weight: 600;
+  color: #2c5530;
+}
+
+/* Course Stats Cards */
+.course-stats-card {
+  border: 2px solid #50C878;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fff8 100%);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.course-stats-card .card-header {
+  background: linear-gradient(135deg, #50C878 0%, #3DAA6B 100%);
+  color: white;
+  border-radius: 10px 10px 0 0;
+  border: none;
+}
+
+.stat-item {
+  padding: 1rem;
+  background: rgba(80, 200, 120, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(80, 200, 120, 0.2);
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+/* Empty States */
+.empty-state {
+  padding: 2rem;
+  background: rgba(80, 200, 120, 0.05);
+  border-radius: 12px;
+  border: 2px dashed rgba(80, 200, 120, 0.3);
+}
+
+/* Section Headers */
+.section-header {
+  text-align: center;
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: linear-gradient(135deg, #f8fff8 0%, #e8f5e8 100%);
+  border-radius: 10px;
+  border: 1px solid rgba(80, 200, 120, 0.3);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .nav-tabs-container {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .nav-tab {
+    width: 100%;
+    max-width: 200px;
+  }
+  
+  .match-card {
+    margin-bottom: 1rem;
+  }
+  
+  .stat-value {
+    font-size: 1.5rem;
+  }
+}
+
+/* Score Entry Modal Styles */
+.score-entry-modal .modal-header {
+  background: linear-gradient(135deg, #50C878 0%, #3DAA6B 100%);
+  border-radius: 10px 10px 0 0;
+}
+
+.score-entry-modal .modal-content {
+  border: 2px solid #50C878;
+  border-radius: 15px;
+  box-shadow: 0 8px 25px rgba(80, 200, 120, 0.2);
+}
+
+.match-info {
+  background: linear-gradient(135deg, #f8fff8 0%, #e8f5e8 100%) !important;
+  border: 1px solid rgba(80, 200, 120, 0.3);
+}
+
+.current-hole-entry {
+  background: rgba(80, 200, 120, 0.05);
+  border-radius: 10px;
+  padding: 1.5rem;
+  border: 2px solid rgba(80, 200, 120, 0.2);
+}
+
+.hole-history {
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 10px;
+  padding: 1rem;
+  border: 1px solid rgba(80, 200, 120, 0.3);
+}
+
+.hole-item {
+  background: rgba(80, 200, 120, 0.1);
+  border-radius: 8px;
+  padding: 0.5rem;
+  border: 1px solid rgba(80, 200, 120, 0.2);
+  min-width: 80px;
+  text-align: center;
+}
+
+.quick-actions {
+  background: rgba(80, 200, 120, 0.05);
+  border-radius: 10px;
+  padding: 1rem;
+}
+
+/* Button hover effects for modal */
+.score-entry-modal .btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(80, 200, 120, 0.2);
+}
+
+.score-entry-modal .btn:active {
+  transform: translateY(0);
+}
