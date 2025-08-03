@@ -5,6 +5,7 @@ import Head from 'next/head';
 import { Navbar, Nav, Container, Button, Form } from 'react-bootstrap';
 import { getTeams, getScores, addTeam, updateTeam, getPlayerHandicaps, setupTeamMatches } from '../firebase';
 import NavigationMenu from '../components/NavigationMenu';
+import FloatingNavigation from '../components/FloatingNavigation';
 import ChampionshipFormat from '../components/ChampionshipFormat';
 import 'bootstrap/dist/css/bootstrap.min.css'; 
 import Image from 'next/image';
@@ -478,6 +479,7 @@ const Teams = () => {
       </Head>
       <div className="app-wrapper">
         {authenticated && <NavigationMenu />}
+        <FloatingNavigation />
         <div className="home-container">
           <div className="overlay"></div>
           <div className="content">

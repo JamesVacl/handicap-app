@@ -5,6 +5,7 @@ import { useRouter } from 'next/router';
 import { Navbar, Nav, Container } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';  // Add this if not already in _app.js
 import NavigationMenu from '../components/NavigationMenu';
+import FloatingNavigation from '../components/FloatingNavigation';
 import WeatherForecast from '../components/WeatherForecast';
 import MatchSetupModal from '../components/MatchSetupModal'; // Add this import
 import { calculateLeaderboard } from '../firebase'; // Add this import at the top
@@ -279,6 +280,7 @@ const Schedule = () => {
   return (
     <div className="app-wrapper">
       {authenticated && <NavigationMenu />}
+      <FloatingNavigation />
       <div className="home-container">
         <div className="overlay"></div>
         <div className="content">
