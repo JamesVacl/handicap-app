@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { useRouter } from 'next/router';
+import Head from 'next/head';
 import { Navbar, Nav, Container, Button, Form } from 'react-bootstrap';
 import { getTeams, getScores, addTeam, updateTeam, getPlayerHandicaps, setupTeamMatches } from '../firebase';
 import NavigationMenu from '../components/NavigationMenu';
@@ -91,7 +92,7 @@ const Teams = () => {
       alternatingMatches: []
     }
   });
-  const [selectedTeeTime, setSelectedTeeTime] = useState(null);
+  const [selectedTeeTimes, setSelectedTeeTimes] = useState({});
   const [holeAssignments, setHoleAssignments] = useState({});
   const [startingPlayer, setStartingPlayer] = useState(null);
   const [persistentMatches, setPersistentMatches] = useState({});
@@ -216,7 +217,7 @@ const Teams = () => {
     // Cleanup function
     return () => {
       listeners.forEach(unsubscribe => unsubscribe());
-      setSelectedTeeTime(null);
+      setSelectedTeeTimes({});
     };
   }, [authenticated]);
 
@@ -332,7 +333,7 @@ const Teams = () => {
     const hour = parseInt(time.split(':')[0]);
     if (hour < 12) {
       return 'morning';
-    } else if (hour < 17) {
+    } else if (hour < 18) {
       return 'afternoon';
     } else {
       return 'evening';
@@ -347,7 +348,7 @@ const Teams = () => {
     
     const updatedSelections = { ...roundSelections };
 
-    if (timeIndex === selectedTeeTime) {
+    if (timeIndex === selectedTeeTimes[roundKey]) {
       updatedSelections[roundKey].mainMatch = {
         teeTimeIndex: timeIndex,
         player1: players[0],
@@ -391,7 +392,7 @@ const Teams = () => {
         }
       };
 
-      if (timeIndex === selectedTeeTime) {
+      if (timeIndex === selectedTeeTimes[roundKey]) {
         // 1v1 Match
         liveMatch.player1 = players[0];
         liveMatch.player2 = players[1];
@@ -433,13 +434,54 @@ const Teams = () => {
     }
   };
 
+  // Helper functions for formatting
+  const formatDate = (dateString) => {
+    // Handle date strings like "2025-08-09"
+    if (dateString && dateString.includes('-')) {
+      const [year, month, day] = dateString.split('-').map(Number);
+      const date = new Date(year, month - 1, day); // month is 0-indexed
+      return date.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      });
+    }
+    // Fallback for other date formats
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    });
+  };
+
+  const formatTeeTime = (time24) => {
+    if (!time24) return '';
+    
+    // Handle times like "7:30", "14:53", etc.
+    const [hours, minutes] = time24.split(':').map(Number);
+    const date = new Date();
+    date.setHours(hours, minutes, 0, 0);
+    
+    return date.toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    });
+  };
+
   return (
-    <div className="app-wrapper">
-      {authenticated && <NavigationMenu />}
-      <div className="home-container">
-        <div className="overlay"></div>
-        <div className="content">
-          <h1 className="text-4xl font-semibold mb-8 cursive-font text-center">Teams</h1>
+    <>
+      <Head>
+        <title>Teams - Guyscorp</title>
+        <meta name="description" content="Team match setup and management" />
+      </Head>
+      <div className="app-wrapper">
+        {authenticated && <NavigationMenu />}
+        <div className="home-container">
+          <div className="overlay"></div>
+          <div className="content">
+            <h1 className="text-4xl font-semibold mb-8 cursive-font text-center">Teams</h1>
           
           {/* Persistent Matches Display Section */}
           {Object.keys(persistentMatches).length > 0 && (
@@ -447,19 +489,21 @@ const Teams = () => {
               <h2 className="text-3xl font-semibold mb-6 text-center text-success">Selected Matches</h2>
               
               {Object.entries(persistentMatches).map(([roundKey, roundData]) => {
-                const [date, round] = roundKey.split('-');
+                const parts = roundKey.split('-');
+                const date = parts.slice(0, 3).join('-'); // Get the date part (2025-08-09)
+                const round = parts.slice(3).join('-'); // Get the round part (morning/afternoon)
                 const event = scheduleData.find(e => e.date === date);
                 
                 return (
                   <div key={roundKey} className="round-matches mb-4 p-3 border rounded">
                     <h3 className="text-xl font-bold mb-3">
-                      {event?.courseName} - {date} ({round.charAt(0).toUpperCase() + round.slice(1)})
+                      {event?.courseName} ({round.charAt(0).toUpperCase() + round.slice(1)})
                     </h3>
                     
                     {/* Main 1v1 Match */}
                     {roundData.mainMatch && (
                       <div className="main-match mb-3 p-3 bg-success text-white rounded">
-                        <h4 className="mb-2">1v1 Match ({event?.teeTimes[roundData.mainMatch.teeTimeIndex]})</h4>
+                        <h4 className="mb-2">1v1 Match ({formatTeeTime(event?.teeTimes[roundData.mainMatch.teeTimeIndex])})</h4>
                         <div className="d-flex justify-content-between align-items-center">
                           <span className="text-lg">
                             {roundData.mainMatch.player1} vs {roundData.mainMatch.player2}
@@ -502,7 +546,7 @@ const Teams = () => {
                               </span>
                               <div className="d-flex align-items-center gap-2">
                                 <span className="badge bg-light text-dark">
-                                  {event?.teeTimes[altMatch.teeTimeIndex]}
+                                  {formatTeeTime(event?.teeTimes[altMatch.teeTimeIndex])}
                                 </span>
                                 {authenticated && (
                                   <Button
@@ -678,7 +722,7 @@ const Teams = () => {
                       event.teeTimes.map((time, timeIndex) => (
                         <div key={timeIndex} className="tee-time-slot mb-4 p-3 border rounded bg-light">
                           <div className="d-flex justify-content-between align-items-center mb-3">
-                            <h4 className="text-xl mb-0">{time}</h4>
+                            <h4 className="text-xl mb-0">{formatTeeTime(time)}</h4>
                             <Form.Group className="d-flex align-items-center gap-2">
                               <Form.Select
                                 size="sm"
@@ -743,28 +787,28 @@ const Teams = () => {
                             <h5 className="mb-3">Round Setup - {event.date}</h5>
                             
                             {/* Only show tee time selection if no 1v1 match is set for this round */}
-                            {!roundSelections[`${event.date}-${getRound(time)}`]?.mainMatch && (
-                              <div className="mb-4">
-                                <h6>Step 1: Select Tee Time for 1v1 Match</h6>
-                                <div className="d-flex gap-3">
-                                  {event.teeTimes.map((teeTime, idx) => (
+                            <div className="mb-4">
+                              <h6>Step 1: Select Tee Time for 1v1 Match</h6>
+                              <div className="d-flex gap-3">
+                                                                  {event.teeTimes.map((teeTime, idx) => {
+                                    const roundKey = `${event.date}-${getRound(teeTime)}`;
+                                    return (
                                     <Button
                                       key={idx}
-                                      variant={selectedTeeTime === idx ? 'success' : 'outline-success'}
-                                      onClick={() => setSelectedTeeTime(idx)}
-                                      disabled={roundSelections[`${event.date}-${getRound(teeTime)}`]?.mainMatch !== null}
+                                      variant={selectedTeeTimes[roundKey] === idx ? 'success' : 'outline-success'}
+                                      onClick={() => setSelectedTeeTimes(prev => ({ ...prev, [roundKey]: idx }))}
                                     >
-                                      {teeTime}
+                                      {formatTeeTime(teeTime)}
                                     </Button>
-                                  ))}
-                                </div>
+                                  );
+                                })}
                               </div>
-                            )}
+                            </div>
 
                             {/* Show match setup interface */}
                             {teamMatches[`${eventIndex}-${timeIndex}`]?.players?.length === 3 && (
                               <div className="match-setup mt-3">
-                                {timeIndex === selectedTeeTime ? (
+                                {timeIndex === selectedTeeTimes[`${event.date}-${getRound(time)}`] ? (
                                   // 1v1 Match Setup
                                   <div>
                                     <h6>1v1 Match Setup</h6>
@@ -816,9 +860,8 @@ const Teams = () => {
                                     )}
                                   </div>
                                 ) : (
-                                  // Alternating Match Setup (only show after 1v1 is set and this is not the 1v1 tee time)
-                                  roundSelections[`${event.date}-${getRound(time)}`]?.mainMatch && 
-                                  timeIndex !== roundSelections[`${event.date}-${getRound(time)}`]?.mainMatch?.teeTimeIndex && (
+                                  // Alternating Match Setup (show for all other tee times)
+                                  timeIndex !== selectedTeeTimes[`${event.date}-${getRound(time)}`] && (
                                     <div>
                                       <h6>Alternating Match Setup</h6>
                                       <p className="text-muted small">1. Select the solo player who will alternate against the other two players</p>
@@ -932,7 +975,7 @@ const Teams = () => {
                             timeIndex !== roundSelections[`${event.date}-${getRound(time)}`]?.mainMatch?.teeTimeIndex && (
                               <div className="match-display mt-3 p-2 bg-warning rounded">
                                 <small className="text-dark">
-                                  <strong>Note:</strong> This tee time will have alternating matches (1v1 match is at {event?.teeTimes[roundSelections[`${event.date}-${getRound(time)}`]?.mainMatch?.teeTimeIndex]})
+                                  <strong>Note:</strong> This tee time will have alternating matches (1v1 match is at {formatTeeTime(event?.teeTimes[roundSelections[`${event.date}-${getRound(time)}`]?.mainMatch?.teeTimeIndex])})
                                 </small>
                               </div>
                             )}
@@ -964,6 +1007,7 @@ const Teams = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 
