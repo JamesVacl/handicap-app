@@ -21,7 +21,7 @@ const Home = () => {
   const [authenticated, setAuthenticated] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [holeType, setHoleType] = useState('18');
+  const [holeType, setHoleType] = useState('');
   const [currentPage, setCurrentPage] = useState(0);
   const [filterPlayer, setFilterPlayer] = useState(''); // New state for filter selection
   const [filterCourse, setFilterCourse] = useState(''); // New state for filter selection
@@ -186,7 +186,7 @@ const Home = () => {
       return;
     }
 
-    if (!selectedPlayer || !selectedCourse || !score || !rating || !slope || !datePlayed) {
+    if (!selectedPlayer || !selectedCourse || !score || !rating || !slope || !datePlayed || !holeType) {
       alert("All fields are required!");
       return;
     }
@@ -213,6 +213,7 @@ const Home = () => {
     setSelectedCourse('');
     setRating('');
     setSlope('');
+    setHoleType('');
     setDatePlayed(new Date().toISOString().split('T')[0]);
 
     // Refresh data
@@ -337,6 +338,7 @@ const Home = () => {
                     value={holeType} 
                     className="form-control"
                   >
+                    <option value="">-- Select Hole Type --</option>
                     <option value="18">18 Holes</option>
                     <option value="9">9 Holes</option>
                   </select>
