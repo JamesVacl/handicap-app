@@ -109,8 +109,11 @@ const Results = () => {
       const strokePlayRef = doc(db, 'strokePlay', '2025');
       const strokePlayUnsubscribe = onSnapshot(strokePlayRef, (doc) => {
         if (doc.exists()) {
-          setStrokePlayScores(doc.data());
+          const data = doc.data();
+          console.log('Stroke play scores loaded:', data);
+          setStrokePlayScores(data);
         } else {
+          console.log('No stroke play scores found');
           setStrokePlayScores({});
         }
       });
@@ -119,8 +122,11 @@ const Results = () => {
       const coursePerformanceRef = doc(db, 'coursePerformance', '2025');
       const coursePerformanceUnsubscribe = onSnapshot(coursePerformanceRef, (doc) => {
         if (doc.exists()) {
-          setCoursePerformance(doc.data());
+          const data = doc.data();
+          console.log('Course performance data loaded:', data);
+          setCoursePerformance(data);
         } else {
+          console.log('No course performance data found');
           setCoursePerformance({});
         }
       });
@@ -587,36 +593,21 @@ const Results = () => {
   };
 
   const CoursePerformanceTab = () => {
-    const [coursePerformance, setCoursePerformance] = useState({});
-
+    // Use the global coursePerformance state instead of local state
     // Process course performance data
+    console.log('CoursePerformanceTab - coursePerformance state:', coursePerformance);
     const coursePerformanceData = Object.entries(coursePerformance)
-      .filter(([key, data]) => data && typeof data === 'object' && data.score !== undefined)
+      .filter(([key, data]) => {
+        console.log('Filtering course performance data:', key, data);
+        return data && typeof data === 'object' && data.score !== undefined;
+      })
       .map(([key, data]) => ({
         player: data.player,
         course: data.course,
         date: data.date,
         score: data.score
       }));
-
-    // Calculate overall player statistics
-    const playerStats = {};
-    coursePerformanceData.forEach(score => {
-      if (!playerStats[score.player]) {
-        playerStats[score.player] = {
-          totalRounds: 0,
-          totalScore: 0,
-          bestScore: null,
-          courses: new Set()
-        };
-      }
-      playerStats[score.player].totalRounds++;
-      playerStats[score.player].totalScore += score.score;
-      playerStats[score.player].courses.add(score.course);
-      if (playerStats[score.player].bestScore === null || score.score < playerStats[score.player].bestScore) {
-        playerStats[score.player].bestScore = score.score;
-      }
-    });
+    console.log('CoursePerformanceTab - processed data:', coursePerformanceData);
 
     // Calculate course statistics
     const courseStats = {};
@@ -638,16 +629,6 @@ const Results = () => {
     });
 
     // Convert to arrays and sort
-    const playerStandings = Object.entries(playerStats)
-      .map(([player, stats]) => ({
-        player,
-        avgScore: stats.totalRounds > 0 ? (stats.totalScore / stats.totalRounds).toFixed(1) : 0,
-        totalRounds: stats.totalRounds,
-        bestScore: stats.bestScore,
-        coursesPlayed: stats.courses.size
-      }))
-      .sort((a, b) => parseFloat(a.avgScore) - parseFloat(b.avgScore));
-
     const courseStandings = Object.entries(courseStats)
       .map(([course, stats]) => ({
         course,
@@ -666,43 +647,8 @@ const Results = () => {
         </div>
 
         <Row>
-          {/* Player Standings */}
-          <Col lg={6} md={12} className="mb-4">
-            <Card className="leaderboard-card">
-              <Card.Header>
-                <h5 className="mb-0">Player Standings</h5>
-              </Card.Header>
-              <Card.Body>
-                {playerStandings.length > 0 ? (
-                  <div className="player-standings">
-                    {playerStandings.map((player, idx) => (
-                      <div key={player.player} className="player-row d-flex justify-content-between align-items-center py-2 border-bottom">
-                        <div className="player-info">
-                          <span className="player-name">
-                            #{idx + 1} {player.player}
-                          </span>
-                          <small className="text-muted d-block">
-                            {player.totalRounds} rounds • {player.coursesPlayed} courses
-                          </small>
-                        </div>
-                        <div className="player-stats text-end">
-                          <span className={`fw-bold ${parseFloat(player.avgScore) <= 0 ? 'text-success' : 'text-danger'}`}>
-                            {parseFloat(player.avgScore) > 0 ? `+${player.avgScore}` : player.avgScore}
-                          </span>
-                          <small className="text-muted d-block">avg score</small>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-muted text-center">No player data available</p>
-                )}
-              </Card.Body>
-            </Card>
-          </Col>
-
           {/* Course Statistics */}
-          <Col lg={6} md={12} className="mb-4">
+          <Col lg={12} md={12} className="mb-4">
             <Card className="leaderboard-card">
               <Card.Header>
                 <h5 className="mb-0">Course Statistics</h5>
@@ -745,7 +691,7 @@ const Results = () => {
       goldenBoys: 0,
       puttPirates: 0
     });
-    const [strokePlayScores, setStrokePlayScores] = useState({});
+    // Use global strokePlayScores state instead of local state
     const [newStrokeScore, setNewStrokeScore] = useState({
       player: '',
       date: '',
@@ -756,6 +702,15 @@ const Results = () => {
       player: '',
       handicap: ''
     });
+
+    // Course list from teams.js
+    const courseList = [
+      'Treetops (Smith Signature)',
+      'Treetops (Jones Masterpiece)', 
+      'Belvedere Golf Club',
+      'Threetops',
+      'Forest Dunes'
+    ];
 
     const handleUpdateTeamPoints = async (team, points) => {
       try {
@@ -793,6 +748,14 @@ const Results = () => {
         }, { merge: true });
 
         // Save to course performance collection
+        console.log('Saving to course performance with key:', courseScoreKey);
+        console.log('Course performance data:', {
+          player: newStrokeScore.player,
+          course: newStrokeScore.course,
+          date: newStrokeScore.date,
+          score: parseInt(newStrokeScore.score),
+          submittedAt: new Date()
+        });
         await setDoc(doc(db, 'coursePerformance', '2025'), {
           [courseScoreKey]: {
             player: newStrokeScore.player,
@@ -804,7 +767,7 @@ const Results = () => {
         }, { merge: true });
         
         setNewStrokeScore({ player: '', date: '', score: '', course: '' });
-        alert('Stroke play score added successfully!');
+        alert(`Stroke play score added successfully! Key: ${scoreKey}`);
       } catch (error) {
         console.error('Error adding stroke play score:', error);
         alert('Error adding stroke play score. Please try again.');
@@ -836,6 +799,9 @@ const Results = () => {
       
       try {
         const db = getFirestore();
+        console.log('Deleting score with key:', scoreKey);
+        console.log('Score data:', strokePlayScores[scoreKey]);
+        
         const [date, player] = scoreKey.split('-');
         
         // Remove from stroke play collection
@@ -845,6 +811,7 @@ const Results = () => {
 
         // Remove from course performance collection
         const courseScoreKey = `${date}-${player}-${strokePlayScores[scoreKey]?.course || 'Unknown'}`;
+        console.log('Deleting from course performance with key:', courseScoreKey);
         await setDoc(doc(db, 'coursePerformance', '2025'), {
           [courseScoreKey]: null
         }, { merge: true });
@@ -861,6 +828,7 @@ const Results = () => {
       
       try {
         const db = getFirestore();
+        console.log('Deleting starting handicap for player:', player);
         await setDoc(doc(db, 'startingHandicaps', '2025'), {
           [player]: null
         }, { merge: true });
@@ -955,12 +923,15 @@ const Results = () => {
                 </div>
                 <div className="mb-3">
                   <label className="form-label">Course</label>
-                  <Form.Control
-                    type="text"
+                  <Form.Select
                     value={newStrokeScore.course}
                     onChange={(e) => setNewStrokeScore(prev => ({ ...prev, course: e.target.value }))}
-                    placeholder="Course name"
-                  />
+                  >
+                    <option value="">-- Choose a Course --</option>
+                    {courseList.map((course) => (
+                      <option key={course} value={course}>{course}</option>
+                    ))}
+                  </Form.Select>
                 </div>
                 <div className="mb-3">
                   <label className="form-label">Date</label>
@@ -1042,10 +1013,14 @@ const Results = () => {
                 <h5 className="mb-0">Existing Stroke Play Scores</h5>
               </Card.Header>
               <Card.Body>
+                {console.log('Rendering stroke play scores:', strokePlayScores)}
                 {Object.entries(strokePlayScores).length > 0 ? (
                   <div className="existing-scores">
                     {Object.entries(strokePlayScores)
-                      .filter(([key, data]) => data && typeof data === 'object' && data.score !== undefined)
+                      .filter(([key, data]) => {
+                        console.log('Filtering stroke play score:', key, data);
+                        return data && typeof data === 'object' && data.score !== undefined;
+                      })
                       .map(([key, data]) => (
                         <div key={key} className="d-flex justify-content-between align-items-center py-2 border-bottom">
                           <div>
