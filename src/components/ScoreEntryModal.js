@@ -14,7 +14,16 @@ const ScoreEntryModal = ({ show, onHide, match, onSave }) => {
       // Initialize hole results from existing data
       if (match.currentScore?.holeResults) {
         setHoleResults(match.currentScore.holeResults);
-        setCurrentHole(Object.keys(match.currentScore.holeResults).length + 1);
+        // Find the first unscored hole, or default to hole 1
+        const scoredHoles = Object.keys(match.currentScore.holeResults).map(Number).sort((a, b) => a - b);
+        let firstUnscoredHole = 1;
+        for (let i = 1; i <= 18; i++) {
+          if (!scoredHoles.includes(i)) {
+            firstUnscoredHole = i;
+            break;
+          }
+        }
+        setCurrentHole(firstUnscoredHole);
       } else {
         setHoleResults({});
         setCurrentHole(1);
@@ -399,19 +408,42 @@ const ScoreEntryModal = ({ show, onHide, match, onSave }) => {
             </div>
 
             {/* Hole History */}
-            {Object.keys(holeResults).length > 0 && (
-              <div className="hole-history">
-                <h6 className="mb-3">Hole History</h6>
-                <div className="d-flex flex-wrap gap-2">
-                  {Object.keys(holeResults).sort((a, b) => parseInt(a) - parseInt(b)).map(hole => (
-                    <div key={hole} className="hole-item">
-                      <small className="text-muted d-block">Hole {hole}</small>
-                      {getHoleResultBadge(hole)}
+            <div className="hole-history">
+              <h6 className="mb-3">Hole Progress</h6>
+              <div className="d-flex flex-wrap gap-2">
+                {Array.from({ length: 18 }, (_, i) => i + 1).map(hole => {
+                  const hasResult = holeResults[hole];
+                  const isCurrentHole = hole === currentHole;
+                  return (
+                    <div 
+                      key={hole} 
+                      className={`hole-item ${isCurrentHole ? 'border border-primary' : ''}`}
+                      style={{ cursor: 'pointer' }}
+                      onClick={() => setCurrentHole(hole)}
+                    >
+                      <small className={`d-block ${hasResult ? 'text-success' : 'text-muted'}`}>
+                        Hole {hole}
+                      </small>
+                      {hasResult ? (
+                        getHoleResultBadge(hole)
+                      ) : (
+                        <Badge bg="light" className="text-muted">Pending</Badge>
+                      )}
                     </div>
-                  ))}
-                </div>
+                  );
+                })}
               </div>
-            )}
+            </div>
+
+            {/* Progress Summary */}
+            <div className="progress-summary mb-3 p-2 bg-light rounded">
+              <div className="d-flex justify-content-between align-items-center">
+                <span>Progress: {Object.keys(holeResults).length}/18 holes completed</span>
+                <span className="text-muted">
+                  {18 - Object.keys(holeResults).length} holes remaining
+                </span>
+              </div>
+            </div>
 
             {/* Quick Actions */}
             <div className="quick-actions mt-4 pt-3 border-top">

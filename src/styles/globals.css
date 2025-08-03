@@ -935,3 +935,40 @@ body {
 .score-entry-modal .btn:active {
   transform: translateY(0);
 }
+
+/* Skeleton Loading Animations */
+@keyframes shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+.skeleton-logo,
+.skeleton-title,
+.skeleton-subtitle,
+.skeleton-player,
+.skeleton-form,
+.skeleton-event {
+  background: linear-gradient(90deg, #e9ecef 25%, #f8f9fa 50%, #e9ecef 75%);
+  background-size: 200px 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.teams-loading-skeleton,
+.matches-loading-skeleton {
+  opacity: 0.8;
+}
+
+/* Smooth transitions for content loading */
+.teams-section,
+.team-matches {
+  transition: opacity 0.3s ease-in-out;
+}
+
+.teams-section:empty,
+.team-matches:empty {
+  opacity: 0;
+}

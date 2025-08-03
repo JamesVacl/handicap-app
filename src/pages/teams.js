@@ -653,67 +653,121 @@ const Teams = () => {
             </div>
           )}
           
-          {/* Show teams section as soon as teams data is available (only for authenticated users) */}
-          {authenticated && teams.length > 0 && (
-            <div className="teams-section">
-              {teams.map(team => (
-                <div key={team.id} className="team-section mb-4">
-                  <div className="team-header">
-                    <div className="team-logo-container">
-                      <Image 
-                        src={team.name === "Putt Pirates" ? "/putt-pirates-logo.jpg" : "/golden-boys-logo.jpg"}
-                        alt={`${team.name} Logo`}
-                        width={150} 
-                        height={150} 
-                        className="team-logo" 
-                      />
+          {/* Teams Section with Loading States */}
+          {authenticated && (
+            <div className="teams-section" style={{ minHeight: '400px' }}>
+              {teams.length > 0 ? (
+                // Teams data loaded - show actual content
+                teams.map(team => (
+                  <div key={team.id} className="team-section mb-4">
+                    <div className="team-header">
+                      <div className="team-logo-container">
+                        <Image 
+                          src={team.name === "Putt Pirates" ? "/putt-pirates-logo.jpg" : "/golden-boys-logo.jpg"}
+                          alt={`${team.name} Logo`}
+                          width={150} 
+                          height={150} 
+                          className="team-logo" 
+                        />
+                      </div>
+                      <div className="team-info">
+                        <h2 className="text-2xl font-bold">{team.name}</h2>
+                        <p className="text-xl text-success">
+                          Team Average: {team.averageHandicap || 0}
+                        </p>
+                      </div>
                     </div>
-                    <div className="team-info">
-                      <h2 className="text-2xl font-bold">{team.name}</h2>
-                      <p className="text-xl text-success">
-                        Team Average: {team.averageHandicap || 0}
-                      </p>
+                    
+                    <div className="players-list my-3">
+                      {team.players?.map(player => (
+                        <div key={player.name} className="player-item">
+                          {player.name} - Handicap: {player.handicap}
+                        </div>
+                      ))}
                     </div>
+
+                    <Form className="mt-3">
+                      <Form.Group className="d-flex gap-2">
+                        <Form.Select 
+                          onChange={(e) => setSelectedPlayer(e.target.value)}
+                          className="w-75"
+                          >
+                          <option value="">Select Player</option>
+                          {players.map(player => (
+                            <option key={player.name} value={player.name}>
+                              {player.name} ({player.handicap})
+                            </option>
+                          ))}
+                        </Form.Select>
+                        <Button 
+                          variant="success"
+                          onClick={() => handleAddPlayer(team.id, selectedPlayer)}
+                        >
+                          Add Player
+                        </Button>
+                      </Form.Group>
+                    </Form>
+                  </div>
+                ))
+              ) : (
+                // Loading skeleton for teams
+                <div className="teams-loading-skeleton">
+                  <div className="team-section mb-4">
+                    <div className="team-header">
+                      <div className="team-logo-container">
+                        <div className="skeleton-logo" style={{ width: '150px', height: '150px', backgroundColor: '#e9ecef', borderRadius: '8px' }}></div>
+                      </div>
+                      <div className="team-info">
+                        <div className="skeleton-title" style={{ width: '200px', height: '32px', backgroundColor: '#e9ecef', borderRadius: '4px', marginBottom: '8px' }}></div>
+                        <div className="skeleton-subtitle" style={{ width: '150px', height: '24px', backgroundColor: '#e9ecef', borderRadius: '4px' }}></div>
+                      </div>
+                    </div>
+                    
+                    <div className="players-list my-3">
+                      {[1, 2, 3].map(i => (
+                        <div key={i} className="skeleton-player" style={{ width: '100%', height: '20px', backgroundColor: '#e9ecef', borderRadius: '4px', marginBottom: '8px' }}></div>
+                      ))}
+                    </div>
+
+                    <div className="skeleton-form" style={{ width: '100%', height: '40px', backgroundColor: '#e9ecef', borderRadius: '4px' }}></div>
                   </div>
                   
-                  <div className="players-list my-3">
-                    {team.players?.map(player => (
-                      <div key={player.name} className="player-item">
-                        {player.name} - Handicap: {player.handicap}
+                  <div className="team-section mb-4">
+                    <div className="team-header">
+                      <div className="team-logo-container">
+                        <div className="skeleton-logo" style={{ width: '150px', height: '150px', backgroundColor: '#e9ecef', borderRadius: '8px' }}></div>
                       </div>
-                    ))}
-                  </div>
+                      <div className="team-info">
+                        <div className="skeleton-title" style={{ width: '200px', height: '32px', backgroundColor: '#e9ecef', borderRadius: '4px', marginBottom: '8px' }}></div>
+                        <div className="skeleton-subtitle" style={{ width: '150px', height: '24px', backgroundColor: '#e9ecef', borderRadius: '4px' }}></div>
+                      </div>
+                    </div>
+                    
+                    <div className="players-list my-3">
+                      {[1, 2, 3].map(i => (
+                        <div key={i} className="skeleton-player" style={{ width: '100%', height: '20px', backgroundColor: '#e9ecef', borderRadius: '4px', marginBottom: '8px' }}></div>
+                      ))}
+                    </div>
 
-                  <Form className="mt-3">
-                    <Form.Group className="d-flex gap-2">
-                      <Form.Select 
-                        onChange={(e) => setSelectedPlayer(e.target.value)}
-                        className="w-75"
-                        >
-                        <option value="">Select Player</option>
-                        {players.map(player => (
-                          <option key={player.name} value={player.name}>
-                            {player.name} ({player.handicap})
-                          </option>
-                        ))}
-                      </Form.Select>
-                      <Button 
-                        variant="success"
-                        onClick={() => handleAddPlayer(team.id, selectedPlayer)}
-                      >
-                        Add Player
-                      </Button>
-                    </Form.Group>
-                  </Form>
+                    <div className="skeleton-form" style={{ width: '100%', height: '40px', backgroundColor: '#e9ecef', borderRadius: '4px' }}></div>
+                  </div>
                 </div>
-              ))}
+              )}
             </div>
           )}
           
-          {/* Show matches section as soon as schedule data is available (only for authenticated users) */}
-          {authenticated && scheduleData.length > 0 && (
-            <div className="team-matches mt-8 pt-8 border-top">
-              <h2 className="text-3xl font-semibold mb-6 text-center">Team Matches Setup</h2>
+          {/* Matches Section with Loading States */}
+          {authenticated && (
+            <div className="team-matches mt-8 pt-8 border-top" style={{ minHeight: '300px' }}>
+              {scheduleData.length > 0 ? (
+                <h2 className="text-3xl font-semibold mb-6 text-center">Team Matches Setup</h2>
+              ) : (
+                <div className="matches-loading-skeleton">
+                  <div className="skeleton-title" style={{ width: '300px', height: '48px', backgroundColor: '#e9ecef', borderRadius: '4px', margin: '0 auto 24px auto' }}></div>
+                  <div className="skeleton-event" style={{ width: '100%', height: '200px', backgroundColor: '#e9ecef', borderRadius: '8px', marginBottom: '16px' }}></div>
+                  <div className="skeleton-event" style={{ width: '100%', height: '200px', backgroundColor: '#e9ecef', borderRadius: '8px', marginBottom: '16px' }}></div>
+                </div>
+              )}
               
               {scheduleData.map((event, eventIndex) => (
                 <div key={eventIndex} className="event-section mb-6">
