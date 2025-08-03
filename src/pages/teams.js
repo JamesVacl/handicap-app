@@ -600,11 +600,47 @@ const Teams = () => {
                             onSave={async (formatData) => {
                               const db = getFirestore();
                               try {
+                                // Save championship format data
                                 await setDoc(doc(db, 'specialFormats', '2025-schedule'), {
                                   [event.date]: formatData
                                 }, { merge: true });
+
+                                // Create championship live match for results page
+                                const championshipMatch = {
+                                  id: `${event.date}-championship`,
+                                  courseName: event.courseName,
+                                  date: event.date,
+                                  matchType: 'championship',
+                                  status: 'not_started',
+                                  lastUpdate: new Date(),
+                                  team1: {
+                                    name: 'Putt Pirates',
+                                    players: formatData.team1 || [],
+                                    score: 0
+                                  },
+                                  team2: {
+                                    name: 'Golden Boys',
+                                    players: formatData.team2 || [],
+                                    score: 0
+                                  },
+                                  holeAssignments: formatData.assignments || {},
+                                  holeResults: {},
+                                  currentScore: {
+                                    team1Wins: 0,
+                                    team2Wins: 0,
+                                    holesPlayed: 0
+                                  }
+                                };
+
+                                // Save to live matches collection
+                                await setDoc(doc(db, 'liveMatches', '2025'), {
+                                  [`${event.date}-championship`]: championshipMatch
+                                }, { merge: true });
+
+                                alert('Championship format saved and live match created!');
                               } catch (error) {
                                 console.error('Error saving championship format:', error);
+                                alert('Error saving championship format. Please try again.');
                               }
                             }}
                           />
@@ -707,11 +743,47 @@ const Teams = () => {
                             onSave={async (formatData) => {
                               const db = getFirestore();
                               try {
+                                // Save championship format data
                                 await setDoc(doc(db, 'specialFormats', '2025-schedule'), {
                                   [event.date]: formatData
                                 }, { merge: true });
+
+                                // Create championship live match for results page
+                                const championshipMatch = {
+                                  id: `${event.date}-championship`,
+                                  courseName: event.courseName,
+                                  date: event.date,
+                                  matchType: 'championship',
+                                  status: 'not_started',
+                                  lastUpdate: new Date(),
+                                  team1: {
+                                    name: 'Putt Pirates',
+                                    players: formatData.team1 || [],
+                                    score: 0
+                                  },
+                                  team2: {
+                                    name: 'Golden Boys',
+                                    players: formatData.team2 || [],
+                                    score: 0
+                                  },
+                                  holeAssignments: formatData.assignments || {},
+                                  holeResults: {},
+                                  currentScore: {
+                                    team1Wins: 0,
+                                    team2Wins: 0,
+                                    holesPlayed: 0
+                                  }
+                                };
+
+                                // Save to live matches collection
+                                await setDoc(doc(db, 'liveMatches', '2025'), {
+                                  [`${event.date}-championship`]: championshipMatch
+                                }, { merge: true });
+
+                                alert('Championship format saved and live match created!');
                               } catch (error) {
                                 console.error('Error saving championship format:', error);
+                                alert('Error saving championship format. Please try again.');
                               }
                             }}
                           />

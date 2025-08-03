@@ -34,25 +34,48 @@ const ScoreEntryModal = ({ show, onHide, match, onSave }) => {
   };
 
   const calculateMatchScore = () => {
-    let player1Score = 0;
-    let player2Score = 0;
-    
-    Object.values(holeResults).forEach(hole => {
-      if (hole.result === 'player1_win') {
-        player1Score++;
-      } else if (hole.result === 'player2_win') {
-        player2Score++;
-      }
-      // Ties don't change the score
-    });
+    if (matchData?.matchType === 'championship') {
+      let team1Wins = 0;
+      let team2Wins = 0;
+      
+      Object.values(holeResults).forEach(hole => {
+        if (hole.result === 'team1_win') {
+          team1Wins++;
+        } else if (hole.result === 'team2_win') {
+          team2Wins++;
+        }
+        // Ties don't change the score
+      });
 
-    return {
-      player1Score,
-      player2Score,
-      holesPlayed: Object.keys(holeResults).length,
-      holeResults,
-      recentHoles: Object.values(holeResults).slice(-6)
-    };
+      return {
+        team1Wins,
+        team2Wins,
+        holesPlayed: Object.keys(holeResults).length,
+        holeResults,
+        recentHoles: Object.values(holeResults).slice(-6)
+      };
+    } else {
+      // Regular match format
+      let player1Score = 0;
+      let player2Score = 0;
+      
+      Object.values(holeResults).forEach(hole => {
+        if (hole.result === 'player1_win') {
+          player1Score++;
+        } else if (hole.result === 'player2_win') {
+          player2Score++;
+        }
+        // Ties don't change the score
+      });
+
+      return {
+        player1Score,
+        player2Score,
+        holesPlayed: Object.keys(holeResults).length,
+        holeResults,
+        recentHoles: Object.values(holeResults).slice(-6)
+      };
+    }
   };
 
   const handleSaveScore = async () => {
@@ -136,14 +159,31 @@ const ScoreEntryModal = ({ show, onHide, match, onSave }) => {
     const result = holeResults[hole];
     if (!result) return null;
     
-    const variant = result.result === 'player1_win' ? 'success' : 
-                   result.result === 'player2_win' ? 'danger' : 'secondary';
+    let variant, text;
     
-    let text = '';
-    if (matchData?.matchType === 'alternating') {
+    if (matchData?.matchType === 'championship') {
+      variant = result.result === 'team1_win' ? 'success' : 
+                result.result === 'team2_win' ? 'danger' : 'secondary';
+      
+      // Show specific player matchup if available
+      const holeAssignment = matchData?.holeAssignments?.[hole];
+      if (holeAssignment) {
+        text = result.result === 'team1_win' ? `${holeAssignment.team1} wins` :
+               result.result === 'team2_win' ? `${holeAssignment.team2} wins` : 'Tie';
+      } else {
+        text = result.result === 'team1_win' ? `${matchData?.team1?.name || 'Putt Pirates'} win` :
+               result.result === 'team2_win' ? `${matchData?.team2?.name || 'Golden Boys'} win` : 'Tie';
+      }
+    } else if (matchData?.matchType === 'alternating') {
+      variant = result.result === 'player1_win' ? 'success' : 
+                result.result === 'player2_win' ? 'danger' : 'secondary';
+      
       text = result.result === 'player1_win' ? `${matchData?.soloPlayer} wins` :
              result.result === 'player2_win' ? `${matchData?.team2Players?.join(' & ')} win` : 'Tie';
     } else {
+      variant = result.result === 'player1_win' ? 'success' : 
+                result.result === 'player2_win' ? 'danger' : 'secondary';
+      
       text = result.result === 'player1_win' ? `${matchData?.player1} wins` :
              result.result === 'player2_win' ? `${matchData?.player2} wins` : 'Tie';
     }
@@ -153,22 +193,35 @@ const ScoreEntryModal = ({ show, onHide, match, onSave }) => {
 
   const getCurrentScore = () => {
     const score = calculateMatchScore();
-    const diff = score.player1Score - score.player2Score;
     
-    if (diff === 0) return 'All Square';
-    if (diff > 0) {
-      // Player 1 is up
-      if (matchData?.matchType === 'alternating') {
-        return `${matchData.soloPlayer} ${diff}UP`;
+    if (matchData?.matchType === 'championship') {
+      const diff = score.team1Wins - score.team2Wins;
+      
+      if (diff === 0) return 'All Square';
+      if (diff > 0) {
+        return `${matchData.team1?.name || 'Putt Pirates'} ${diff}UP`;
       } else {
-        return `${matchData.player1} ${diff}UP`;
+        return `${matchData.team2?.name || 'Golden Boys'} ${Math.abs(diff)}UP`;
       }
     } else {
-      // Player 2 is up
-      if (matchData?.matchType === 'alternating') {
-        return `${matchData.team2Players?.join(' & ')} ${Math.abs(diff)}UP`;
+      // Regular match format
+      const diff = score.player1Score - score.player2Score;
+      
+      if (diff === 0) return 'All Square';
+      if (diff > 0) {
+        // Player 1 is up
+        if (matchData?.matchType === 'alternating') {
+          return `${matchData.soloPlayer} ${diff}UP`;
+        } else {
+          return `${matchData.player1} ${diff}UP`;
+        }
       } else {
-        return `${matchData.player2} ${Math.abs(diff)}UP`;
+        // Player 2 is up
+        if (matchData?.matchType === 'alternating') {
+          return `${matchData.team2Players?.join(' & ')} ${Math.abs(diff)}UP`;
+        } else {
+          return `${matchData.player2} ${Math.abs(diff)}UP`;
+        }
       }
     }
   };
@@ -187,68 +240,150 @@ const ScoreEntryModal = ({ show, onHide, match, onSave }) => {
               <p className="text-muted mb-2">
                 {matchData.date} • {matchData.teeTime}
               </p>
-                             <div className="d-flex justify-content-between align-items-center">
-                 <div>
-                   <div className="d-flex flex-column">
-                     <span className="fw-bold">
-                       {matchData.matchType === 'alternating' ? matchData.soloPlayer : matchData.player1}
-                     </span>
-                     <small className="text-muted">
-                       {matchData.matchType === 'alternating' ? matchData.soloPlayerTeam : matchData.player1Team}
-                     </small>
-                   </div>
-                   <span className="mx-2">vs</span>
-                   <div className="d-flex flex-column">
-                     <span className="fw-bold">
-                       {matchData.matchType === 'alternating' ? matchData.team2Players?.join(' & ') : matchData.player2}
-                     </span>
-                     <small className="text-muted">
-                       {matchData.matchType === 'alternating' ? 
-                         matchData.team2PlayerTeams?.join(' & ') : matchData.player2Team}
-                     </small>
-                   </div>
-                 </div>
-                 <Badge bg="success" className="fs-6">
-                   {getCurrentScore()}
-                 </Badge>
-               </div>
+                             {matchData.matchType === 'championship' ? (
+                               // Championship format display
+                               <div className="d-flex justify-content-between align-items-center">
+                                 <div>
+                                   <div className="d-flex flex-column">
+                                     <span className="fw-bold">
+                                       {matchData.team1?.name || 'Putt Pirates'}
+                                     </span>
+                                     <small className="text-muted">
+                                       {matchData.team1?.players?.join(', ') || 'No players assigned'}
+                                     </small>
+                                   </div>
+                                   <span className="mx-2">vs</span>
+                                   <div className="d-flex flex-column">
+                                     <span className="fw-bold">
+                                       {matchData.team2?.name || 'Golden Boys'}
+                                     </span>
+                                     <small className="text-muted">
+                                       {matchData.team2?.players?.join(', ') || 'No players assigned'}
+                                     </small>
+                                   </div>
+                                 </div>
+                                 <Badge bg="success" className="fs-6">
+                                   {getCurrentScore()}
+                                 </Badge>
+                               </div>
+                             ) : (
+                               // Regular match format display
+                               <div className="d-flex justify-content-between align-items-center">
+                                 <div>
+                                   <div className="d-flex flex-column">
+                                     <span className="fw-bold">
+                                       {matchData.matchType === 'alternating' ? matchData.soloPlayer : matchData.player1}
+                                     </span>
+                                     <small className="text-muted">
+                                       {matchData.matchType === 'alternating' ? matchData.soloPlayerTeam : matchData.player1Team}
+                                     </small>
+                                   </div>
+                                   <span className="mx-2">vs</span>
+                                   <div className="d-flex flex-column">
+                                     <span className="fw-bold">
+                                       {matchData.matchType === 'alternating' ? matchData.team2Players?.join(' & ') : matchData.player2}
+                                     </span>
+                                     <small className="text-muted">
+                                       {matchData.matchType === 'alternating' ? 
+                                         matchData.team2PlayerTeams?.join(' & ') : matchData.player2Team}
+                                     </small>
+                                   </div>
+                                 </div>
+                                 <Badge bg="success" className="fs-6">
+                                   {getCurrentScore()}
+                                 </Badge>
+                               </div>
+                             )}
             </div>
 
             {/* Current Hole Entry */}
             <div className="current-hole-entry mb-4">
               <h6 className="mb-3">Hole {currentHole} Result</h6>
-                             <Row>
-                 <Col xs={4}>
-                   <Button
-                     variant="outline-success"
-                     className="w-100 mb-2"
-                     onClick={() => handleHoleResult(currentHole, 'player1_win')}
-                     active={holeResults[currentHole]?.result === 'player1_win'}
-                   >
-                     {matchData.matchType === 'alternating' ? matchData.soloPlayer : matchData.player1} Wins
-                   </Button>
-                 </Col>
-                 <Col xs={4}>
-                   <Button
-                     variant="outline-secondary"
-                     className="w-100 mb-2"
-                     onClick={() => handleHoleResult(currentHole, 'tie')}
-                     active={holeResults[currentHole]?.result === 'tie'}
-                   >
-                     Tie
-                   </Button>
-                 </Col>
-                 <Col xs={4}>
-                   <Button
-                     variant="outline-danger"
-                     className="w-100 mb-2"
-                     onClick={() => handleHoleResult(currentHole, 'player2_win')}
-                     active={holeResults[currentHole]?.result === 'player2_win'}
-                   >
-                     {matchData.matchType === 'alternating' ? matchData.team2Players?.join(' & ') : matchData.player2} Wins
-                   </Button>
-                 </Col>
-               </Row>
+              
+              {/* Show hole assignment for championship matches */}
+              {matchData?.matchType === 'championship' && matchData?.holeAssignments?.[currentHole] && (
+                <div className="hole-assignment mb-3 p-2 bg-light rounded">
+                  <small className="text-muted">Hole {currentHole} Matchup:</small>
+                  <div className="d-flex justify-content-between align-items-center">
+                    <span className="fw-bold text-success">
+                      {matchData.holeAssignments[currentHole].team1}
+                    </span>
+                    <span className="text-muted">vs</span>
+                    <span className="fw-bold text-danger">
+                      {matchData.holeAssignments[currentHole].team2}
+                    </span>
+                  </div>
+                </div>
+              )}
+                             {matchData.matchType === 'championship' ? (
+                               // Championship format buttons
+                               <Row>
+                                 <Col xs={4}>
+                                   <Button
+                                     variant="outline-success"
+                                     className="w-100 mb-2"
+                                     onClick={() => handleHoleResult(currentHole, 'team1_win')}
+                                     active={holeResults[currentHole]?.result === 'team1_win'}
+                                   >
+                                     {matchData?.holeAssignments?.[currentHole]?.team1 || matchData.team1?.name || 'Putt Pirates'} Wins
+                                   </Button>
+                                 </Col>
+                                 <Col xs={4}>
+                                   <Button
+                                     variant="outline-secondary"
+                                     className="w-100 mb-2"
+                                     onClick={() => handleHoleResult(currentHole, 'tie')}
+                                     active={holeResults[currentHole]?.result === 'tie'}
+                                   >
+                                     Tie
+                                   </Button>
+                                 </Col>
+                                 <Col xs={4}>
+                                   <Button
+                                     variant="outline-danger"
+                                     className="w-100 mb-2"
+                                     onClick={() => handleHoleResult(currentHole, 'team2_win')}
+                                     active={holeResults[currentHole]?.result === 'team2_win'}
+                                   >
+                                     {matchData?.holeAssignments?.[currentHole]?.team2 || matchData.team2?.name || 'Golden Boys'} Wins
+                                   </Button>
+                                 </Col>
+                               </Row>
+                             ) : (
+                               // Regular match format buttons
+                               <Row>
+                                 <Col xs={4}>
+                                   <Button
+                                     variant="outline-success"
+                                     className="w-100 mb-2"
+                                     onClick={() => handleHoleResult(currentHole, 'player1_win')}
+                                     active={holeResults[currentHole]?.result === 'player1_win'}
+                                   >
+                                     {matchData.matchType === 'alternating' ? matchData.soloPlayer : matchData.player1} Wins
+                                   </Button>
+                                 </Col>
+                                 <Col xs={4}>
+                                   <Button
+                                     variant="outline-secondary"
+                                     className="w-100 mb-2"
+                                     onClick={() => handleHoleResult(currentHole, 'tie')}
+                                     active={holeResults[currentHole]?.result === 'tie'}
+                                   >
+                                     Tie
+                                   </Button>
+                                 </Col>
+                                 <Col xs={4}>
+                                   <Button
+                                     variant="outline-danger"
+                                     className="w-100 mb-2"
+                                     onClick={() => handleHoleResult(currentHole, 'player2_win')}
+                                     active={holeResults[currentHole]?.result === 'player2_win'}
+                                   >
+                                     {matchData.matchType === 'alternating' ? matchData.team2Players?.join(' & ') : matchData.player2} Wins
+                                   </Button>
+                                 </Col>
+                               </Row>
+                             )}
               
               {holeResults[currentHole] && (
                 <div className="text-center mt-2">

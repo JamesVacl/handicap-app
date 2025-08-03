@@ -157,23 +157,36 @@ const Results = () => {
   const formatMatchScore = (match) => {
     if (!match.currentScore) return 'Not Started';
     
-    const { player1Score, player2Score, holesPlayed } = match.currentScore;
-    const diff = player1Score - player2Score;
-    
-    if (diff === 0) return 'All Square';
-    if (diff > 0) {
-      // Player 1 is up
-      if (match.matchType === 'alternating') {
-        return `${match.soloPlayer} ${diff}UP`;
+    if (match.matchType === 'championship') {
+      const { team1Wins, team2Wins, holesPlayed } = match.currentScore;
+      const diff = team1Wins - team2Wins;
+      
+      if (diff === 0) return 'All Square';
+      if (diff > 0) {
+        return `${match.team1?.name || 'Putt Pirates'} ${diff}UP`;
       } else {
-        return `${match.player1} ${diff}UP`;
+        return `${match.team2?.name || 'Golden Boys'} ${Math.abs(diff)}UP`;
       }
     } else {
-      // Player 2 is up
-      if (match.matchType === 'alternating') {
-        return `${match.team2Players?.join(' & ')} ${Math.abs(diff)}UP`;
+      // Regular match format
+      const { player1Score, player2Score, holesPlayed } = match.currentScore;
+      const diff = player1Score - player2Score;
+      
+      if (diff === 0) return 'All Square';
+      if (diff > 0) {
+        // Player 1 is up
+        if (match.matchType === 'alternating') {
+          return `${match.soloPlayer} ${diff}UP`;
+        } else {
+          return `${match.player1} ${diff}UP`;
+        }
       } else {
-        return `${match.player2} ${Math.abs(diff)}UP`;
+        // Player 2 is up
+        if (match.matchType === 'alternating') {
+          return `${match.team2Players?.join(' & ')} ${Math.abs(diff)}UP`;
+        } else {
+          return `${match.player2} ${Math.abs(diff)}UP`;
+        }
       }
     }
   };
@@ -227,32 +240,53 @@ const Results = () => {
       const currentScore = match.currentScore || { player1Score: 0, player2Score: 0 };
       
       // Determine winner and final score
-      const winner = currentScore.player1Score > currentScore.player2Score ? 
-        (match.matchType === 'alternating' ? match.soloPlayer : match.player1) :
-        (match.matchType === 'alternating' ? match.team2Players?.join(' & ') : match.player2);
+      let winner, loser, finalScore;
       
-      const loser = currentScore.player1Score > currentScore.player2Score ? 
-        (match.matchType === 'alternating' ? match.team2Players?.join(' & ') : match.player2) :
-        (match.matchType === 'alternating' ? match.soloPlayer : match.player1);
-      
-      const finalScore = currentScore.player1Score > currentScore.player2Score ? 
-        `${currentScore.player1Score}&${currentScore.player2Score}` : 
-        `${currentScore.player2Score}&${currentScore.player1Score}`;
+      if (match.matchType === 'championship') {
+        const { team1Wins, team2Wins } = currentScore;
+        winner = team1Wins > team2Wins ? match.team1?.name : match.team2?.name;
+        loser = team1Wins > team2Wins ? match.team2?.name : match.team1?.name;
+        finalScore = team1Wins > team2Wins ? 
+          `${team1Wins}&${team2Wins}` : 
+          `${team2Wins}&${team1Wins}`;
+      } else {
+        winner = currentScore.player1Score > currentScore.player2Score ? 
+          (match.matchType === 'alternating' ? match.soloPlayer : match.player1) :
+          (match.matchType === 'alternating' ? match.team2Players?.join(' & ') : match.player2);
+        
+        loser = currentScore.player1Score > currentScore.player2Score ? 
+          (match.matchType === 'alternating' ? match.team2Players?.join(' & ') : match.player2) :
+          (match.matchType === 'alternating' ? match.soloPlayer : match.player1);
+        
+        finalScore = currentScore.player1Score > currentScore.player2Score ? 
+          `${currentScore.player1Score}&${currentScore.player2Score}` : 
+          `${currentScore.player2Score}&${currentScore.player1Score}`;
+      }
 
       // Move to history
+      const historyData = {
+        courseName: match.courseName,
+        date: match.date,
+        winner: winner,
+        loser: loser,
+        finalScore: finalScore,
+        duration: '4h 15m', // TODO: Calculate actual duration
+        completedAt: new Date()
+      };
+
+      if (match.matchType === 'championship') {
+        historyData.matchType = 'championship';
+        historyData.team1 = match.team1;
+        historyData.team2 = match.team2;
+        historyData.holeResults = match.holeResults || {};
+      } else {
+        historyData.teeTime = match.teeTime;
+        historyData.player1 = match.matchType === 'alternating' ? match.soloPlayer : match.player1;
+        historyData.player2 = match.matchType === 'alternating' ? match.team2Players?.join(' & ') : match.player2;
+      }
+
       await setDoc(doc(db, 'matchHistory', '2025'), {
-        [match.id]: {
-          courseName: match.courseName,
-          date: match.date,
-          teeTime: match.teeTime,
-          player1: match.matchType === 'alternating' ? match.soloPlayer : match.player1,
-          player2: match.matchType === 'alternating' ? match.team2Players?.join(' & ') : match.player2,
-          winner: winner,
-          loser: loser,
-          finalScore: finalScore,
-          duration: '4h 15m', // TODO: Calculate actual duration
-          completedAt: new Date()
-        }
+        [match.id]: historyData
       }, { merge: true });
 
       // Remove from live matches
@@ -324,33 +358,60 @@ const Results = () => {
                 </Card.Header>
                 <Card.Body>
                                      <div className="match-players mb-3">
-                     <div className="player-row d-flex justify-content-between align-items-center">
-                       <div className="d-flex flex-column">
-                         <span className="player-name">
-                           {match.matchType === 'alternating' ? match.soloPlayer : match.player1}
-                         </span>
-                         <small className="text-muted">
-                           {match.matchType === 'alternating' ? 
-                             (match.soloPlayerTeam || 'Unknown Team') : 
-                             (match.player1Team || 'Unknown Team')}
-                         </small>
-                       </div>
-                       <span className="player-score">{match.currentScore?.player1Score || 0}</span>
-                     </div>
-                     <div className="player-row d-flex justify-content-between align-items-center">
-                       <div className="d-flex flex-column">
-                         <span className="player-name">
-                           {match.matchType === 'alternating' ? match.team2Players?.join(' & ') : match.player2}
-                         </span>
-                         <small className="text-muted">
-                           {match.matchType === 'alternating' ? 
-                             (match.team2PlayerTeams?.join(' & ') || 'Unknown Team') : 
-                             (match.player2Team || 'Unknown Team')}
-                         </small>
-                       </div>
-                       <span className="player-score">{match.currentScore?.player2Score || 0}</span>
-                     </div>
-                   </div>
+                    {match.matchType === 'championship' ? (
+                      // Championship format display
+                      <div>
+                        <div className="player-row d-flex justify-content-between align-items-center">
+                          <div className="d-flex flex-column">
+                            <span className="player-name">{match.team1?.name || 'Putt Pirates'}</span>
+                            <small className="text-muted">
+                              {match.team1?.players?.join(', ') || 'No players assigned'}
+                            </small>
+                          </div>
+                          <span className="player-score">{match.currentScore?.team1Wins || 0}</span>
+                        </div>
+                        <div className="player-row d-flex justify-content-between align-items-center">
+                          <div className="d-flex flex-column">
+                            <span className="player-name">{match.team2?.name || 'Golden Boys'}</span>
+                            <small className="text-muted">
+                              {match.team2?.players?.join(', ') || 'No players assigned'}
+                            </small>
+                          </div>
+                          <span className="player-score">{match.currentScore?.team2Wins || 0}</span>
+                        </div>
+                      </div>
+                    ) : (
+                      // Regular match format display
+                      <div>
+                        <div className="player-row d-flex justify-content-between align-items-center">
+                          <div className="d-flex flex-column">
+                            <span className="player-name">
+                              {match.matchType === 'alternating' ? match.soloPlayer : match.player1}
+                            </span>
+                            <small className="text-muted">
+                              {match.matchType === 'alternating' ? 
+                                (match.soloPlayerTeam || 'Unknown Team') : 
+                                (match.player1Team || 'Unknown Team')}
+                            </small>
+                          </div>
+                          <span className="player-score">{match.currentScore?.player1Score || 0}</span>
+                        </div>
+                        <div className="player-row d-flex justify-content-between align-items-center">
+                          <div className="d-flex flex-column">
+                            <span className="player-name">
+                              {match.matchType === 'alternating' ? match.team2Players?.join(' & ') : match.player2}
+                            </span>
+                            <small className="text-muted">
+                              {match.matchType === 'alternating' ? 
+                                (match.team2PlayerTeams?.join(' & ') || 'Unknown Team') : 
+                                (match.player2Team || 'Unknown Team')}
+                            </small>
+                          </div>
+                          <span className="player-score">{match.currentScore?.player2Score || 0}</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                   
                   <div className="match-score text-center mb-3">
                     <h4 className="text-success mb-1">{formatMatchScore(match)}</h4>
