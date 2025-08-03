@@ -3,7 +3,7 @@ import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { Navbar, Nav, Container, Button, Form, Badge, Card, Row, Col } from 'react-bootstrap';
-import { getFirestore, doc, setDoc, onSnapshot, collection, getDocs, query, orderBy } from 'firebase/firestore';
+import { getFirestore, doc, setDoc, onSnapshot, collection, getDocs, query, orderBy, deleteField, getDoc } from 'firebase/firestore';
 import { getPlayerHandicaps } from '../firebase';
 import NavigationMenu from '../components/NavigationMenu';
 import ScoreEntryModal from '../components/ScoreEntryModal';
@@ -18,7 +18,7 @@ const Results = () => {
   const [leaderboards, setLeaderboards] = useState({});
   const [courseStats, setCourseStats] = useState({});
   const [strokePlayScores, setStrokePlayScores] = useState({});
-  const [coursePerformance, setCoursePerformance] = useState({});
+
   const [players, setPlayers] = useState([]);
   const [startingHandicaps, setStartingHandicaps] = useState({});
   const [loading, setLoading] = useState(true);
@@ -118,18 +118,7 @@ const Results = () => {
         }
       });
 
-      // Listen for course performance scores (available to everyone)
-      const coursePerformanceRef = doc(db, 'coursePerformance', '2025');
-      const coursePerformanceUnsubscribe = onSnapshot(coursePerformanceRef, (doc) => {
-        if (doc.exists()) {
-          const data = doc.data();
-          console.log('Course performance data loaded:', data);
-          setCoursePerformance(data);
-        } else {
-          console.log('No course performance data found');
-          setCoursePerformance({});
-        }
-      });
+
 
       // Listen for starting handicaps (available to everyone)
       const startingHandicapsRef = doc(db, 'startingHandicaps', '2025');
@@ -149,7 +138,6 @@ const Results = () => {
         leaderboardsUnsubscribe();
         courseStatsUnsubscribe();
         strokePlayUnsubscribe();
-        coursePerformanceUnsubscribe();
         startingHandicapsUnsubscribe();
       };
   }, []);
@@ -653,99 +641,7 @@ const Results = () => {
     );
   };
 
-  const CoursePerformanceTab = () => {
-    // Use the global coursePerformance state instead of local state
-    // Process course performance data
-    console.log('CoursePerformanceTab - coursePerformance state:', coursePerformance);
-    const coursePerformanceData = Object.entries(coursePerformance)
-      .filter(([key, data]) => {
-        console.log('Filtering course performance data:', key, data);
-        return data && typeof data === 'object' && data.score !== undefined;
-      })
-      .map(([key, data]) => ({
-        player: data.player,
-        course: data.course,
-        date: data.date,
-        score: data.score
-      }));
-    console.log('CoursePerformanceTab - processed data:', coursePerformanceData);
 
-    // Calculate course statistics
-    const courseStats = {};
-    coursePerformanceData.forEach(score => {
-      if (!courseStats[score.course]) {
-        courseStats[score.course] = {
-          totalRounds: 0,
-          totalScore: 0,
-          bestScore: null,
-          players: new Set()
-        };
-      }
-      courseStats[score.course].totalRounds++;
-      courseStats[score.course].totalScore += score.score;
-      courseStats[score.course].players.add(score.player);
-      if (courseStats[score.course].bestScore === null || score.score < courseStats[score.course].bestScore) {
-        courseStats[score.course].bestScore = score.score;
-      }
-    });
-
-    // Convert to arrays and sort
-    const courseStandings = Object.entries(courseStats)
-      .map(([course, stats]) => ({
-        course,
-        avgScore: stats.totalRounds > 0 ? (stats.totalScore / stats.totalRounds).toFixed(1) : 0,
-        totalRounds: stats.totalRounds,
-        bestScore: stats.bestScore,
-        uniquePlayers: stats.players.size
-      }))
-      .sort((a, b) => parseFloat(a.avgScore) - parseFloat(b.avgScore));
-
-    return (
-      <div className="course-performance-section">
-        <div className="section-header mb-4">
-          <h2 className="text-3xl font-semibold text-success">Course Performance</h2>
-          <p className="text-muted">Track individual scores by course and overall statistics</p>
-        </div>
-
-        <Row>
-          {/* Course Statistics */}
-          <Col lg={12} md={12} className="mb-4">
-            <Card className="leaderboard-card">
-              <Card.Header>
-                <h5 className="mb-0">Course Statistics</h5>
-              </Card.Header>
-              <Card.Body>
-                {courseStandings.length > 0 ? (
-                  <div className="course-standings">
-                    {courseStandings.map((course, idx) => (
-                      <div key={course.course} className="course-row d-flex justify-content-between align-items-center py-2 border-bottom">
-                        <div className="course-info">
-                          <span className="course-name">
-                            #{idx + 1} {course.course}
-                          </span>
-                          <small className="text-muted d-block">
-                            {course.totalRounds} rounds • {course.uniquePlayers} players
-                          </small>
-                        </div>
-                        <div className="course-stats text-end">
-                          <span className={`fw-bold ${parseFloat(course.avgScore) <= 0 ? 'text-success' : 'text-danger'}`}>
-                            {parseFloat(course.avgScore) > 0 ? `+${course.avgScore}` : course.avgScore}
-                          </span>
-                          <small className="text-muted d-block">avg score</small>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-muted text-center">No course data available</p>
-                )}
-              </Card.Body>
-            </Card>
-          </Col>
-        </Row>
-      </div>
-    );
-  };
 
   const PointsManagementTab = () => {
     const [teamPoints, setTeamPoints] = useState({
@@ -808,24 +704,7 @@ const Results = () => {
           }
         }, { merge: true });
 
-        // Save to course performance collection
-        console.log('Saving to course performance with key:', courseScoreKey);
-        console.log('Course performance data:', {
-          player: newStrokeScore.player,
-          course: newStrokeScore.course,
-          date: newStrokeScore.date,
-          score: parseInt(newStrokeScore.score),
-          submittedAt: new Date()
-        });
-        await setDoc(doc(db, 'coursePerformance', '2025'), {
-          [courseScoreKey]: {
-            player: newStrokeScore.player,
-            course: newStrokeScore.course,
-            date: newStrokeScore.date,
-            score: parseInt(newStrokeScore.score),
-            submittedAt: new Date()
-          }
-        }, { merge: true });
+
         
         setNewStrokeScore({ player: '', date: '', score: '', course: '' });
         alert(`Stroke play score added successfully! Key: ${scoreKey}`);
@@ -863,19 +742,21 @@ const Results = () => {
         console.log('Deleting score with key:', scoreKey);
         console.log('Score data:', strokePlayScores[scoreKey]);
         
+        const scoreData = strokePlayScores[scoreKey];
+        if (!scoreData) {
+          alert('Score data not found. Please refresh and try again.');
+          return;
+        }
+        
         const [date, player] = scoreKey.split('-');
+        const course = scoreData.course;
         
         // Remove from stroke play collection
         await setDoc(doc(db, 'strokePlay', '2025'), {
-          [scoreKey]: null
+          [scoreKey]: deleteField()
         }, { merge: true });
 
-        // Remove from course performance collection
-        const courseScoreKey = `${date}-${player}-${strokePlayScores[scoreKey]?.course || 'Unknown'}`;
-        console.log('Deleting from course performance with key:', courseScoreKey);
-        await setDoc(doc(db, 'coursePerformance', '2025'), {
-          [courseScoreKey]: null
-        }, { merge: true });
+
         
         alert('Score deleted successfully!');
       } catch (error) {
@@ -1185,13 +1066,7 @@ const Results = () => {
               >
                 Leaderboards
               </Button>
-                          <Button 
-                variant={activeTab === 'performance' ? 'success' : 'outline-success'}
-                className="nav-tab"
-                onClick={() => setActiveTab('performance')}
-              >
-                Course Performance
-              </Button>
+
               <Button 
                 variant={activeTab === 'management' ? 'success' : 'outline-success'}
                 className="nav-tab"
@@ -1217,7 +1092,6 @@ const Results = () => {
               {activeTab === 'live' && <LiveMatchesTab />}
               {activeTab === 'history' && <MatchHistoryTab />}
               {activeTab === 'leaderboards' && <LeaderboardsTab />}
-              {activeTab === 'performance' && <CoursePerformanceTab />}
               {activeTab === 'management' && <PointsManagementTab />}
             </div>
           )}
