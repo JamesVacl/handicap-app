@@ -341,7 +341,7 @@ const Teams = () => {
     }
   };
 
-  const handleRoundMatchSetup = async (date, timeIndex, players, holeAssignments = null) => {
+    const handleRoundMatchSetup = async (date, timeIndex, selectedPlayers, holeAssignments = null) => {
     const time = scheduleData.find(e => e.date === date)?.teeTimes[timeIndex];
     const round = getRound(time);
     const roundKey = `${date}-${round}`;
@@ -349,21 +349,17 @@ const Teams = () => {
     
     const updatedSelections = { ...roundSelections };
 
-    if (timeIndex === selectedTeeTimes[roundKey]) {
-      updatedSelections[roundKey].mainMatch = {
-        teeTimeIndex: timeIndex,
-        player1: players[0],
-        player2: players[1],
-        sittingOut: players[2]
-      };
-    } else {
-      updatedSelections[roundKey].alternatingMatches.push({
-        teeTimeIndex: timeIndex,
-        soloPlayer: players[0],
-        team2Players: players.slice(1),
-        holeAssignments: holeAssignments
-      });
-    }
+    // Get the third player (the one not selected for 1v1)
+    const allPlayers = teamMatches[`${scheduleData.findIndex(e => e.date === date)}-${timeIndex}`]?.players || [];
+    const sittingOut = allPlayers.find(p => !selectedPlayers.includes(p));
+
+    // Create 1v1 match with the 2 selected players
+    updatedSelections[roundKey].mainMatch = {
+      teeTimeIndex: timeIndex,
+      player1: selectedPlayers[0],
+      player2: selectedPlayers[1],
+      sittingOut: sittingOut
+    };
 
     setRoundSelections(updatedSelections);
 
@@ -393,38 +389,18 @@ const Teams = () => {
         }
       };
 
-      if (timeIndex === selectedTeeTimes[roundKey]) {
-        // 1v1 Match
-        liveMatch.player1 = players[0];
-        liveMatch.player2 = players[1];
-        liveMatch.matchType = '1v1';
-        liveMatch.sittingOut = players[2];
-        
-        // Add team affiliations for 1v1 matches
-        const player1Team = teams.find(team => team.players?.some(p => p.name === players[0]))?.name || 'Unknown';
-        const player2Team = teams.find(team => team.players?.some(p => p.name === players[1]))?.name || 'Unknown';
-        console.log('1v1 Match Team Assignment:', { player1: players[0], player1Team, player2: players[1], player2Team, teams });
-        liveMatch.player1Team = player1Team;
-        liveMatch.player2Team = player2Team;
-      } else {
-        // Alternating Match
-        liveMatch.player1 = players[0]; // solo player
-        liveMatch.player2 = players.slice(1).join(' & '); // team players
-        liveMatch.matchType = 'alternating';
-        liveMatch.soloPlayer = players[0];
-        liveMatch.team2Players = players.slice(1);
-        liveMatch.holeAssignments = holeAssignments;
-        
-        // Add team affiliations for alternating matches
-        const soloPlayerTeam = teams.find(team => team.players?.some(p => p.name === players[0]))?.name || 'Unknown';
-        const team2PlayerTeams = players.slice(1).map(player => {
-          const team = teams.find(team => team.players?.some(p => p.name === player));
-          return team?.name || 'Unknown';
-        });
-        console.log('Alternating Match Team Assignment:', { soloPlayer: players[0], soloPlayerTeam, team2Players: players.slice(1), team2PlayerTeams, teams });
-        liveMatch.soloPlayerTeam = soloPlayerTeam;
-        liveMatch.team2PlayerTeams = team2PlayerTeams;
-      }
+      // Always create 1v1 match when this function is called
+      liveMatch.player1 = selectedPlayers[0];
+      liveMatch.player2 = selectedPlayers[1];
+      liveMatch.matchType = '1v1';
+      liveMatch.sittingOut = sittingOut;
+      
+      // Add team affiliations for 1v1 matches
+      const player1Team = teams.find(team => team.players?.some(p => p.name === selectedPlayers[0]))?.name || 'Unknown';
+      const player2Team = teams.find(team => team.players?.some(p => p.name === selectedPlayers[1]))?.name || 'Unknown';
+      console.log('1v1 Match Team Assignment:', { player1: selectedPlayers[0], player1Team, player2: selectedPlayers[1], player2Team, teams });
+      liveMatch.player1Team = player1Team;
+      liveMatch.player2Team = player2Team;
 
       await setDoc(doc(db, 'liveMatches', '2025'), {
         [matchId]: liveMatch
@@ -432,6 +408,76 @@ const Teams = () => {
 
     } catch (error) {
       console.error('Error saving round setup:', error);
+    }
+  };
+
+  const handleAlternatingMatchSetup = async (date, timeIndex, players, holeAssignments = null) => {
+    const time = scheduleData.find(e => e.date === date)?.teeTimes[timeIndex];
+    const round = getRound(time);
+    const roundKey = `${date}-${round}`;
+    const event = scheduleData.find(e => e.date === date);
+    
+    const updatedSelections = { ...roundSelections };
+
+    // Create alternating match
+    updatedSelections[roundKey].alternatingMatches.push({
+      teeTimeIndex: timeIndex,
+      soloPlayer: players[0],
+      team2Players: players.slice(1),
+      holeAssignments: holeAssignments
+    });
+
+    setRoundSelections(updatedSelections);
+
+    const db = getFirestore();
+    try {
+      // Save to team matches
+      await setDoc(doc(db, 'teamMatches', '2025-rounds'), {
+        [roundKey]: updatedSelections[roundKey]
+      }, { merge: true });
+
+      // Create live match for results page
+      const matchId = `${date}-${round}-${timeIndex}`;
+      const liveMatch = {
+        id: matchId,
+        courseName: event?.courseName || 'Unknown Course',
+        date: date,
+        teeTime: time,
+        round: round,
+        status: 'not_started',
+        lastUpdate: new Date(),
+        currentScore: {
+          player1Score: 0,
+          player2Score: 0,
+          holesPlayed: 0,
+          holeResults: {},
+          recentHoles: []
+        },
+        // Alternating Match
+        player1: players[0], // solo player
+        player2: players.slice(1).join(' & '), // team players
+        matchType: 'alternating',
+        soloPlayer: players[0],
+        team2Players: players.slice(1),
+        holeAssignments: holeAssignments
+      };
+      
+      // Add team affiliations for alternating matches
+      const soloPlayerTeam = teams.find(team => team.players?.some(p => p.name === players[0]))?.name || 'Unknown';
+      const team2PlayerTeams = players.slice(1).map(player => {
+        const team = teams.find(team => team.players?.some(p => p.name === player));
+        return team?.name || 'Unknown';
+      });
+      console.log('Alternating Match Team Assignment:', { soloPlayer: players[0], soloPlayerTeam, team2Players: players.slice(1), team2PlayerTeams, teams });
+      liveMatch.soloPlayerTeam = soloPlayerTeam;
+      liveMatch.team2PlayerTeams = team2PlayerTeams;
+
+      await setDoc(doc(db, 'liveMatches', '2025'), {
+        [matchId]: liveMatch
+      }, { merge: true });
+
+    } catch (error) {
+      console.error('Error saving alternating match setup:', error);
     }
   };
 
@@ -472,7 +518,7 @@ const Teams = () => {
   };
 
   return (
-    <>
+    <div>
       <Head>
         <title>Teams - Guyscorp</title>
         <meta name="description" content="Team match setup and management" />
@@ -485,459 +531,489 @@ const Teams = () => {
           <div className="content">
             <h1 className="text-4xl font-semibold mb-8 cursive-font text-center">Teams</h1>
           
-          {/* Persistent Matches Display Section */}
-          {Object.keys(persistentMatches).length > 0 && (
-            <div className="persistent-matches-section mb-8 p-4 bg-light border rounded">
-              <h2 className="text-3xl font-semibold mb-6 text-center text-success">Selected Matches</h2>
-              
-              {Object.entries(persistentMatches).map(([roundKey, roundData]) => {
-                const parts = roundKey.split('-');
-                const date = parts.slice(0, 3).join('-'); // Get the date part (2025-08-09)
-                const round = parts.slice(3).join('-'); // Get the round part (morning/afternoon)
-                const event = scheduleData.find(e => e.date === date);
+            {/* Persistent Matches Display Section */}
+            {Object.keys(persistentMatches).length > 0 && (
+              <div className="persistent-matches-section mb-8 p-4 bg-light border rounded">
+                <h2 className="text-3xl font-semibold mb-6 text-center text-success">Scheduled Matches</h2>
                 
-                return (
-                  <div key={roundKey} className="round-matches mb-4 p-3 border rounded">
-                    <h3 className="text-xl font-bold mb-3">
-                      {event?.courseName} ({round.charAt(0).toUpperCase() + round.slice(1)})
-                    </h3>
+                {(() => {
+                  // Group matches by course
+                  const matchesByCourse = {};
+                  
+                  Object.entries(persistentMatches).forEach(([roundKey, roundData]) => {
+                    const parts = roundKey.split('-');
+                    const date = parts.slice(0, 3).join('-');
+                    const round = parts.slice(3).join('-');
+                    const event = scheduleData.find(e => e.date === date);
+                    const courseName = event?.courseName || 'Unknown Course';
                     
-                    {/* Main 1v1 Match */}
-                    {roundData.mainMatch && (
-                      <div className="main-match mb-3 p-3 bg-success text-white rounded">
-                        <h4 className="mb-2">1v1 Match ({formatTeeTime(event?.teeTimes[roundData.mainMatch.teeTimeIndex])})</h4>
-                        <div className="d-flex justify-content-between align-items-center">
-                          <span className="text-lg">
-                            {roundData.mainMatch.player1} vs {roundData.mainMatch.player2}
-                          </span>
-                          <div className="d-flex align-items-center gap-2">
-                            <span className="badge bg-light text-dark">
-                              Sitting out: {roundData.mainMatch.sittingOut}
-                            </span>
-                            {authenticated && (
-                              <Button
-                                variant="link"
-                                className="text-white p-0 ms-2"
-                                onClick={async () => {
-                                  const db = getFirestore();
-                                  await setDoc(doc(db, 'teamMatches', '2025-rounds'), {
-                                    [roundKey]: {
-                                      ...roundData,
-                                      mainMatch: null
-                                    }
-                                  }, { merge: true });
-                                }}
-                              >
-                                ×
-                              </Button>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    )}
+                    if (!matchesByCourse[courseName]) {
+                      matchesByCourse[courseName] = [];
+                    }
                     
-                    {/* Alternating Matches */}
-                    {roundData.alternatingMatches && roundData.alternatingMatches.length > 0 && (
-                      <div className="alternating-matches">
-                        <h4 className="mb-2">Alternating Matches</h4>
-                        {roundData.alternatingMatches.map((altMatch, idx) => (
-                          <div key={idx} className="alt-match mb-2 p-2 bg-success text-white rounded">
-                            <div className="d-flex justify-content-between align-items-center">
-                              <span>
-                                {altMatch.soloPlayer} vs {altMatch.team2Players.join(' & ')}
-                              </span>
-                              <div className="d-flex align-items-center gap-2">
-                                <span className="badge bg-light text-dark">
-                                  {formatTeeTime(event?.teeTimes[altMatch.teeTimeIndex])}
+                    matchesByCourse[courseName].push({
+                      roundKey,
+                      roundData,
+                      date,
+                      round,
+                      event
+                    });
+                  });
+                  
+                  return Object.entries(matchesByCourse).map(([courseName, courseMatches]) => (
+                    <div key={courseName} className="course-matches mb-6">
+                      <h3 className="text-2xl font-bold mb-4 text-success border-bottom pb-2">
+                        {courseName}
+                      </h3>
+                      
+                      {courseMatches.map(({ roundKey, roundData, date, round, event }) => (
+                        <div key={roundKey} className="round-matches mb-4 p-3 border rounded">
+                          <h4 className="text-lg font-semibold mb-3 text-muted">
+                            {round.charAt(0).toUpperCase() + round.slice(1)} Round
+                          </h4>
+                      
+                          {/* Main 1v1 Match */}
+                          {roundData.mainMatch && (
+                            <div className="main-match mb-3 p-3 bg-success text-white rounded">
+                              <h4 className="mb-2">1v1 Match ({formatTeeTime(event?.teeTimes[roundData.mainMatch.teeTimeIndex])})</h4>
+                              <div className="d-flex justify-content-between align-items-center">
+                                <span className="text-lg">
+                                  {roundData.mainMatch.player1} vs {roundData.mainMatch.player2}
                                 </span>
-                                {authenticated && (
-                                  <Button
-                                    variant="link"
-                                    className="text-white p-0 ms-2"
-                                    onClick={async () => {
-                                      const db = getFirestore();
-                                      const updatedAlternatingMatches = roundData.alternatingMatches.filter((_, matchIdx) => matchIdx !== idx);
-                                      await setDoc(doc(db, 'teamMatches', '2025-rounds'), {
-                                        [roundKey]: {
-                                          ...roundData,
-                                          alternatingMatches: updatedAlternatingMatches
-                                        }
-                                      }, { merge: true });
-                                    }}
-                                  >
-                                    ×
-                                  </Button>
-                                )}
-                              </div>
-                            </div>
-                            {altMatch.holeAssignments && (
-                              <div className="mt-2">
-                                <small className="text-light">Hole Assignments:</small>
-                                <div className="d-flex flex-wrap gap-1 mt-1">
-                                  {Object.entries(altMatch.holeAssignments).slice(0, 9).map(([hole, player]) => (
-                                    <span key={hole} className="badge bg-light text-dark">
-                                      H{hole}: {player}
-                                    </span>
-                                  ))}
-                                  {Object.keys(altMatch.holeAssignments).length > 9 && (
-                                    <span className="badge bg-light text-dark">...</span>
+                                <div className="d-flex align-items-center gap-2">
+                                  <span className="badge bg-light text-dark">
+                                    Sitting out: {roundData.mainMatch.sittingOut}
+                                  </span>
+                                  {authenticated && (
+                                    <Button
+                                      variant="link"
+                                      className="text-white p-0 ms-2"
+                                      onClick={async () => {
+                                        const db = getFirestore();
+                                        await setDoc(doc(db, 'teamMatches', '2025-rounds'), {
+                                          [roundKey]: {
+                                            ...roundData,
+                                            mainMatch: null
+                                          }
+                                        }, { merge: true });
+                                      }}
+                                    >
+                                      ×
+                                    </Button>
                                   )}
                                 </div>
                               </div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                    
-                    {/* Championship Format Display */}
-                    {event?.specialFormat?.type === 'Championship' && (
-                      <div className="championship-format-display mt-3 p-3 bg-warning text-dark rounded">
-                        <h4 className="mb-2">Championship Format</h4>
-                        <p className="mb-2">Team vs Team hole assignments</p>
-                        {authenticated && (
-                          <ChampionshipFormat 
-                            event={event}
-                            players={players}
-                            onSave={async (formatData) => {
-                              const db = getFirestore();
-                              try {
-                                // Save championship format data
-                                await setDoc(doc(db, 'specialFormats', '2025-schedule'), {
-                                  [event.date]: formatData
-                                }, { merge: true });
-
-                                // Create championship live match for results page
-                                const championshipMatch = {
-                                  id: `${event.date}-championship`,
-                                  courseName: event.courseName,
-                                  date: event.date,
-                                  matchType: 'championship',
-                                  status: 'not_started',
-                                  lastUpdate: new Date(),
-                                  team1: {
-                                    name: 'Putt Pirates',
-                                    players: formatData.team1 || [],
-                                    score: 0
-                                  },
-                                  team2: {
-                                    name: 'Golden Boys',
-                                    players: formatData.team2 || [],
-                                    score: 0
-                                  },
-                                  holeAssignments: formatData.assignments || {},
-                                  holeResults: {},
-                                  currentScore: {
-                                    team1Wins: 0,
-                                    team2Wins: 0,
-                                    holesPlayed: 0
-                                  }
-                                };
-
-                                // Save to live matches collection
-                                await setDoc(doc(db, 'liveMatches', '2025'), {
-                                  [`${event.date}-championship`]: championshipMatch
-                                }, { merge: true });
-
-                                alert('Championship format saved and live match created!');
-                              } catch (error) {
-                                console.error('Error saving championship format:', error);
-                                alert('Error saving championship format. Please try again.');
-                              }
-                            }}
-                          />
-                        )}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          )}
-          
-          {/* Teams Section with Loading States */}
-          {authenticated && (
-            <div className="teams-section" style={{ minHeight: '400px' }}>
-              {teams.length > 0 ? (
-                // Teams data loaded - show actual content
-                teams.map(team => (
-                  <div key={team.id} className="team-section mb-4">
-                    <div className="team-header">
-                      <div className="team-logo-container">
-                        <Image 
-                          src={team.name === "Putt Pirates" ? "/putt-pirates-logo.jpg" : "/golden-boys-logo.jpg"}
-                          alt={`${team.name} Logo`}
-                          width={150} 
-                          height={150} 
-                          className="team-logo" 
-                        />
-                      </div>
-                      <div className="team-info">
-                        <h2 className="text-2xl font-bold">{team.name}</h2>
-                        <p className="text-xl text-success">
-                          Team Average: {team.averageHandicap || 0}
-                        </p>
-                      </div>
-                    </div>
-                    
-                    <div className="players-list my-3">
-                      {team.players?.map(player => (
-                        <div key={player.name} className="player-item">
-                          {player.name} - Handicap: {player.handicap}
-                        </div>
-                      ))}
-                    </div>
-
-                    <Form className="mt-3">
-                      <Form.Group className="d-flex gap-2">
-                        <Form.Select 
-                          onChange={(e) => setSelectedPlayer(e.target.value)}
-                          className="w-75"
-                          >
-                          <option value="">Select Player</option>
-                          {players.map(player => (
-                            <option key={player.name} value={player.name}>
-                              {player.name} ({player.handicap})
-                            </option>
-                          ))}
-                        </Form.Select>
-                        <Button 
-                          variant="success"
-                          onClick={() => handleAddPlayer(team.id, selectedPlayer)}
-                        >
-                          Add Player
-                        </Button>
-                      </Form.Group>
-                    </Form>
-                  </div>
-                ))
-              ) : (
-                // Loading skeleton for teams
-                <div className="teams-loading-skeleton">
-                  <div className="team-section mb-4">
-                    <div className="team-header">
-                      <div className="team-logo-container">
-                        <div className="skeleton-logo" style={{ width: '150px', height: '150px', backgroundColor: '#e9ecef', borderRadius: '8px' }}></div>
-                      </div>
-                      <div className="team-info">
-                        <div className="skeleton-title" style={{ width: '200px', height: '32px', backgroundColor: '#e9ecef', borderRadius: '4px', marginBottom: '8px' }}></div>
-                        <div className="skeleton-subtitle" style={{ width: '150px', height: '24px', backgroundColor: '#e9ecef', borderRadius: '4px' }}></div>
-                      </div>
-                    </div>
-                    
-                    <div className="players-list my-3">
-                      {[1, 2, 3].map(i => (
-                        <div key={i} className="skeleton-player" style={{ width: '100%', height: '20px', backgroundColor: '#e9ecef', borderRadius: '4px', marginBottom: '8px' }}></div>
-                      ))}
-                    </div>
-
-                    <div className="skeleton-form" style={{ width: '100%', height: '40px', backgroundColor: '#e9ecef', borderRadius: '4px' }}></div>
-                  </div>
-                  
-                  <div className="team-section mb-4">
-                    <div className="team-header">
-                      <div className="team-logo-container">
-                        <div className="skeleton-logo" style={{ width: '150px', height: '150px', backgroundColor: '#e9ecef', borderRadius: '8px' }}></div>
-                      </div>
-                      <div className="team-info">
-                        <div className="skeleton-title" style={{ width: '200px', height: '32px', backgroundColor: '#e9ecef', borderRadius: '4px', marginBottom: '8px' }}></div>
-                        <div className="skeleton-subtitle" style={{ width: '150px', height: '24px', backgroundColor: '#e9ecef', borderRadius: '4px' }}></div>
-                      </div>
-                    </div>
-                    
-                    <div className="players-list my-3">
-                      {[1, 2, 3].map(i => (
-                        <div key={i} className="skeleton-player" style={{ width: '100%', height: '20px', backgroundColor: '#e9ecef', borderRadius: '4px', marginBottom: '8px' }}></div>
-                      ))}
-                    </div>
-
-                    <div className="skeleton-form" style={{ width: '100%', height: '40px', backgroundColor: '#e9ecef', borderRadius: '4px' }}></div>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-          
-          {/* Matches Section with Loading States */}
-          {authenticated && (
-            <div className="team-matches mt-8 pt-8 border-top" style={{ minHeight: '300px' }}>
-              {scheduleData.length > 0 ? (
-                <h2 className="text-3xl font-semibold mb-6 text-center">Team Matches Setup</h2>
-              ) : (
-                <div className="matches-loading-skeleton">
-                  <div className="skeleton-title" style={{ width: '300px', height: '48px', backgroundColor: '#e9ecef', borderRadius: '4px', margin: '0 auto 24px auto' }}></div>
-                  <div className="skeleton-event" style={{ width: '100%', height: '200px', backgroundColor: '#e9ecef', borderRadius: '8px', marginBottom: '16px' }}></div>
-                  <div className="skeleton-event" style={{ width: '100%', height: '200px', backgroundColor: '#e9ecef', borderRadius: '8px', marginBottom: '16px' }}></div>
-                </div>
-              )}
-              
-              {scheduleData.map((event, eventIndex) => (
-                <div key={eventIndex} className="event-section mb-6">
-                  <div className="event-header mb-4">
-                    <h3 className="text-2xl text-success">{event.courseName}</h3>
-                    <p className="text-muted">{event.date}</p>
-                    {event.notes && (
-                      <p className="text-gray-600 italic">{event.notes}</p>
-                    )}
-                    {event.format && (
-                      <div className="format-info mt-2 p-3 bg-light border rounded">
-                        <h5 className="mb-2">Format:</h5>
-                        <p className="mb-0">{event.format}</p>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="tee-times">
-                    {/* Championship Format Section */}
-                    {event?.specialFormat?.type === 'Championship' ? (
-                      <div className="championship-format-section mb-4 p-3 border rounded bg-light">
-                        <h4 className="mb-3">Championship Format</h4>
-                        {authenticated && (
-                          <ChampionshipFormat 
-                            event={event}
-                            players={players}
-                            onSave={async (formatData) => {
-                              const db = getFirestore();
-                              try {
-                                // Save championship format data
-                                await setDoc(doc(db, 'specialFormats', '2025-schedule'), {
-                                  [event.date]: formatData
-                                }, { merge: true });
-
-                                // Create championship live match for results page
-                                const championshipMatch = {
-                                  id: `${event.date}-championship`,
-                                  courseName: event.courseName,
-                                  date: event.date,
-                                  matchType: 'championship',
-                                  status: 'not_started',
-                                  lastUpdate: new Date(),
-                                  team1: {
-                                    name: 'Putt Pirates',
-                                    players: formatData.team1 || [],
-                                    score: 0
-                                  },
-                                  team2: {
-                                    name: 'Golden Boys',
-                                    players: formatData.team2 || [],
-                                    score: 0
-                                  },
-                                  holeAssignments: formatData.assignments || {},
-                                  holeResults: {},
-                                  currentScore: {
-                                    team1Wins: 0,
-                                    team2Wins: 0,
-                                    holesPlayed: 0
-                                  }
-                                };
-
-                                // Save to live matches collection
-                                await setDoc(doc(db, 'liveMatches', '2025'), {
-                                  [`${event.date}-championship`]: championshipMatch
-                                }, { merge: true });
-
-                                alert('Championship format saved and live match created!');
-                              } catch (error) {
-                                console.error('Error saving championship format:', error);
-                                alert('Error saving championship format. Please try again.');
-                              }
-                            }}
-                          />
-                        )}
-                      </div>
-                    ) : (
-                      // Regular Team Match Format
-                      event.teeTimes.map((time, timeIndex) => (
-                        <div key={timeIndex} className="tee-time-slot mb-4 p-3 border rounded bg-light">
-                          <div className="d-flex justify-content-between align-items-center mb-3">
-                            <h4 className="text-xl mb-0">{formatTeeTime(time)}</h4>
-                            <Form.Group className="d-flex align-items-center gap-2">
-                              <Form.Select
-                                size="sm"
-                                value={selectionAssignments[event.date]?.[time]?.team || ''}
-                                onChange={(e) => handleUpdateSelection(event.date, time, e.target.value)}
-                                style={{ width: 'auto' }}
-                              >
-                                <option value="">Select Team</option>
-                                <option value="Golden Boys">Golden Boys</option>
-                                <option value="Putt Pirates">Putt Pirates</option>
-                              </Form.Select>
-                              <small className="text-muted">Selection</small>
-                            </Form.Group>
-                          </div>
-
-                          <div className="group-assignment mb-3 p-3 border rounded">
-                            <h5 className="mb-3">Group Assignment</h5>
-                            <div className="selected-players mb-2">
-                              {teamMatches[`${eventIndex}-${timeIndex}`]?.players?.map((player, idx) => (
-                                <div key={idx} className="player-badge d-inline-block me-2 mb-2 p-2 bg-success text-white rounded">
-                                  {player}
-                                  <Button 
-                                    variant="link" 
-                                    className="text-white ms-2 p-0" 
-                                    onClick={() => {
-                                      const updatedPlayers = teamMatches[`${eventIndex}-${timeIndex}`].players.filter(p => p !== player);
-                                      handleGroupAssignment(eventIndex, timeIndex, updatedPlayers);
-                                    }}
-                                  >
-                                    ×
-                                  </Button>
+                            </div>
+                          )}
+                          
+                          {/* Alternating Matches */}
+                          {roundData.alternatingMatches && roundData.alternatingMatches.length > 0 && (
+                            <div className="alternating-matches">
+                              <h4 className="mb-2">Alternating Matches</h4>
+                              {roundData.alternatingMatches.map((altMatch, idx) => (
+                                <div key={idx} className="alt-match mb-2 p-2 bg-success text-white rounded">
+                                  <div className="d-flex justify-content-between align-items-center">
+                                    <span>
+                                      {altMatch.soloPlayer} vs {altMatch.team2Players.join(' & ')}
+                                    </span>
+                                    <div className="d-flex align-items-center gap-2">
+                                      <span className="badge bg-light text-dark">
+                                        {formatTeeTime(event?.teeTimes[altMatch.teeTimeIndex])}
+                                      </span>
+                                      {authenticated && (
+                                        <Button
+                                          variant="link"
+                                          className="text-white p-0 ms-2"
+                                          onClick={async () => {
+                                            const db = getFirestore();
+                                            const updatedAlternatingMatches = roundData.alternatingMatches.filter((_, matchIdx) => matchIdx !== idx);
+                                            await setDoc(doc(db, 'teamMatches', '2025-rounds'), {
+                                              [roundKey]: {
+                                                ...roundData,
+                                                alternatingMatches: updatedAlternatingMatches
+                                              }
+                                            }, { merge: true });
+                                          }}
+                                        >
+                                          ×
+                                        </Button>
+                                      )}
+                                    </div>
+                                  </div>
+                                  {altMatch.holeAssignments && (
+                                    <div className="mt-2">
+                                      <small className="text-light">Hole Assignments:</small>
+                                      <div className="d-flex flex-wrap gap-1 mt-1">
+                                        {Object.entries(altMatch.holeAssignments).slice(0, 9).map(([hole, player]) => (
+                                          <span key={hole} className="badge bg-light text-dark">
+                                            H{hole}: {player}
+                                          </span>
+                                        ))}
+                                        {Object.keys(altMatch.holeAssignments).length > 9 && (
+                                          <span className="badge bg-light text-dark">...</span>
+                                        )}
+                                      </div>
+                                    </div>
+                                  )}
                                 </div>
                               ))}
                             </div>
-                            
-                            <Form.Group>
-                              <Form.Select 
-                                value=""
-                                onChange={(e) => {
-                                  if (!e.target.value) return;
-                                  const currentPlayers = teamMatches[`${eventIndex}-${timeIndex}`]?.players || [];
-                                  if (currentPlayers.length >= 3) {
-                                    alert('Maximum 3 players allowed per group');
-                                    return;
-                                  }
-                                  handleGroupAssignment(eventIndex, timeIndex, [...currentPlayers, e.target.value]);
-                                }}
-                              >
-                                <option value="">Add Player to Group</option>
-                                {players
-                                  .filter(player => !teamMatches[`${eventIndex}-${timeIndex}`]?.players?.includes(player.name))
-                                  .map(player => (
-                                    <option key={player.name} value={player.name}>
-                                      {player.name} ({player.handicap})
-                                    </option>
-                                  ))}
-                              </Form.Select>
-                            </Form.Group>
-                          </div>
+                          )}
+                          
+                          {/* Championship Format Display */}
+                          {event?.specialFormat?.type === 'Championship' && (
+                            <div className="championship-format-display mt-3 p-3 bg-warning text-dark rounded">
+                              <h4 className="mb-2">Championship Format</h4>
+                              <p className="mb-2">Team vs Team hole assignments</p>
+                              {authenticated && (
+                                <ChampionshipFormat 
+                                  event={event}
+                                  players={players}
+                                  onSave={async (formatData) => {
+                                    const db = getFirestore();
+                                    try {
+                                      // Save championship format data
+                                      await setDoc(doc(db, 'specialFormats', '2025-schedule'), {
+                                        [event.date]: formatData
+                                      }, { merge: true });
 
-                          <div className="round-setup p-3 border rounded mt-3">
-                            <h5 className="mb-3">Round Setup - {event.date}</h5>
-                            
-                            {/* Only show tee time selection if no 1v1 match is set for this round */}
-                            <div className="mb-4">
-                              <h6>Step 1: Select Tee Time for 1v1 Match</h6>
-                              <div className="d-flex gap-3">
-                                                                  {event.teeTimes.map((teeTime, idx) => {
-                                    const roundKey = `${event.date}-${getRound(teeTime)}`;
-                                    return (
-                                    <Button
-                                      key={idx}
-                                      variant={selectedTeeTimes[roundKey] === idx ? 'success' : 'outline-success'}
-                                      onClick={() => setSelectedTeeTimes(prev => ({ ...prev, [roundKey]: idx }))}
-                                    >
-                                      {formatTeeTime(teeTime)}
-                                    </Button>
-                                  );
-                                })}
-                              </div>
+                                      // Create championship live match for results page
+                                      const championshipMatch = {
+                                        id: `${event.date}-championship`,
+                                        courseName: event.courseName,
+                                        date: event.date,
+                                        matchType: 'championship',
+                                        status: 'not_started',
+                                        lastUpdate: new Date(),
+                                        team1: {
+                                          name: 'Putt Pirates',
+                                          players: formatData.team1 || [],
+                                          score: 0
+                                        },
+                                        team2: {
+                                          name: 'Golden Boys',
+                                          players: formatData.team2 || [],
+                                          score: 0
+                                        },
+                                        holeAssignments: formatData.assignments || {},
+                                        holeResults: {},
+                                        currentScore: {
+                                          team1Wins: 0,
+                                          team2Wins: 0,
+                                          holesPlayed: 0
+                                        }
+                                      };
+
+                                      // Save to live matches collection
+                                      await setDoc(doc(db, 'liveMatches', '2025'), {
+                                        [`${event.date}-championship`]: championshipMatch
+                                      }, { merge: true });
+
+                                      alert('Championship format saved and live match created!');
+                                    } catch (error) {
+                                      console.error('Error saving championship format:', error);
+                                      alert('Error saving championship format. Please try again.');
+                                    }
+                                  }}
+                                />
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  ));
+                })()}
+              </div>
+            )}
+            
+            {/* FIX #1: REMOVED STRAY CHARACTERS
+              A stray comma (,) and closing curly brace (}) were here, causing a syntax error. 
+              They have been deleted.
+            */}
+
+            {/* Teams Section with Loading States */}
+            {authenticated && (
+              <div className="teams-section" style={{ minHeight: '400px' }}>
+                {teams.length > 0 ? (
+                  // Teams data loaded - show actual content
+                  teams.map(team => (
+                    <div key={team.id} className="team-section mb-4">
+                      <div className="team-header">
+                        <div className="team-logo-container">
+                          <Image 
+                            src={team.name === "Putt Pirates" ? "/putt-pirates-logo.jpg" : "/golden-boys-logo.jpg"}
+                            alt={`${team.name} Logo`}
+                            width={150} 
+                            height={150} 
+                            className="team-logo" 
+                          />
+                        </div>
+                        <div className="team-info">
+                          <h2 className="text-2xl font-bold">{team.name}</h2>
+                          <p className="text-xl text-success">
+                            Team Average: {team.averageHandicap || 0}
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <div className="players-list my-3">
+                        {team.players?.map(player => (
+                          <div key={player.name} className="player-item">
+                            {player.name} - Handicap: {player.handicap}
+                          </div>
+                        ))}
+                      </div>
+
+                      <Form className="mt-3">
+                        <Form.Group className="d-flex gap-2">
+                          <Form.Select 
+                            onChange={(e) => setSelectedPlayer(e.target.value)}
+                            className="w-75"
+                          >
+                            <option value="">Select Player</option>
+                            {players.map(player => (
+                              <option key={player.name} value={player.name}>
+                                {player.name} ({player.handicap})
+                              </option>
+                            ))}
+                          </Form.Select>
+                          <Button 
+                            variant="success"
+                            onClick={() => handleAddPlayer(team.id, selectedPlayer)}
+                          >
+                            Add Player
+                          </Button>
+                        </Form.Group>
+                      </Form>
+                    </div>
+                  ))
+                ) : (
+                  // Loading skeleton for teams
+                  <div className="teams-loading-skeleton">
+                    <div className="team-section mb-4">
+                      <div className="team-header">
+                        <div className="team-logo-container">
+                          <div className="skeleton-logo" style={{ width: '150px', height: '150px', backgroundColor: '#e9ecef', borderRadius: '8px' }}></div>
+                        </div>
+                        <div className="team-info">
+                          <div className="skeleton-title" style={{ width: '200px', height: '32px', backgroundColor: '#e9ecef', borderRadius: '4px', marginBottom: '8px' }}></div>
+                          <div className="skeleton-subtitle" style={{ width: '150px', height: '24px', backgroundColor: '#e9ecef', borderRadius: '4px' }}></div>
+                        </div>
+                      </div>
+                      
+                      <div className="players-list my-3">
+                        {[1, 2, 3].map(i => (
+                          <div key={i} className="skeleton-player" style={{ width: '100%', height: '20px', backgroundColor: '#e9ecef', borderRadius: '4px', marginBottom: '8px' }}></div>
+                        ))}
+                      </div>
+
+                      <div className="skeleton-form" style={{ width: '100%', height: '40px', backgroundColor: '#e9ecef', borderRadius: '4px' }}></div>
+                    </div>
+                    
+                    <div className="team-section mb-4">
+                      <div className="team-header">
+                        <div className="team-logo-container">
+                          <div className="skeleton-logo" style={{ width: '150px', height: '150px', backgroundColor: '#e9ecef', borderRadius: '8px' }}></div>
+                        </div>
+                        <div className="team-info">
+                          <div className="skeleton-title" style={{ width: '200px', height: '32px', backgroundColor: '#e9ecef', borderRadius: '4px', marginBottom: '8px' }}></div>
+                          <div className="skeleton-subtitle" style={{ width: '150px', height: '24px', backgroundColor: '#e9ecef', borderRadius: '4px' }}></div>
+                        </div>
+                      </div>
+                      
+                      <div className="players-list my-3">
+                        {[1, 2, 3].map(i => (
+                          <div key={i} className="skeleton-player" style={{ width: '100%', height: '20px', backgroundColor: '#e9ecef', borderRadius: '4px', marginBottom: '8px' }}></div>
+                        ))}
+                      </div>
+
+                      <div className="skeleton-form" style={{ width: '100%', height: '40px', backgroundColor: '#e9ecef', borderRadius: '4px' }}></div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+            
+            {/* Matches Section with Loading States */}
+            {authenticated && (
+              <div className="team-matches mt-8 pt-8 border-top" style={{ minHeight: '300px' }}>
+                {scheduleData.length > 0 ? (
+                  <h2 className="text-3xl font-semibold mb-6 text-center">Team Matches Setup</h2>
+                ) : (
+                  <div className="matches-loading-skeleton">
+                    <div className="skeleton-title" style={{ width: '300px', height: '48px', backgroundColor: '#e9ecef', borderRadius: '4px', margin: '0 auto 24px auto' }}></div>
+                    <div className="skeleton-event" style={{ width: '100%', height: '200px', backgroundColor: '#e9ecef', borderRadius: '8px', marginBottom: '16px' }}></div>
+                    <div className="skeleton-event" style={{ width: '100%', height: '200px', backgroundColor: '#e9ecef', borderRadius: '8px', marginBottom: '16px' }}></div>
+                  </div>
+                )}
+                
+                {scheduleData.map((event, eventIndex) => (
+                  <div key={eventIndex} className="event-section mb-6">
+                    <div className="event-header mb-4">
+                      <h3 className="text-2xl text-success">{event.courseName}</h3>
+                      <p className="text-muted">{formatDate(event.date)}</p>
+                      {event.notes && (
+                        <p className="text-gray-600 italic">{event.notes}</p>
+                      )}
+                      {event.format && (
+                        <div className="format-info mt-2 p-3 bg-light border rounded">
+                          <h5 className="mb-2">Format:</h5>
+                          <p className="mb-0">{event.format}</p>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="tee-times">
+                      {/* Championship Format Section */}
+                      {event?.specialFormat?.type === 'Championship' ? (
+                        <div className="championship-format-section mb-4 p-3 border rounded bg-light">
+                          <h4 className="mb-3">Championship Format</h4>
+                          {authenticated && (
+                            <ChampionshipFormat 
+                              event={event}
+                              players={players}
+                              onSave={async (formatData) => {
+                                const db = getFirestore();
+                                try {
+                                  // Save championship format data
+                                  await setDoc(doc(db, 'specialFormats', '2025-schedule'), {
+                                    [event.date]: formatData
+                                  }, { merge: true });
+
+                                  // Create championship live match for results page
+                                  const championshipMatch = {
+                                    id: `${event.date}-championship`,
+                                    courseName: event.courseName,
+                                    date: event.date,
+                                    matchType: 'championship',
+                                    status: 'not_started',
+                                    lastUpdate: new Date(),
+                                    team1: {
+                                      name: 'Putt Pirates',
+                                      players: formatData.team1 || [],
+                                      score: 0
+                                    },
+                                    team2: {
+                                      name: 'Golden Boys',
+                                      players: formatData.team2 || [],
+                                      score: 0
+                                    },
+                                    holeAssignments: formatData.assignments || {},
+                                    holeResults: {},
+                                    currentScore: {
+                                      team1Wins: 0,
+                                      team2Wins: 0,
+                                      holesPlayed: 0
+                                    }
+                                  };
+
+                                  // Save to live matches collection
+                                  await setDoc(doc(db, 'liveMatches', '2025'), {
+                                    [`${event.date}-championship`]: championshipMatch
+                                  }, { merge: true });
+
+                                  alert('Championship format saved and live match created!');
+                                } catch (error) {
+                                  console.error('Error saving championship format:', error);
+                                  alert('Error saving championship format. Please try again.');
+                                }
+                              }}
+                            />
+                          )}
+                        </div>
+                      ) : (
+                        // Regular Team Match Format
+                        event.teeTimes.map((time, timeIndex) => (
+                          <div key={timeIndex} className="tee-time-slot mb-4 p-3 border rounded bg-light">
+                            <div className="d-flex justify-content-between align-items-center mb-3">
+                              <h4 className="text-xl mb-0">{formatTeeTime(time)}</h4>
+                              <Form.Group className="d-flex align-items-center gap-2">
+                                <Form.Select
+                                  size="sm"
+                                  value={selectionAssignments[event.date]?.[time]?.team || ''}
+                                  onChange={(e) => handleUpdateSelection(event.date, time, e.target.value)}
+                                  style={{ width: 'auto' }}
+                                >
+                                  <option value="">Select Team</option>
+                                  <option value="Golden Boys">Golden Boys</option>
+                                  <option value="Putt Pirates">Putt Pirates</option>
+                                </Form.Select>
+                                <small className="text-muted">Selection</small>
+                              </Form.Group>
                             </div>
 
-                            {/* Show match setup interface */}
-                            {teamMatches[`${eventIndex}-${timeIndex}`]?.players?.length === 3 && (
-                              <div className="match-setup mt-3">
-                                {timeIndex === selectedTeeTimes[`${event.date}-${getRound(time)}`] ? (
-                                  // 1v1 Match Setup
+                            <div className="group-assignment mb-3 p-3 border rounded">
+                              <h5 className="mb-3">Group Assignment</h5>
+                              <div className="selected-players mb-2">
+                                {teamMatches[`${eventIndex}-${timeIndex}`]?.players?.map((player, idx) => (
+                                  <div key={idx} className="player-badge d-inline-block me-2 mb-2 p-2 bg-success text-white rounded">
+                                    {player}
+                                    <Button 
+                                      variant="link" 
+                                      className="text-white ms-2 p-0" 
+                                      onClick={() => {
+                                        const updatedPlayers = teamMatches[`${eventIndex}-${timeIndex}`].players.filter(p => p !== player);
+                                        handleGroupAssignment(eventIndex, timeIndex, updatedPlayers);
+                                      }}
+                                    >
+                                      ×
+                                    </Button>
+                                  </div>
+                                ))}
+                              </div>
+                              
+                              <Form.Group>
+                                <Form.Select 
+                                  value=""
+                                  onChange={(e) => {
+                                    if (!e.target.value) return;
+                                    const currentPlayers = teamMatches[`${eventIndex}-${timeIndex}`]?.players || [];
+                                    if (currentPlayers.length >= 3) {
+                                      alert('Maximum 3 players allowed per group');
+                                      return;
+                                    }
+                                    handleGroupAssignment(eventIndex, timeIndex, [...currentPlayers, e.target.value]);
+                                  }}
+                                >
+                                  <option value="">Add Player to Group</option>
+                                  {players
+                                    .filter(player => !teamMatches[`${eventIndex}-${timeIndex}`]?.players?.includes(player.name))
+                                    .map(player => (
+                                      <option key={player.name} value={player.name}>
+                                        {player.name} ({player.handicap})
+                                      </option>
+                                    ))}
+                                </Form.Select>
+                              </Form.Group>
+                            </div>
+
+                            <div className="round-setup p-3 border rounded mt-3">
+                              <h5 className="mb-3">Round Setup - {formatDate(event.date)}</h5>
+                              
+                              {/* Only show tee time selection if no 1v1 match is set for this round */}
+                              <div className="mb-4">
+                                <h6>Step 1: Select Tee Time for 1v1 Match</h6>
+                                <div className="d-flex gap-3">
+                                  {event.teeTimes.map((teeTime, idx) => {
+                                    const roundKey = `${event.date}-${getRound(teeTime)}`;
+                                    return (
+                                      <Button
+                                        key={idx}
+                                        variant={selectedTeeTimes[roundKey] === idx ? 'success' : 'outline-success'}
+                                        onClick={() => setSelectedTeeTimes(prev => ({ ...prev, [roundKey]: idx }))}
+                                      >
+                                        {formatTeeTime(teeTime)}
+                                      </Button>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+
+                              {/* Show match setup interface */}
+                              {teamMatches[`${eventIndex}-${timeIndex}`]?.players?.length === 3 && (
+                                <div className="match-setup mt-3">
+                                  {/* 1v1 Match Setup - Available for all tee times */}
                                   <div>
                                     <h6>1v1 Match Setup</h6>
                                     <div className="d-flex gap-2 mt-2">
@@ -977,166 +1053,93 @@ const Teams = () => {
                                         variant="primary"
                                         size="sm"
                                         className="mt-2"
-                                        onClick={() => handleRoundMatchSetup(
-                                          event.date,
-                                          timeIndex,
-                                          teamMatches[`${eventIndex}-${timeIndex}`].players
-                                        )}
+                                                                               onClick={() => handleRoundMatchSetup(
+                                         event.date,
+                                         timeIndex,
+                                         matchSelections[`${eventIndex}-${timeIndex}`].players
+                                       )}
                                       >
                                         Confirm 1v1 Match
                                       </Button>
                                     )}
                                   </div>
-                                ) : (
-                                  // Alternating Match Setup (show for all other tee times)
-                                  timeIndex !== selectedTeeTimes[`${event.date}-${getRound(time)}`] && (
-                                    <div>
-                                      <h6>Alternating Match Setup</h6>
-                                      <p className="text-muted small">1. Select the solo player who will alternate against the other two players</p>
-                                      <div className="d-flex gap-2 mt-2 mb-3">
-                                        {teamMatches[`${eventIndex}-${timeIndex}`].players.map((player, idx) => (
-                                          <Button
-                                            key={idx}
-                                            variant={
-                                              matchSelections[`${eventIndex}-${timeIndex}`]?.soloPlayer === player
-                                                ? 'success'
-                                                : 'outline-success'
-                                            }
-                                            onClick={() => {
-                                              setMatchSelections({
-                                                ...matchSelections,
-                                                [`${eventIndex}-${timeIndex}`]: {
-                                                  soloPlayer: player,
-                                                  team2Players: teamMatches[`${eventIndex}-${timeIndex}`].players.filter(p => p !== player)
-                                                }
-                                              });
-                                            }}
-                                          >
-                                            {player}
-                                          </Button>
-                                        ))}
-                                      </div>
 
-                                      {matchSelections[`${eventIndex}-${timeIndex}`]?.soloPlayer && (
-                                        <>
-                                          <p className="text-muted small mt-4">2. Select which opponent starts on hole 1</p>
-                                          <div className="d-flex gap-2 mt-2 mb-3">
-                                            {matchSelections[`${eventIndex}-${timeIndex}`].team2Players.map((player, idx) => (
-                                              <Button
-                                                key={idx}
-                                                variant={startingPlayer === player ? 'success' : 'outline-success'}
-                                                onClick={() => setStartingPlayer(player)}
-                                              >
-                                                {player}
-                                              </Button>
-                                            ))}
-                                          </div>
-
-                                          {startingPlayer && (
-                                            <>
-                                              <Button
-                                                variant="primary"
-                                                size="sm"
-                                                className="mt-3"
-                                                onClick={() => {
-                                                  const soloPlayer = matchSelections[`${eventIndex}-${timeIndex}`].soloPlayer;
-                                                  const otherPlayer = matchSelections[`${eventIndex}-${timeIndex}`].team2Players.find(p => p !== startingPlayer);
-                                                  
-                                                  // Create hole assignments
-                                                  const holes = {};
-                                                  for (let i = 1; i <= 18; i++) {
-                                                    holes[i] = i % 2 === 1 ? startingPlayer : otherPlayer;
-                                                  }
-                                                  
-                                                  setHoleAssignments({
-                                                    ...holeAssignments,
-                                                    [`${eventIndex}-${timeIndex}`]: holes
-                                                  });
-
-                                                  handleRoundMatchSetup(
-                                                    event.date,
-                                                    timeIndex,
-                                                    [soloPlayer, startingPlayer, otherPlayer],
-                                                    holes
-                                                  );
-                                                }}
-                                              >
-                                                Confirm Alternating Match
-                                              </Button>
-
-                                              <div className="hole-assignments mt-3 p-3 bg-light rounded">
-                                                <h6>Preview Hole Assignments vs {matchSelections[`${eventIndex}-${timeIndex}`]?.soloPlayer}:</h6>
-                                                <div className="d-flex flex-wrap gap-2 mt-2">
-                                                  {[...Array(18)].map((_, i) => (
-                                                    <div key={i} className="text-center">
-                                                      <small className="d-block text-muted">Hole {i + 1}</small>
-                                                      <span className="badge bg-success">
-                                                        {i % 2 === 0 ? startingPlayer : matchSelections[`${eventIndex}-${timeIndex}`].team2Players.find(p => p !== startingPlayer)}
-                                                      </span>
-                                                    </div>
-                                                  ))}
-                                                </div>
-                                              </div>
-                                            </>
-                                          )}
-                                        </>
-                                      )}
+                                  {/* Alternating Match Setup - Available for all tee times */}
+                                  <div className="mt-4">
+                                    <h6>Alternating Match Setup</h6>
+                                    <p className="text-muted small">1. Select the solo player who will alternate against the other two players</p>
+                                    <div className="d-flex gap-2 mt-2 mb-3">
+                                      {teamMatches[`${eventIndex}-${timeIndex}`].players.map((player, idx) => (
+                                        <Button
+                                          key={idx}
+                                          variant={
+                                            matchSelections[`${eventIndex}-${timeIndex}`]?.soloPlayer === player
+                                              ? 'success'
+                                              : 'outline-success'
+                                          }
+                                          onClick={() => {
+                                            setMatchSelections({
+                                              ...matchSelections,
+                                              [`${eventIndex}-${timeIndex}`]: {
+                                                soloPlayer: player,
+                                                team2Players: teamMatches[`${eventIndex}-${timeIndex}`].players.filter(p => p !== player)
+                                              }
+                                            });
+                                          }}
+                                        >
+                                          {player}
+                                        </Button>
+                                      ))}
                                     </div>
-                                  )
-                                )}
-                              </div>
-                            )}
 
-                            {/* Show current match setup if exists */}
-                            {roundSelections[`${event.date}-${getRound(time)}`]?.mainMatch && 
-                            timeIndex === roundSelections[`${event.date}-${getRound(time)}`]?.mainMatch?.teeTimeIndex && (
-                              <div className="match-display mt-3 p-2 bg-light rounded">
-                                <strong>1v1 Match:</strong> {roundSelections[`${event.date}-${getRound(time)}`].mainMatch.player1} vs{' '}
-                                {roundSelections[`${event.date}-${getRound(time)}`].mainMatch.player2}
-                                <br />
-                                <small className="text-muted">Sitting out: {roundSelections[`${event.date}-${getRound(time)}`].mainMatch.sittingOut}</small>
-                              </div>
-                            )}
-                            
-                            {/* Show message when this tee time is excluded from alternating matches */}
-                            {roundSelections[`${event.date}-${getRound(time)}`]?.mainMatch && 
-                            timeIndex !== roundSelections[`${event.date}-${getRound(time)}`]?.mainMatch?.teeTimeIndex && (
-                              <div className="match-display mt-3 p-2 bg-warning rounded">
-                                <small className="text-dark">
-                                  <strong>Note:</strong> This tee time will have alternating matches (1v1 match is at {formatTeeTime(event?.teeTimes[roundSelections[`${event.date}-${getRound(time)}`]?.mainMatch?.teeTimeIndex])})
-                                </small>
-                              </div>
-                            )}
+                                    {/*
+                                      FIX #2: COMPLETED TRUNCATED CODE
+                                      Your code was cut off here. I've completed the block by closing
+                                      all the open tags and parentheses.
+                                    */}
+                                    {matchSelections[`${eventIndex}-${timeIndex}`]?.soloPlayer && (
+                                      <>
+                                        <p className="text-muted small mt-4">2. Select which opponent starts on hole 1</p>
+                                        <div className="d-flex gap-2 mt-2 mb-3">
+                                          {matchSelections[`${eventIndex}-${timeIndex}`]?.team2Players?.map((player, idx) => (
+                                            <Button key={idx} variant="outline-primary">
+                                              {player}
+                                            </Button>
+                                          ))}
+                                        </div>
+                                        <Button
+                                          variant="primary"
+                                          size="sm"
+                                          className="mt-2"
+                                          onClick={() => {
+                                            const players = [
+                                              matchSelections[`${eventIndex}-${timeIndex}`].soloPlayer,
+                                              ...matchSelections[`${eventIndex}-${timeIndex}`].team2Players
+                                            ];
+                                            handleAlternatingMatchSetup(event.date, timeIndex, players);
+                                          }}
+                                        >
+                                          Confirm Alternating Match
+                                        </Button>
+                                      </>
+                                    )}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
                           </div>
-                        </div>
-                      ))
-                    )}
+                        ))
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          )}
-          
-          {/* Show message for non-authenticated users */}
-          {!authenticated && Object.keys(persistentMatches).length === 0 && (
-            <div className="text-center mt-4">
-              <p className="text-muted">No matches have been selected yet. Please log in to set up matches.</p>
-            </div>
-          )}
-          
-          {/* Show loading state if nothing is available yet */}
-          {loading && !teams.length && !scheduleData.length && (
-            <div className="text-center">
-              <div className="spinner-border text-success" role="status">
-                <span className="visually-hidden">Loading...</span>
+                ))}
               </div>
-            </div>
-          )}
+            )}
+
+          </div>
         </div>
       </div>
     </div>
-    </>
   );
-};
-
+}
 export default Teams;

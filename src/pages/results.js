@@ -164,16 +164,16 @@ const Results = () => {
       if (diff > 0) {
         // Player 1 is up
         if (match.matchType === 'alternating') {
-          return `${match.soloPlayer} ${diff}UP`;
+          return `${typeof match.soloPlayer === 'string' ? match.soloPlayer : match.soloPlayer.name} ${diff}UP`;
         } else {
-          return `${match.player1} ${diff}UP`;
+                      return `${typeof match.player1 === 'string' ? match.player1 : (match.player1?.name || 'Unknown Player')} ${diff}UP`;
         }
       } else {
         // Player 2 is up
         if (match.matchType === 'alternating') {
-          return `${match.team2Players?.join(' & ')} ${Math.abs(diff)}UP`;
+          return `${match.team2Players?.map(p => typeof p === 'string' ? p : p.name).join(' & ')} ${Math.abs(diff)}UP`;
         } else {
-          return `${match.player2} ${Math.abs(diff)}UP`;
+                      return `${typeof match.player2 === 'string' ? match.player2 : (match.player2?.name || 'Unknown Player')} ${Math.abs(diff)}UP`;
         }
       }
     }
@@ -239,12 +239,12 @@ const Results = () => {
           `${team2Wins}&${team1Wins}`;
       } else {
         winner = currentScore.player1Score > currentScore.player2Score ? 
-          (match.matchType === 'alternating' ? match.soloPlayer : match.player1) :
-          (match.matchType === 'alternating' ? match.team2Players?.join(' & ') : match.player2);
+                      (match.matchType === 'alternating' ? (typeof match.soloPlayer === 'string' ? match.soloPlayer : (match.soloPlayer?.name || 'Unknown Player')) : (typeof match.player1 === 'string' ? match.player1 : (match.player1?.name || 'Unknown Player'))) :
+                                              (match.matchType === 'alternating' ? match.team2Players?.map(p => typeof p === 'string' ? p : p.name).join(' & ') : (typeof match.player2 === 'string' ? match.player2 : (match.player2?.name || 'Unknown Player')));
         
         loser = currentScore.player1Score > currentScore.player2Score ? 
-          (match.matchType === 'alternating' ? match.team2Players?.join(' & ') : match.player2) :
-          (match.matchType === 'alternating' ? match.soloPlayer : match.player1);
+                      (match.matchType === 'alternating' ? match.team2Players?.map(p => typeof p === 'string' ? p : p.name).join(' & ') : match.player2) :
+                      (match.matchType === 'alternating' ? (typeof match.soloPlayer === 'string' ? match.soloPlayer : (match.soloPlayer?.name || 'Unknown Player')) : (typeof match.player1 === 'string' ? match.player1 : (match.player1?.name || 'Unknown Player')));
         
         finalScore = currentScore.player1Score > currentScore.player2Score ? 
           `${currentScore.player1Score}&${currentScore.player2Score}` : 
@@ -269,8 +269,8 @@ const Results = () => {
         historyData.holeResults = match.holeResults || {};
       } else {
         historyData.teeTime = match.teeTime;
-        historyData.player1 = match.matchType === 'alternating' ? match.soloPlayer : match.player1;
-        historyData.player2 = match.matchType === 'alternating' ? match.team2Players?.join(' & ') : match.player2;
+        historyData.player1 = match.matchType === 'alternating' ? (typeof match.soloPlayer === 'string' ? match.soloPlayer : (match.soloPlayer?.name || 'Unknown Player')) : (typeof match.player1 === 'string' ? match.player1 : (match.player1?.name || 'Unknown Player'));
+        historyData.player2 = match.matchType === 'alternating' ? match.team2Players?.map(p => typeof p === 'string' ? p : p.name).join(' & ') : (typeof match.player2 === 'string' ? match.player2 : (match.player2?.name || 'Unknown Player'));
       }
 
       await setDoc(doc(db, 'matchHistory', '2025'), {
@@ -353,7 +353,7 @@ const Results = () => {
                           <div className="d-flex flex-column">
                             <span className="player-name">{match.team1?.name || 'Putt Pirates'}</span>
                             <small className="text-muted">
-                              {match.team1?.players?.join(', ') || 'No players assigned'}
+                              {match.team1?.players?.map(p => typeof p === 'string' ? p : p.name).join(', ') || 'No players assigned'}
                             </small>
                           </div>
                           <span className="player-score">{match.currentScore?.team1Wins || 0}</span>
@@ -362,7 +362,7 @@ const Results = () => {
                           <div className="d-flex flex-column">
                             <span className="player-name">{match.team2?.name || 'Golden Boys'}</span>
                             <small className="text-muted">
-                              {match.team2?.players?.join(', ') || 'No players assigned'}
+                              {match.team2?.players?.map(p => typeof p === 'string' ? p : p.name).join(', ') || 'No players assigned'}
                             </small>
                           </div>
                           <span className="player-score">{match.currentScore?.team2Wins || 0}</span>
@@ -374,7 +374,7 @@ const Results = () => {
                         <div className="player-row d-flex justify-content-between align-items-center">
                           <div className="d-flex flex-column">
                             <span className="player-name">
-                              {match.matchType === 'alternating' ? match.soloPlayer : match.player1}
+                              {match.matchType === 'alternating' ? (typeof match.soloPlayer === 'string' ? match.soloPlayer : (match.soloPlayer?.name || 'Unknown Player')) : (typeof match.player1 === 'string' ? match.player1 : (match.player1?.name || 'Unknown Player'))}
                             </span>
                             <small className="text-muted">
                               {match.matchType === 'alternating' ? 
@@ -387,7 +387,7 @@ const Results = () => {
                         <div className="player-row d-flex justify-content-between align-items-center">
                           <div className="d-flex flex-column">
                             <span className="player-name">
-                              {match.matchType === 'alternating' ? match.team2Players?.join(' & ') : match.player2}
+                              {match.matchType === 'alternating' ? match.team2Players?.map(p => typeof p === 'string' ? p : p.name).join(' & ') : (typeof match.player2 === 'string' ? match.player2 : (match.player2?.name || 'Unknown Player'))}
                             </span>
                             <small className="text-muted">
                               {match.matchType === 'alternating' ? 
@@ -612,10 +612,10 @@ const Results = () => {
                 {strokePlayStandings.length > 0 ? (
                   <div className="individual-leaders">
                                          {strokePlayStandings.slice(0, 10).map((player, idx) => (
-                       <div key={player.player} className="player-row d-flex justify-content-between align-items-center py-2 border-bottom">
+                       <div key={player.player.name} className="player-row d-flex justify-content-between align-items-center py-2 border-bottom">
                          <div className="player-info">
                            <span className="player-name">
-                             #{idx + 1} {player.player}
+                             #{idx + 1} {player.player.name}
                            </span>
                            <small className="text-muted d-block">
                              {player.rounds.length} rounds • Starting: {player.startingHandicap > 0 ? `+${player.startingHandicap}` : player.startingHandicap}
@@ -1097,6 +1097,7 @@ const Results = () => {
           )}
         </div>
       </div>
+    </div>
       
       {/* Score Entry Modal */}
       <ScoreEntryModal
@@ -1108,7 +1109,6 @@ const Results = () => {
           console.log('Match updated:', updatedMatch);
         }}
       />
-    </div>
     </>
   );
 };
