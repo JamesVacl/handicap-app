@@ -4,7 +4,7 @@ import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { Navbar, Nav, Container, Button, Form, Badge, Card, Row, Col } from 'react-bootstrap';
 import { getFirestore, doc, setDoc, onSnapshot, collection, getDocs, query, orderBy, deleteField, getDoc } from 'firebase/firestore';
-import { getPlayerHandicaps } from '../firebase';
+import { getPlayerHandicaps, getPlayers } from '../firebase';
 import NavigationMenu from '../components/NavigationMenu';
 import FloatingNavigation from '../components/FloatingNavigation';
 import ScoreEntryModal from '../components/ScoreEntryModal';
@@ -46,7 +46,7 @@ const Results = () => {
     // Fetch players data
     const fetchPlayers = async () => {
       try {
-        const playerList = await getPlayerHandicaps();
+        const playerList = await getPlayers();
         console.log('Players loaded:', playerList);
         setPlayers(playerList);
       } catch (error) {

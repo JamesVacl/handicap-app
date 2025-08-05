@@ -78,7 +78,7 @@ const getScores = async () => {
   }));
 };
 
-// Update the getPlayerHandicaps function
+// Update the getPlayerHandicaps function (simplified for faster refresh)
 const getPlayerHandicaps = async () => {
   const scores = await getScores();
   const playerScores = {};
@@ -100,7 +100,7 @@ const getPlayerHandicaps = async () => {
     }
   });
 
-  // Calculate handicap for each player
+  // Calculate handicap for each player (simplified - no Firestore updates)
   const playerHandicaps = Object.entries(playerScores).map(([playerName, scores]) => {
     // Sort differentials by date (newest first)
     const sortedScores = scores.sort((a, b) => b.date - a.date);
@@ -120,12 +120,8 @@ const getPlayerHandicaps = async () => {
       return b.date - a.date;
     });
 
-    // Take lowest 8 differentials and mark them
+    // Take lowest 8 differentials
     const lowestEight = differentialsWithIndex.slice(0, 8);
-    lowestEight.forEach(score => {
-      const originalScore = recentScores[score.originalIndex];
-      originalScore.isUsedForDifferential = true;
-    });
 
     // Calculate handicap
     const handicap = lowestEight.length > 0
@@ -134,23 +130,9 @@ const getPlayerHandicaps = async () => {
 
     return {
       name: playerName,
-      handicap: handicap,
-      scores: recentScores // Include the marked scores
+      handicap: handicap
     };
   });
-
-  // Update the isUsedForDifferential flag in Firestore
-  await Promise.all(
-    playerHandicaps.flatMap(player =>
-      player.scores
-        .filter(score => score.id) // Only process scores with IDs
-        .map(score =>
-          updateDoc(doc(db, "scores", score.id), {
-            isUsedForDifferential: score.isUsedForDifferential
-          })
-        )
-    )
-  );
 
   return playerHandicaps;
 };
@@ -303,33 +285,24 @@ const addCourse = async ({ course, rating, slope }) => {
   }
 };
 
-// Fetch teams from Firestore
+// Fetch teams from Firestore (optimized - no real-time handicap calculation)
 const getTeams = async () => {
   const teamsRef = collection(db, 'Teams');
   const snapshot = await getDocs(teamsRef);
   const teams = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
   
-  // Get current handicaps
-  const playerHandicaps = await getPlayerHandicaps();
-  
-  // Update team players with current handicaps
+  // Calculate team averages using stored handicaps (no real-time calculation)
   return teams.map(team => {
-    const updatedPlayers = team.players?.map(player => {
-      const currentHandicap = playerHandicaps.find(p => p.name === player.name);
-      return {
-        ...player,
-        handicap: currentHandicap?.handicap || player.handicap
-      };
-    }) || [];
+    const players = team.players || [];
     
-    // Recalculate team average
-    const averageHandicap = updatedPlayers.length 
-      ? parseFloat((updatedPlayers.reduce((acc, p) => acc + p.handicap, 0) / updatedPlayers.length).toFixed(1))
+    // Calculate team average from stored handicaps
+    const averageHandicap = players.length 
+      ? parseFloat((players.reduce((acc, p) => acc + (p.handicap || 0), 0) / players.length).toFixed(1))
       : 0;
 
     return {
       ...team,
-      players: updatedPlayers,
+      players: players,
       averageHandicap
     };
   });
