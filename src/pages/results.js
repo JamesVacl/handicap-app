@@ -6,6 +6,7 @@ import { Navbar, Nav, Container, Button, Form, Badge, Card, Row, Col } from 'rea
 import { getFirestore, doc, setDoc, onSnapshot, collection, getDocs, query, orderBy, deleteField, getDoc } from 'firebase/firestore';
 import { getPlayerHandicaps } from '../firebase';
 import NavigationMenu from '../components/NavigationMenu';
+import FloatingNavigation from '../components/FloatingNavigation';
 import ScoreEntryModal from '../components/ScoreEntryModal';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Image from 'next/image';
@@ -1037,6 +1038,7 @@ const Results = () => {
       </Head>
       <div className="app-wrapper">
         {authenticated && <NavigationMenu />}
+        <FloatingNavigation />
         <div className="home-container">
           <div className="overlay"></div>
           <div className="content">
