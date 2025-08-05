@@ -21,7 +21,6 @@ const Results = () => {
   const [strokePlayScores, setStrokePlayScores] = useState({});
 
   const [players, setPlayers] = useState([]);
-  const [startingHandicaps, setStartingHandicaps] = useState({});
   const [loading, setLoading] = useState(true);
   const [showScoreModal, setShowScoreModal] = useState(false);
   const [selectedMatch, setSelectedMatch] = useState(null);
@@ -121,15 +120,7 @@ const Results = () => {
 
 
 
-      // Listen for starting handicaps (available to everyone)
-      const startingHandicapsRef = doc(db, 'startingHandicaps', '2025');
-      const startingHandicapsUnsubscribe = onSnapshot(startingHandicapsRef, (doc) => {
-        if (doc.exists()) {
-          setStartingHandicaps(doc.data());
-        } else {
-          setStartingHandicaps({});
-        }
-      });
+
 
       setLoading(false);
 
@@ -139,7 +130,6 @@ const Results = () => {
         leaderboardsUnsubscribe();
         courseStatsUnsubscribe();
         strokePlayUnsubscribe();
-        startingHandicapsUnsubscribe();
       };
   }, []);
 
@@ -541,8 +531,7 @@ const Results = () => {
           playerCumulativeScores[player] = {
             player: player,
             totalScore: 0,
-            rounds: [],
-            startingHandicap: 0
+            rounds: []
           };
         }
         playerCumulativeScores[player].totalScore += data.score;
@@ -552,14 +541,6 @@ const Results = () => {
           score: data.score
         });
       });
-
-    // Add starting handicaps to the calculation
-    Object.entries(startingHandicaps).forEach(([player, handicap]) => {
-      if (playerCumulativeScores[player]) {
-        playerCumulativeScores[player].startingHandicap = handicap;
-        playerCumulativeScores[player].totalScore += handicap;
-      }
-    });
 
     const strokePlayStandings = Object.values(playerCumulativeScores)
       .sort((a, b) => a.totalScore - b.totalScore); // Sort by best total score (lowest first)
@@ -613,13 +594,13 @@ const Results = () => {
                 {strokePlayStandings.length > 0 ? (
                   <div className="individual-leaders">
                                          {strokePlayStandings.slice(0, 10).map((player, idx) => (
-                       <div key={player.player.name} className="player-row d-flex justify-content-between align-items-center py-2 border-bottom">
+                       <div key={player.player} className="player-row d-flex justify-content-between align-items-center py-2 border-bottom">
                          <div className="player-info">
                            <span className="player-name">
-                             #{idx + 1} {player.player.name}
+                             #{idx + 1} {player.player}
                            </span>
                            <small className="text-muted d-block">
-                             {player.rounds.length} rounds • Starting: {player.startingHandicap > 0 ? `+${player.startingHandicap}` : player.startingHandicap}
+                             {player.rounds.length} rounds
                            </small>
                          </div>
                          <div className="player-stats text-end">
@@ -656,10 +637,7 @@ const Results = () => {
       score: '',
       course: ''
     });
-    const [newStartingHandicap, setNewStartingHandicap] = useState({
-      player: '',
-      handicap: ''
-    });
+
 
     // Course list from teams.js
     const courseList = [
@@ -715,25 +693,7 @@ const Results = () => {
       }
     };
 
-    const handleAddStartingHandicap = async () => {
-      if (!newStartingHandicap.player || !newStartingHandicap.handicap) {
-        alert('Please fill in all fields');
-        return;
-      }
 
-      try {
-        const db = getFirestore();
-        await setDoc(doc(db, 'startingHandicaps', '2025'), {
-          [newStartingHandicap.player]: parseInt(newStartingHandicap.handicap)
-        }, { merge: true });
-        
-        setNewStartingHandicap({ player: '', handicap: '' });
-        alert('Starting handicap added successfully!');
-      } catch (error) {
-        console.error('Error adding starting handicap:', error);
-        alert('Error adding starting handicap. Please try again.');
-      }
-    };
 
     const handleDeleteStrokeScore = async (scoreKey) => {
       if (!confirm('Are you sure you want to delete this score?')) return;
@@ -766,22 +726,7 @@ const Results = () => {
       }
     };
 
-    const handleDeleteStartingHandicap = async (player) => {
-      if (!confirm(`Are you sure you want to delete the starting handicap for ${player}?`)) return;
-      
-      try {
-        const db = getFirestore();
-        console.log('Deleting starting handicap for player:', player);
-        await setDoc(doc(db, 'startingHandicaps', '2025'), {
-          [player]: null
-        }, { merge: true });
-        
-        alert('Starting handicap deleted successfully!');
-      } catch (error) {
-        console.error('Error deleting starting handicap:', error);
-        alert('Error deleting starting handicap. Please try again.');
-      }
-    };
+
 
     return (
       <div className="points-management-section">
@@ -904,48 +849,7 @@ const Results = () => {
             </Card>
           </Col>
 
-          {/* Starting Handicap Management */}
-          <Col lg={6} md={12} className="mb-4">
-            <Card className="h-100">
-              <Card.Header>
-                <h5 className="mb-0">Starting Handicaps</h5>
-              </Card.Header>
-              <Card.Body>
-                <div className="mb-3">
-                  <label className="form-label">Player Name</label>
-                  <Form.Select
-                    value={newStartingHandicap.player}
-                    onChange={(e) => setNewStartingHandicap(prev => ({ ...prev, player: e.target.value }))}
-                  >
-                    <option value="">-- Choose a Player --</option>
-                    {players.length > 0 ? (
-                      players.sort((a, b) => a.name.localeCompare(b.name)).map((player) => (
-                        <option key={player.id} value={player.name}>{player.name}</option>
-                      ))
-                    ) : (
-                      <option value="" disabled>Loading players...</option>
-                    )}
-                  </Form.Select>
-                </div>
-                <div className="mb-3">
-                  <label className="form-label">Starting Handicap (+/-)</label>
-                  <Form.Control
-                    type="number"
-                    value={newStartingHandicap.handicap}
-                    onChange={(e) => setNewStartingHandicap(prev => ({ ...prev, handicap: e.target.value }))}
-                    placeholder="+5, -2, etc."
-                  />
-                </div>
-                <Button 
-                  variant="success" 
-                  className="w-100"
-                  onClick={handleAddStartingHandicap}
-                >
-                  Set Starting Handicap
-                </Button>
-              </Card.Body>
-            </Card>
-          </Col>
+
         </Row>
 
         {/* Existing Data Management */}
@@ -990,41 +894,6 @@ const Results = () => {
             </Card>
           </Col>
 
-          <Col lg={6} md={12} className="mb-4">
-            <Card>
-              <Card.Header>
-                <h5 className="mb-0">Existing Starting Handicaps</h5>
-              </Card.Header>
-              <Card.Body>
-                {Object.entries(startingHandicaps).length > 0 ? (
-                  <div className="existing-handicaps">
-                    {Object.entries(startingHandicaps)
-                      .filter(([player, handicap]) => handicap !== null && handicap !== undefined)
-                      .map(([player, handicap]) => (
-                        <div key={player} className="d-flex justify-content-between align-items-center py-2 border-bottom">
-                          <div>
-                            <strong>{player}</strong>
-                            <br />
-                            <small className="text-muted">
-                              Starting: {handicap > 0 ? `+${handicap}` : handicap}
-                            </small>
-                          </div>
-                          <Button 
-                            variant="outline-danger" 
-                            size="sm"
-                            onClick={() => handleDeleteStartingHandicap(player)}
-                          >
-                            Delete
-                          </Button>
-                        </div>
-                      ))}
-                  </div>
-                ) : (
-                  <p className="text-muted text-center">No starting handicaps found</p>
-                )}
-              </Card.Body>
-            </Card>
-          </Col>
         </Row>
       </div>
     );
