@@ -215,54 +215,88 @@ const Results = () => {
     if (!confirm('Are you sure you want to complete this match?')) return;
 
     try {
+      console.log('Completing match:', match);
       const db = getFirestore();
       const currentScore = match.currentScore || { player1Score: 0, player2Score: 0 };
+      
+      console.log('Current score:', currentScore);
       
       // Determine winner and final score
       let winner, loser, finalScore;
       
       if (match.matchType === 'championship') {
-        const { team1Wins, team2Wins } = currentScore;
+        const { team1Wins = 0, team2Wins = 0 } = currentScore;
         winner = team1Wins > team2Wins ? match.team1?.name : match.team2?.name;
         loser = team1Wins > team2Wins ? match.team2?.name : match.team1?.name;
         finalScore = team1Wins > team2Wins ? 
           `${team1Wins}&${team2Wins}` : 
           `${team2Wins}&${team1Wins}`;
       } else {
-        winner = currentScore.player1Score > currentScore.player2Score ? 
-                      (match.matchType === 'alternating' ? (typeof match.soloPlayer === 'string' ? match.soloPlayer : (match.soloPlayer?.name || 'Unknown Player')) : (typeof match.player1 === 'string' ? match.player1 : (match.player1?.name || 'Unknown Player'))) :
-                                              (match.matchType === 'alternating' ? match.team2Players?.map(p => typeof p === 'string' ? p : p.name).join(' & ') : (typeof match.player2 === 'string' ? match.player2 : (match.player2?.name || 'Unknown Player')));
+        // Simplified winner/loser logic
+        const player1Score = currentScore.player1Score || 0;
+        const player2Score = currentScore.player2Score || 0;
         
-        loser = currentScore.player1Score > currentScore.player2Score ? 
-                      (match.matchType === 'alternating' ? match.team2Players?.map(p => typeof p === 'string' ? p : p.name).join(' & ') : match.player2) :
-                      (match.matchType === 'alternating' ? (typeof match.soloPlayer === 'string' ? match.soloPlayer : (match.soloPlayer?.name || 'Unknown Player')) : (typeof match.player1 === 'string' ? match.player1 : (match.player1?.name || 'Unknown Player')));
+        console.log(`Player scores: ${player1Score} vs ${player2Score}`);
         
-        finalScore = currentScore.player1Score > currentScore.player2Score ? 
-          `${currentScore.player1Score}&${currentScore.player2Score}` : 
-          `${currentScore.player2Score}&${currentScore.player1Score}`;
+        if (match.matchType === 'alternating') {
+          const soloPlayer = typeof match.soloPlayer === 'string' ? match.soloPlayer : (match.soloPlayer?.name || 'Unknown Player');
+          const team2Players = match.team2Players?.map(p => typeof p === 'string' ? p : p.name).join(' & ') || 'Unknown Team';
+          
+          if (player1Score > player2Score) {
+            winner = soloPlayer;
+            loser = team2Players;
+            finalScore = `${player1Score}&${player2Score}`;
+          } else {
+            winner = team2Players;
+            loser = soloPlayer;
+            finalScore = `${player2Score}&${player1Score}`;
+          }
+        } else {
+          // 1v1 match
+          const player1 = typeof match.player1 === 'string' ? match.player1 : (match.player1?.name || 'Unknown Player');
+          const player2 = typeof match.player2 === 'string' ? match.player2 : (match.player2?.name || 'Unknown Player');
+          
+          if (player1Score > player2Score) {
+            winner = player1;
+            loser = player2;
+            finalScore = `${player1Score}&${player2Score}`;
+          } else {
+            winner = player2;
+            loser = player1;
+            finalScore = `${player2Score}&${player1Score}`;
+          }
+        }
       }
+      
+      console.log(`Winner: ${winner}, Loser: ${loser}, Final Score: ${finalScore}`);
 
       // Move to history
       const historyData = {
-        courseName: match.courseName,
-        date: match.date,
-        winner: winner,
-        loser: loser,
-        finalScore: finalScore,
+        courseName: match.courseName || 'Unknown Course',
+        date: match.date || new Date().toISOString().split('T')[0],
+        winner: winner || 'Unknown',
+        loser: loser || 'Unknown',
+        finalScore: finalScore || '0&0',
         duration: '4h 15m', // TODO: Calculate actual duration
         completedAt: new Date()
       };
 
       if (match.matchType === 'championship') {
         historyData.matchType = 'championship';
-        historyData.team1 = match.team1;
-        historyData.team2 = match.team2;
+        historyData.team1 = match.team1 || {};
+        historyData.team2 = match.team2 || {};
         historyData.holeResults = match.holeResults || {};
       } else {
-        historyData.teeTime = match.teeTime;
-        historyData.player1 = match.matchType === 'alternating' ? (typeof match.soloPlayer === 'string' ? match.soloPlayer : (match.soloPlayer?.name || 'Unknown Player')) : (typeof match.player1 === 'string' ? match.player1 : (match.player1?.name || 'Unknown Player'));
-        historyData.player2 = match.matchType === 'alternating' ? match.team2Players?.map(p => typeof p === 'string' ? p : p.name).join(' & ') : (typeof match.player2 === 'string' ? match.player2 : (match.player2?.name || 'Unknown Player'));
+        historyData.teeTime = match.teeTime || 'Unknown';
+        historyData.player1 = match.matchType === 'alternating' ? 
+          (typeof match.soloPlayer === 'string' ? match.soloPlayer : (match.soloPlayer?.name || 'Unknown Player')) : 
+          (typeof match.player1 === 'string' ? match.player1 : (match.player1?.name || 'Unknown Player'));
+        historyData.player2 = match.matchType === 'alternating' ? 
+          (match.team2Players?.map(p => typeof p === 'string' ? p : p.name).join(' & ') || 'Unknown Team') : 
+          (typeof match.player2 === 'string' ? match.player2 : (match.player2?.name || 'Unknown Player'));
       }
+      
+      console.log('History data:', historyData);
 
       await setDoc(doc(db, 'matchHistory', '2025'), {
         [match.id]: historyData
@@ -276,6 +310,7 @@ const Results = () => {
       alert('Match completed successfully!');
     } catch (error) {
       console.error('Error completing match:', error);
+      console.error('Match data:', match);
       alert('Error completing match. Please try again.');
     }
   };

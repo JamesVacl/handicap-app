@@ -103,12 +103,22 @@ const ScoreEntryModal = ({ show, onHide, match, onSave }) => {
       
       // Check for early completion (mathematically impossible to come back)
       if (newScore.holesPlayed >= 18) {
+        // All holes played
         status = 'completed';
+        console.log('Match completed: All holes played');
       } else if (maxPossibleScore > 9) {
+        // Winner has more than 9 points (impossible to lose)
         status = 'completed';
+        console.log('Match completed: Winner has more than 9 points');
       } else if (maxPossibleScore - minPossibleScore > holesRemaining) {
         // If the difference is greater than holes remaining, match is over
+        // Example: 3 up with 2 holes to play = impossible to come back
         status = 'completed';
+        console.log(`Match completed: ${maxPossibleScore} vs ${minPossibleScore} with ${holesRemaining} holes remaining`);
+      } else if (holesRemaining === 0) {
+        // All holes played
+        status = 'completed';
+        console.log('Match completed: No holes remaining');
       }
 
       const updatedMatch = {
