@@ -270,6 +270,14 @@ const Results = () => {
       
       console.log(`Winner: ${winner}, Loser: ${loser}, Final Score: ${finalScore}`);
 
+      // Calculate actual duration
+      const startTime = match.lastUpdate ? new Date(match.lastUpdate) : new Date();
+      const endTime = new Date();
+      const durationMs = endTime - startTime;
+      const hours = Math.floor(durationMs / (1000 * 60 * 60));
+      const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
+      const duration = `${hours}h ${minutes}m`;
+
       // Move to history
       const historyData = {
         courseName: match.courseName || 'Unknown Course',
@@ -277,7 +285,7 @@ const Results = () => {
         winner: winner || 'Unknown',
         loser: loser || 'Unknown',
         finalScore: finalScore || '0&0',
-        duration: '4h 15m', // TODO: Calculate actual duration
+        duration: duration,
         completedAt: new Date()
       };
 
@@ -572,7 +580,6 @@ const Results = () => {
         playerCumulativeScores[player].totalScore += data.score;
         playerCumulativeScores[player].rounds.push({
           date: data.date,
-          course: data.course || 'Unknown Course',
           score: data.score
         });
       });
@@ -669,19 +676,11 @@ const Results = () => {
     const [newStrokeScore, setNewStrokeScore] = useState({
       player: '',
       date: '',
-      score: '',
-      course: ''
+      score: ''
     });
 
 
-    // Course list from teams.js
-    const courseList = [
-      'Treetops (Smith Signature)',
-      'Treetops (Jones Masterpiece)', 
-      'Belvedere Golf Club',
-      'Threetops',
-      'Forest Dunes'
-    ];
+
 
     const handleUpdateTeamPoints = async (team, points) => {
       try {
@@ -697,7 +696,7 @@ const Results = () => {
     };
 
     const handleAddStrokeScore = async () => {
-      if (!newStrokeScore.player || !newStrokeScore.date || !newStrokeScore.score || !newStrokeScore.course) {
+      if (!newStrokeScore.player || !newStrokeScore.date || !newStrokeScore.score) {
         alert('Please fill in all fields');
         return;
       }
@@ -705,7 +704,6 @@ const Results = () => {
       try {
         const db = getFirestore();
         const scoreKey = `${newStrokeScore.date}-${newStrokeScore.player}`;
-        const courseScoreKey = `${newStrokeScore.date}-${newStrokeScore.player}-${newStrokeScore.course}`;
         
         // Save to stroke play collection
         await setDoc(doc(db, 'strokePlay', '2025'), {
@@ -713,15 +711,12 @@ const Results = () => {
             player: newStrokeScore.player,
             date: newStrokeScore.date,
             score: parseInt(newStrokeScore.score),
-            course: newStrokeScore.course,
             submittedAt: new Date()
           }
         }, { merge: true });
 
-
-        
-        setNewStrokeScore({ player: '', date: '', score: '', course: '' });
-        alert(`Stroke play score added successfully! Key: ${scoreKey}`);
+        setNewStrokeScore({ player: '', date: '', score: '' });
+        alert(`Stroke play score added successfully!`);
       } catch (error) {
         console.error('Error adding stroke play score:', error);
         alert('Error adding stroke play score. Please try again.');
@@ -845,18 +840,6 @@ const Results = () => {
                   )}
                 </div>
                 <div className="mb-3">
-                  <label className="form-label">Course</label>
-                  <Form.Select
-                    value={newStrokeScore.course}
-                    onChange={(e) => setNewStrokeScore(prev => ({ ...prev, course: e.target.value }))}
-                  >
-                    <option value="">-- Choose a Course --</option>
-                    {courseList.map((course) => (
-                      <option key={course} value={course}>{course}</option>
-                    ))}
-                  </Form.Select>
-                </div>
-                <div className="mb-3">
                   <label className="form-label">Date</label>
                   <Form.Control
                     type="date"
@@ -909,7 +892,7 @@ const Results = () => {
                             <strong>{data.player}</strong>
                             <br />
                             <small className="text-muted">
-                              {data.date} • {data.course || 'Unknown Course'} • {data.score > 0 ? `+${data.score}` : data.score}
+                              {data.date} • {data.score > 0 ? `+${data.score}` : data.score}
                             </small>
                           </div>
                           <Button 

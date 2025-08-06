@@ -144,6 +144,14 @@ const ScoreEntryModal = ({ show, onHide, match, onSave }) => {
         const loser = newScore.player1Score > newScore.player2Score ? 
           matchData.player2 : matchData.player1;
 
+        // Calculate actual duration
+        const startTime = matchData.lastUpdate ? new Date(matchData.lastUpdate) : new Date();
+        const endTime = new Date();
+        const durationMs = endTime - startTime;
+        const hours = Math.floor(durationMs / (1000 * 60 * 60));
+        const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
+        const duration = `${hours}h ${minutes}m`;
+
         await setDoc(doc(db, 'matchHistory', '2025'), {
           [matchData.id]: {
             courseName: matchData.courseName,
@@ -154,7 +162,7 @@ const ScoreEntryModal = ({ show, onHide, match, onSave }) => {
             winner: winner,
             loser: loser,
             finalScore: finalScore,
-            duration: '4h 15m', // TODO: Calculate actual duration
+            duration: duration,
             completedAt: new Date()
           }
         }, { merge: true });
