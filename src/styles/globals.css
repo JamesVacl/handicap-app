@@ -531,6 +531,35 @@ body {
   background: transparent;
 }
 
+.countdown-banner {
+  background: linear-gradient(190deg, #000e02, #042508) !important;
+  color: white;
+  text-align: center;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-bottom: none !important;
+}
+
+.countdown-banner:hover {
+  background: linear-gradient(190deg, #001a04, #063a0c) !important;
+  color: #fff;
+}
+
+.countdown-nav {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+}
+
+/* Hide countdown when navbar is collapsed */
+@media (max-width: 991px) {
+  .countdown-nav {
+    display: none !important;
+  }
+}
+
 .countdown-timer.celebration {
   animation: celebrate 2s infinite;
   text-shadow: 0 0 10px #fff,
