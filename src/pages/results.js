@@ -270,13 +270,16 @@ const Results = () => {
       
       console.log(`Winner: ${winner}, Loser: ${loser}, Final Score: ${finalScore}`);
 
-      // Calculate actual duration
-      const startTime = match.lastUpdate ? new Date(match.lastUpdate) : new Date();
-      const endTime = new Date();
-      const durationMs = endTime - startTime;
-      const hours = Math.floor(durationMs / (1000 * 60 * 60));
-      const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
-      const duration = `${hours}h ${minutes}m`;
+      // Calculate actual duration (only if match has started)
+      let duration = '0h 0m';
+      if (match.lastUpdate) {
+        const startTime = new Date(match.lastUpdate);
+        const endTime = new Date();
+        const durationMs = endTime - startTime;
+        const hours = Math.floor(durationMs / (1000 * 60 * 60));
+        const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
+        duration = `${hours}h ${minutes}m`;
+      }
 
       // Move to history
       const historyData = {
@@ -461,7 +464,7 @@ const Results = () => {
 
                   <div className="match-footer mt-3 pt-3 border-top">
                     <small className="text-muted">
-                      Last updated: {formatTime(match.lastUpdate)}
+                      {match.lastUpdate ? `Last updated: ${formatTime(match.lastUpdate)}` : 'Match not started yet'}
                     </small>
                                          <div className="d-flex gap-2">
                        <Button 

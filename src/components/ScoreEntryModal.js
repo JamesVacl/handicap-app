@@ -121,11 +121,14 @@ const ScoreEntryModal = ({ show, onHide, match, onSave }) => {
         console.log('Match completed: No holes remaining');
       }
 
+      // Set lastUpdate only if this is the first score entry
+      const isFirstScore = !matchData.lastUpdate;
+      
       const updatedMatch = {
         ...matchData,
         currentScore: newScore,
         status: status,
-        lastUpdate: new Date()
+        lastUpdate: isFirstScore ? new Date() : matchData.lastUpdate
       };
 
       // Save to live matches
@@ -144,13 +147,16 @@ const ScoreEntryModal = ({ show, onHide, match, onSave }) => {
         const loser = newScore.player1Score > newScore.player2Score ? 
           matchData.player2 : matchData.player1;
 
-        // Calculate actual duration
-        const startTime = matchData.lastUpdate ? new Date(matchData.lastUpdate) : new Date();
-        const endTime = new Date();
-        const durationMs = endTime - startTime;
-        const hours = Math.floor(durationMs / (1000 * 60 * 60));
-        const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
-        const duration = `${hours}h ${minutes}m`;
+        // Calculate actual duration (only if match has started)
+        let duration = '0h 0m';
+        if (matchData.lastUpdate) {
+          const startTime = new Date(matchData.lastUpdate);
+          const endTime = new Date();
+          const durationMs = endTime - startTime;
+          const hours = Math.floor(durationMs / (1000 * 60 * 60));
+          const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
+          duration = `${hours}h ${minutes}m`;
+        }
 
         await setDoc(doc(db, 'matchHistory', '2025'), {
           [matchData.id]: {

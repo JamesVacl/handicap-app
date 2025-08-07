@@ -151,7 +151,7 @@ const Teams = () => {
       matchType: matchType,
       teeTime: teeTime,
       status: 'not_started',
-      lastUpdate: new Date(),
+      lastUpdate: null,
       currentScore: {
         player1Score: 0,
         player2Score: 0,
@@ -702,7 +702,7 @@ const Teams = () => {
                     date: selectedEvent.date,
                     matchType: 'championship',
                     status: 'not_started',
-                    lastUpdate: new Date(),
+                    lastUpdate: null,
                     formatData: formatData
                   };
                   
