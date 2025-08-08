@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getFirestore, collection, addDoc, getDocs, orderBy, query, updateDoc, doc, where, setDoc } from 'firebase/firestore';
-import { getAuth, signInWithEmailAndPassword, signOut, setPersistence, browserSessionPersistence } from 'firebase/auth';
+import { getAuth, signInWithEmailAndPassword, signOut, setPersistence, browserLocalPersistence } from 'firebase/auth';
 import { getAnalytics, isSupported } from "firebase/analytics";
 
 const firebaseConfig = {
@@ -29,8 +29,8 @@ if (typeof window !== 'undefined') {
     }
   });
   
-  // Set persistence to session
-  setPersistence(auth, browserSessionPersistence).catch(console.error);
+  // Set persistence to LOCAL (stays logged in until explicitly signed out)
+  setPersistence(auth, browserLocalPersistence).catch(console.error);
 }
 
 const signIn = async (email, password) => {

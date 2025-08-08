@@ -21,6 +21,7 @@ const Home = () => {
   const [authenticated, setAuthenticated] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
   const [holeType, setHoleType] = useState('');
   const [currentPage, setCurrentPage] = useState(0);
   const [filterPlayer, setFilterPlayer] = useState(''); // New state for filter selection
@@ -43,6 +44,21 @@ const Home = () => {
     });
 
     return () => unsubscribe();
+  }, []);
+
+  // Load saved credentials on component mount
+  useEffect(() => {
+    try {
+      const savedEmail = localStorage.getItem('guyscorp_email');
+      const savedRemember = localStorage.getItem('guyscorp_remember');
+      
+      if (savedEmail && savedRemember === 'true') {
+        setEmail(savedEmail);
+        setRememberMe(true);
+      }
+    } catch (error) {
+      // Ignore localStorage errors (e.g., in private browsing)
+    }
   }, []);
 
   useEffect(() => {
@@ -162,6 +178,15 @@ const Home = () => {
     try {
       await signIn(email, password);
       setAuthenticated(true);
+      
+      // Handle remember me functionality
+      if (rememberMe) {
+        localStorage.setItem('guyscorp_email', email);
+        localStorage.setItem('guyscorp_remember', 'true');
+      } else {
+        localStorage.removeItem('guyscorp_email');
+        localStorage.removeItem('guyscorp_remember');
+      }
     } catch (error) {
       alert("Authentication failed!");
     }
@@ -170,6 +195,14 @@ const Home = () => {
   const handleSignOut = async () => {
     await signOutUser();
     setAuthenticated(false);
+    
+    // Clear saved credentials on sign out
+    try {
+      localStorage.removeItem('guyscorp_email');
+      localStorage.removeItem('guyscorp_remember');
+    } catch (error) {
+      // Ignore localStorage errors
+    }
   };
 
   const handleCourseSelect = (e) => {
@@ -278,6 +311,18 @@ const Home = () => {
                   onChange={(e) => setPassword(e.target.value)}
                   className="mb-4 p-3 form-control w-50"
                 />
+                <div className="form-check mb-3 w-50">
+                  <input
+                    className="form-check-input"
+                    type="checkbox"
+                    id="rememberMe"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                  />
+                  <label className="form-check-label" htmlFor="rememberMe">
+                    Remember me (stay logged in)
+                  </label>
+                </div>
                 <button type="submit" className="btn btn-success w-50">Sign In</button>
               </form>
             </div>
