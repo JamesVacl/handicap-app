@@ -150,27 +150,49 @@ const ScoreEntryModal = ({ show, onHide, match, onSave }) => {
         // Calculate actual duration (only if match has started)
         let duration = '0h 0m';
         if (matchData.lastUpdate) {
-          const startTime = new Date(matchData.lastUpdate);
+          // Handle Firestore Timestamp properly
+          const startTime = matchData.lastUpdate.toDate ? matchData.lastUpdate.toDate() : new Date(matchData.lastUpdate);
           const endTime = new Date();
           const durationMs = endTime - startTime;
-          const hours = Math.floor(durationMs / (1000 * 60 * 60));
-          const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
-          duration = `${hours}h ${minutes}m`;
+          
+          // Handle very short durations (less than 1 minute)
+          if (durationMs < 60000) {
+            duration = '<1 min';
+          } else {
+            const hours = Math.floor(durationMs / (1000 * 60 * 60));
+            const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
+            
+            // Ensure we don't get NaN values
+            if (isNaN(hours) || isNaN(minutes)) {
+              duration = '<1 min';
+            } else if (hours === 0 && minutes === 0) {
+              // If both hours and minutes are 0, show <1 min
+              duration = '<1 min';
+            } else {
+              duration = `${hours}h ${minutes}m`;
+            }
+          }
+          
+          // Show duration in alert for debugging
+          alert(`Duration debug: ${durationMs}ms = ${duration} (lastUpdate: ${matchData.lastUpdate})`);
         }
 
+        // Ensure all fields have valid values
+        const historyData = {
+          courseName: matchData.courseName || 'Unknown Course',
+          date: matchData.date || new Date().toISOString().split('T')[0],
+          teeTime: matchData.teeTime || 'Unknown',
+          player1: matchData.player1 || 'Unknown Player',
+          player2: matchData.player2 || 'Unknown Player',
+          winner: winner || 'Unknown',
+          loser: loser || 'Unknown',
+          finalScore: finalScore || '0&0',
+          duration: duration || '0h 0m',
+          completedAt: new Date()
+        };
+
         await setDoc(doc(db, 'matchHistory', '2025'), {
-          [matchData.id]: {
-            courseName: matchData.courseName,
-            date: matchData.date,
-            teeTime: matchData.teeTime,
-            player1: matchData.player1,
-            player2: matchData.player2,
-            winner: winner,
-            loser: loser,
-            finalScore: finalScore,
-            duration: duration,
-            completedAt: new Date()
-          }
+          [matchData.id]: historyData
         }, { merge: true });
 
         // Remove from live matches

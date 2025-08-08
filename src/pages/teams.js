@@ -56,15 +56,20 @@ const Teams = () => {
   ];
 
   useEffect(() => {
-    const auth = getAuth();
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setAuthenticated(!!user);
-    });
-    return () => unsubscribe();
+    // TEMPORARILY DISABLED AUTHENTICATION FOR TOURNAMENT WEEKEND
+    // const auth = getAuth();
+    // const unsubscribe = onAuthStateChanged(auth, (user) => {
+    //   setAuthenticated(!!user);
+    // });
+    // return () => unsubscribe();
+    
+    // Always authenticated for tournament weekend
+    setAuthenticated(true);
   }, []);
 
   useEffect(() => {
-    if (authenticated) {
+    // TEMPORARILY REMOVED AUTHENTICATION CHECK FOR TOURNAMENT WEEKEND
+    // if (authenticated) {
       const loadData = async () => {
         try {
           const teamsData = await getTeams();
@@ -76,11 +81,12 @@ const Teams = () => {
         }
       };
       loadData();
-    }
+    // }
   }, [authenticated]);
 
   const refreshHandicaps = async () => {
-    if (!authenticated) return;
+    // TEMPORARILY REMOVED AUTHENTICATION CHECK FOR TOURNAMENT WEEKEND
+    // if (!authenticated) return;
     
     console.log('Starting handicap refresh...');
     setIsRefreshingHandicaps(true);

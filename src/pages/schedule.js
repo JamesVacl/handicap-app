@@ -99,20 +99,24 @@ const Schedule = () => {
   ];
 
   useEffect(() => {
-    const auth = getAuth();
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setAuthenticated(true);
-      } else {
-        router.push('/');
-      }
-    });
-
-    return () => unsubscribe();
+    // TEMPORARILY DISABLED AUTHENTICATION FOR TOURNAMENT WEEKEND
+    // const auth = getAuth();
+    // const unsubscribe = onAuthStateChanged(auth, (user) => {
+    //   if (user) {
+    //     setAuthenticated(true);
+    //   } else {
+    //     router.push('/');
+    //   }
+    // });
+    // return () => unsubscribe();
+    
+    // Always authenticated for tournament weekend
+    setAuthenticated(true);
   }, [router]);
 
   useEffect(() => {
-    if (authenticated) {
+    // TEMPORARILY REMOVED AUTHENTICATION CHECK FOR TOURNAMENT WEEKEND
+    // if (authenticated) {
       const db = getFirestore();
       const assignmentsRef = doc(db, 'teeTimeAssignments', '2025-schedule');
       
@@ -125,19 +129,20 @@ const Schedule = () => {
       });
 
       return () => unsubscribe();
-    }
+    // }
   }, [authenticated]);
 
   useEffect(() => {
     const fetchPlayers = async () => {
-      if (authenticated) {
+      // TEMPORARILY REMOVED AUTHENTICATION CHECK FOR TOURNAMENT WEEKEND
+      // if (authenticated) {
         const db = getFirestore();
         const playersSnapshot = await getDocs(collection(db, 'players'));
         const playersList = playersSnapshot.docs
           .map(doc => doc.data().name)
           .sort(); // Sort alphabetically
         setPlayers(playersList);
-      }
+      // }
     };
 
     fetchPlayers();
@@ -145,7 +150,8 @@ const Schedule = () => {
 
   useEffect(() => {
     const fetchHandicaps = async () => {
-      if (authenticated) {
+      // TEMPORARILY REMOVED AUTHENTICATION CHECK FOR TOURNAMENT WEEKEND
+      // if (authenticated) {
         try {
           const db = getFirestore();
           const scoresRef = collection(db, 'scores');
@@ -165,7 +171,7 @@ const Schedule = () => {
         } catch (error) {
           console.error("Error fetching handicaps:", error);
         }
-      }
+      // }
     };
 
     fetchHandicaps();
@@ -173,7 +179,8 @@ const Schedule = () => {
 
   // Add this useEffect to fetch matches
   useEffect(() => {
-    if (authenticated) {
+    // TEMPORARILY REMOVED AUTHENTICATION CHECK FOR TOURNAMENT WEEKEND
+    // if (authenticated) {
       const db = getFirestore();
       const matchesRef = doc(db, 'matches', '2025-schedule');
       
@@ -186,11 +193,12 @@ const Schedule = () => {
       });
 
       return () => unsubscribe();
-    }
+    // }
   }, [authenticated]);
   
   const handlePlayerAssignment = async (eventIndex, timeIndex, playerSlot, player) => {
-    if (!authenticated) return;
+    // TEMPORARILY REMOVED AUTHENTICATION CHECK FOR TOURNAMENT WEEKEND
+    // if (!authenticated) return;
     
     const db = getFirestore();
     const key = `${eventIndex}-${timeIndex}-${playerSlot}`;

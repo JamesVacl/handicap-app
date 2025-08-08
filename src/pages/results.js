@@ -27,16 +27,19 @@ const Results = () => {
   const router = useRouter();
 
   useEffect(() => {
-    const auth = getAuth();
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setAuthenticated(true);
-      } else {
-        setAuthenticated(false);
-      }
-    });
-
-    return () => unsubscribe();
+    // TEMPORARILY DISABLED AUTHENTICATION FOR TOURNAMENT WEEKEND
+    // const auth = getAuth();
+    // const unsubscribe = onAuthStateChanged(auth, (user) => {
+    //   if (user) {
+    //     setAuthenticated(true);
+    //   } else {
+    //     setAuthenticated(false);
+    //   }
+    // });
+    // return () => unsubscribe();
+    
+    // Always authenticated for tournament weekend
+    setAuthenticated(true);
   }, [router]);
 
     useEffect(() => {
@@ -273,22 +276,41 @@ const Results = () => {
       // Calculate actual duration (only if match has started)
       let duration = '0h 0m';
       if (match.lastUpdate) {
-        const startTime = new Date(match.lastUpdate);
+        // Handle Firestore Timestamp properly
+        const startTime = match.lastUpdate.toDate ? match.lastUpdate.toDate() : new Date(match.lastUpdate);
         const endTime = new Date();
         const durationMs = endTime - startTime;
-        const hours = Math.floor(durationMs / (1000 * 60 * 60));
-        const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
-        duration = `${hours}h ${minutes}m`;
+        
+        // Handle very short durations (less than 1 minute)
+        if (durationMs < 60000) {
+          duration = '<1 min';
+        } else {
+          const hours = Math.floor(durationMs / (1000 * 60 * 60));
+          const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
+          
+          // Ensure we don't get NaN values and handle edge cases
+          if (isNaN(hours) || isNaN(minutes)) {
+            duration = '<1 min';
+          } else if (hours === 0 && minutes === 0) {
+            // If both hours and minutes are 0, show <1 min
+            duration = '<1 min';
+          } else {
+            duration = `${hours}h ${minutes}m`;
+          }
+        }
+        
+        // Show duration in alert for debugging
+        alert(`Results Duration debug: ${durationMs}ms = ${duration} (lastUpdate: ${match.lastUpdate})`);
       }
 
-      // Move to history
+      // Move to history with robust null checking
       const historyData = {
         courseName: match.courseName || 'Unknown Course',
-        date: match.date || new Date().toISOString().split('T')[0],
+        date: match.date ? match.date : new Date().toISOString().split('T')[0],
         winner: winner || 'Unknown',
         loser: loser || 'Unknown',
         finalScore: finalScore || '0&0',
-        duration: duration,
+        duration: duration || '0h 0m',
         completedAt: new Date()
       };
 
@@ -308,9 +330,13 @@ const Results = () => {
       }
       
       console.log('History data:', historyData);
+      console.log('Match ID:', match.id);
 
+      // Ensure match ID is valid
+      const matchId = match.id || `match-${Date.now()}`;
+      
       await setDoc(doc(db, 'matchHistory', '2025'), {
-        [match.id]: historyData
+        [matchId]: historyData
       }, { merge: true });
 
       // Remove from live matches
@@ -545,7 +571,9 @@ const Results = () => {
                   </div>
                   <div className="match-stats text-end">
                     <small className="text-muted d-block">Duration</small>
-                    <span className="text-success">{match.duration}</span>
+                    <span className="text-success">
+                      {match.duration && typeof match.duration === 'string' ? match.duration : '0h 0m'}
+                    </span>
                   </div>
                 </div>
               </Card.Body>
