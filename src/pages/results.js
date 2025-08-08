@@ -27,19 +27,16 @@ const Results = () => {
   const router = useRouter();
 
   useEffect(() => {
-    // TEMPORARILY DISABLED AUTHENTICATION FOR TOURNAMENT WEEKEND
-    // const auth = getAuth();
-    // const unsubscribe = onAuthStateChanged(auth, (user) => {
-    //   if (user) {
-    //     setAuthenticated(true);
-    //   } else {
-    //     setAuthenticated(false);
-    //   }
-    // });
-    // return () => unsubscribe();
-    
-    // Always authenticated for tournament weekend
-    setAuthenticated(true);
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setAuthenticated(true);
+      } else {
+        setAuthenticated(false);
+      }
+    });
+
+    return () => unsubscribe();
   }, [router]);
 
     useEffect(() => {

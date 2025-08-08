@@ -33,25 +33,21 @@ const Home = () => {
   const itemsPerPage = 10;
 
   useEffect(() => {
-    // TEMPORARILY DISABLED AUTHENTICATION FOR TOURNAMENT WEEKEND
-    // const auth = getAuth();
-    // const unsubscribe = onAuthStateChanged(auth, (user) => {
-    //   if (user) {
-    //     setAuthenticated(true);
-    //   } else {
-    //     setAuthenticated(false);
-    //   }
-    // });
-    // return () => unsubscribe();
-    
-    // Always authenticated for tournament weekend
-    setAuthenticated(true);
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setAuthenticated(true);
+      } else {
+        setAuthenticated(false);
+      }
+    });
+
+    return () => unsubscribe();
   }, []);
 
   useEffect(() => {
     const fetchData = async () => {
-      // TEMPORARILY REMOVED AUTHENTICATION CHECK FOR TOURNAMENT WEEKEND
-      // if (authenticated) {
+      if (authenticated) {
         const playerList = await getPlayers();
         setPlayers(playerList);
 
@@ -63,7 +59,7 @@ const Home = () => {
 
         const leaderboardData = calculateLeaderboard(scoreList);
         setLeaderboard(leaderboardData);
-      // }
+      }
     };
     fetchData();
   }, [authenticated]);
