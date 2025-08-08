@@ -423,7 +423,31 @@ const Results = () => {
         </div>
       ) : (
         <Row>
-          {liveMatches.map((match) => (
+          {liveMatches
+            .sort((a, b) => {
+              // Sort by status priority: in_progress first, then not_started, then others
+              const statusPriority = {
+                'in_progress': 1,
+                'not_started': 2,
+                'completed': 3,
+                'match_ready_to_complete': 4
+              };
+              
+              const aPriority = statusPriority[a.status] || 5;
+              const bPriority = statusPriority[b.status] || 5;
+              
+              if (aPriority !== bPriority) {
+                return aPriority - bPriority;
+              }
+              
+              // If same status, sort by course name and tee time
+              if (a.courseName !== b.courseName) {
+                return a.courseName.localeCompare(b.courseName);
+              }
+              
+              return (a.teeTime || '').localeCompare(b.teeTime || '');
+            })
+            .map((match) => (
             <Col key={match.id} lg={6} md={12} className="mb-4">
               <Card className="match-card h-100">
                 <Card.Header className="match-header">
