@@ -182,8 +182,16 @@ const Teams = () => {
       
       const soloTeam = teams.find(team => team.players?.some(p => p.name === players[0]))?.name || 'Unknown';
       const team2Team = teams.find(team => team.players?.some(p => p.name === players[1]))?.name || 'Unknown';
-      match.soloTeam = soloTeam;
+      match.soloPlayerTeam = soloTeam;
       match.team2Team = team2Team;
+      
+      // Set team affiliations for team2Players
+      const team2PlayerTeams = [];
+      for (const player of players.slice(1)) {
+        const playerTeam = teams.find(team => team.players?.some(p => p.name === player))?.name || 'Unknown';
+        team2PlayerTeams.push(playerTeam);
+      }
+      match.team2PlayerTeams = team2PlayerTeams;
     }
 
     const db = getFirestore();

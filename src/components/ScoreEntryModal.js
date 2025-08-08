@@ -173,8 +173,7 @@ const ScoreEntryModal = ({ show, onHide, match, onSave }) => {
             }
           }
           
-          // Show duration in alert for debugging
-          alert(`Duration debug: ${durationMs}ms = ${duration} (lastUpdate: ${matchData.lastUpdate})`);
+
         }
 
         // Ensure all fields have valid values

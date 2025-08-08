@@ -214,6 +214,37 @@ const Results = () => {
     });
   };
 
+  const formatHoleResult = (match, hole) => {
+    if (!hole || !hole.result) return 'Tie';
+    
+    if (match.matchType === 'championship') {
+      if (hole.result === 'team1_win') {
+        return `${match.team1?.name || 'Putt Pirates'} wins`;
+      } else if (hole.result === 'team2_win') {
+        return `${match.team2?.name || 'Golden Boys'} wins`;
+      } else {
+        return 'Tie';
+      }
+    } else if (match.matchType === 'alternating') {
+      if (hole.result === 'player1_win') {
+        return `${typeof match.soloPlayer === 'string' ? match.soloPlayer : match.soloPlayer?.name || 'Unknown Player'} wins`;
+      } else if (hole.result === 'player2_win') {
+        return `${match.team2Players?.map(p => typeof p === 'string' ? p : p.name).join(' & ') || 'Unknown Team'} wins`;
+      } else {
+        return 'Tie';
+      }
+    } else {
+      // 1v1 match
+      if (hole.result === 'player1_win') {
+        return `${typeof match.player1 === 'string' ? match.player1 : match.player1?.name || 'Unknown Player'} wins`;
+      } else if (hole.result === 'player2_win') {
+        return `${typeof match.player2 === 'string' ? match.player2 : match.player2?.name || 'Unknown Player'} wins`;
+      } else {
+        return 'Tie';
+      }
+    }
+  };
+
   const handleCompleteMatch = async (match) => {
     if (!confirm('Are you sure you want to complete this match?')) return;
 
@@ -299,8 +330,7 @@ const Results = () => {
           }
         }
         
-        // Show duration in alert for debugging
-        alert(`Results Duration debug: ${durationMs}ms = ${duration} (lastUpdate: ${match.lastUpdate})`);
+
       }
 
       // Move to history with robust null checking
@@ -475,15 +505,19 @@ const Results = () => {
                     <div className="hole-progress">
                       <small className="text-muted d-block mb-2">Recent Holes:</small>
                       <div className="d-flex flex-wrap gap-1">
-                        {match.currentScore.recentHoles?.slice(-6).map((hole, idx) => (
-                          <Badge 
-                            key={idx} 
-                            bg={hole.result === 'win' ? 'success' : hole.result === 'loss' ? 'danger' : 'secondary'}
-                            className="hole-badge"
-                          >
-                            H{hole.number}: {hole.result}
-                          </Badge>
-                        ))}
+                        {match.currentScore.recentHoles?.slice(-6).map((hole, idx) => {
+                          const holeText = formatHoleResult(match, hole);
+                          return (
+                            <Badge 
+                              key={idx} 
+                              bg={hole.result === 'player1_win' || hole.result === 'team1_win' ? 'success' : 
+                                  hole.result === 'player2_win' || hole.result === 'team2_win' ? 'danger' : 'secondary'}
+                              className="hole-badge"
+                            >
+                              H{hole.number}: {holeText}
+                            </Badge>
+                          );
+                        })}
                       </div>
                     </div>
                   )}
