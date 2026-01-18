@@ -560,41 +560,6 @@ body {
   }
 }
 
-.countdown-timer.celebration {
-  animation: celebrate 2s infinite;
-  text-shadow: 0 0 10px #fff,
-               0 0 20px #fff,
-               0 0 30px #28a745,
-               0 0 40px #28a745;
-  font-size: 1.2rem;
-  font-weight: bold;
-}
-
-@keyframes celebrate {
-  0% {
-    transform: scale(1);
-    text-shadow: 0 0 10px #fff,
-                 0 0 20px #fff,
-                 0 0 30px #28a745,
-                 0 0 40px #28a745;
-  }
-  50% {
-    transform: scale(1.1);
-    text-shadow: 0 0 20px #fff,
-                 0 0 30px #fff,
-                 0 0 40px #28a745,
-                 0 0 50px #28a745,
-                 0 0 60px #28a745;
-  }
-  100% {
-    transform: scale(1);
-    text-shadow: 0 0 10px #fff,
-                 0 0 20px #fff,
-                 0 0 30px #28a745,
-                 0 0 40px #28a745;
-  }
-}
-
 .tee-time-header {
   background-color: rgba(255, 255, 255, 0.1);
   padding: 0.5rem 1rem;
