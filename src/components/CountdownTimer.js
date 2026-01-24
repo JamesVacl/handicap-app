@@ -6,7 +6,7 @@ const CountdownTimer = () => {
 
   useEffect(() => {
     const calculateTime = () => {
-      const tripDate = new Date('2025-08-08T07:00:00');
+      const tripDate = new Date('2026-08-14T07:00:00');
       const now = new Date();
       const difference = tripDate - now;
 

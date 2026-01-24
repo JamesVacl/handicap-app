@@ -293,7 +293,6 @@ const Home = () => {
             <Image src="/logo.png" alt="Logo" width={300} height={300} className="rounded-logo" />
           </div>
           <h1 className="text-4xl font-semibold text-center mb-8 cursive-font">Guyscorp Handicap Tracking</h1>
-
           {!authenticated ? (
             <div className="auth-container">
               <form onSubmit={handleSignIn} className="d-flex flex-column align-items-center mb-8 auth-form">
