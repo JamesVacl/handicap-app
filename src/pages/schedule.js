@@ -32,18 +32,18 @@ const Schedule = () => {
 
   const scheduleData = [
     {
-      date: '2025-08-08',
-      courseName: 'Forest Dunes (The Loop)',
-      city: 'Roscommon,US',
-      teeTimes: ['13:33', '13:44',],
-      notes: 'Sneaky Friday round - 4 hour drive from London'
+      date: '2026-08-14',
+      courseName: 'Legends on the Niagara - Ushers Creek',
+      city: 'Niagara Falls, CA',
+      teeTimes: ['12:30', '12:40','12:50'],
+      notes: '2.5 hour drive from London - 20 minutes from Lucas - White Tees Modified Strokeplay - $120'
     },
     {
-      date: '2025-08-09',
-      courseName: 'Treetops (Smith Signature)',
-      city: 'Gaylord,US',
-      teeTimes: ['7:30', '7:40', '7:50'],
-      notes: 'Blue tees - Modified strokeplay - 8 minutes from hotel',
+      date: '2026-08-15',
+      courseName: 'Thundering Waters',
+      city: 'Niagara Falls, CA',
+      teeTimes: ['8:10', '8:20', '8:30'],
+      notes: 'Black tees - TEAM DAY - 2V2 Scrambles- 5 minutes from hotel - $75',
       matches: [
         {
           teeTime: '7:30',
@@ -66,36 +66,36 @@ const Schedule = () => {
       ]
     },
     {
-      courseName: 'Treetops (Jones Masterpiece)',
-      city: 'Gaylord,US',
-      teeTimes: ['14:53', '15:04', '15:15'],
-      notes: 'Blue tees - Modified strokeplay - 8 minutes from Smith Signature'
+      courseName: 'Thundering Waters',
+      city: 'Niagara Falls, CA',
+      teeTimes: ['14:30', '14:40', '14:50'],
+      notes: 'Black Tees - 2v2 Alt Shot - $75'
     },
     {
-      date: '2025-08-10',
-      courseName: 'Belvedere Golf Club',
-      city: 'Charlevoix,US',
+      date: '2026-08-16',
+      courseName: 'Whirlpool',
+      city: 'Niagara Falls, CA',
       teeTimes: ['10:10', '10:20', '10:30'],
-      notes: 'White tees - Modified strokeplay - $150 - 55 minutes from hotel'
+      notes: 'White tees - Modified strokeplay - $110 - 5 minutes from hotel'
     },
     {
-      courseName: 'Threetops',
-      city: 'Gaylord,US',
-      teeTimes: ['18:40', '18:50', '19:00'],
-      notes: '$5 per hole skins game - 55 minutes back to Treetops'
+      courseName: 'Rainforest Cafe',
+      city: 'Niagara Falls, CA',
+      teeTimes: ['18:00, 18:10, 18:20'],
+      notes: 'How many Mongoos Mai tais can we drink?'
     },
     {
-      date: '2025-08-11',
-      courseName: 'Forest Dunes',
-      city: 'Roscommon,US',
-      teeTimes: ['9:20', '9:31', '9:42'],
-      notes: 'Championship Matchplay - 45 minutes from Gaylord to Forest Dunes - 4 hour drive home to London'
+      date: '2026-08-17',
+      courseName: 'Legends on the Niagara - Battlefield',
+      city: 'Niagara Falls, CA',
+      teeTimes: ['8:30', '8:40', '8:50'],
+      notes: 'Championship day - Modified Strokeplay'
     }
   ];
 
   const weatherCities = [
-    'Gaylord, US',
-    'Roscommon, US',
+    'Niagara Falls, CA',
+    'London, CA',
   ];
 
   useEffect(() => {
