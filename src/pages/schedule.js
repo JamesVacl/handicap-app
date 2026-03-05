@@ -36,14 +36,14 @@ const Schedule = () => {
       courseName: 'Legends on the Niagara - Ushers Creek',
       city: 'Niagara Falls, CA',
       teeTimes: ['12:30', '12:40','12:50'],
-      notes: '2.5 hour drive from London - 20 minutes from Lucas - White Tees Modified Strokeplay - $120'
+      notes: '2.5 hour drive from London - 20 minutes from Lucas - White Tees - Modified Strokeplay - $120'
     },
     {
       date: '2026-08-15',
       courseName: 'Thundering Waters',
       city: 'Niagara Falls, CA',
       teeTimes: ['8:10', '8:20', '8:30'],
-      notes: 'Black tees - TEAM DAY - 2V2 Scrambles- 5 minutes from hotel - $75',
+      notes: 'TEAM DAY - Black Tees - 2V2 Scrambles- 5 minutes from hotel - $75',
       matches: [
         {
           teeTime: '7:30',
@@ -81,8 +81,8 @@ const Schedule = () => {
     {
       courseName: 'Rainforest Cafe',
       city: 'Niagara Falls, CA',
-      teeTimes: ['18:00, 18:10, 18:20'],
-      notes: 'How many Mongoos Mai tais can we drink?'
+      teeTimes: ['18:00', '18:10', '18:20'],
+      notes: 'How many Mongoose Mai tais can we (dewy) drink???'
     },
     {
       date: '2026-08-17',
