@@ -17,6 +17,16 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
+const getScoreDateMs = (scoreDate) => {
+  if (!scoreDate) return 0;
+  if (typeof scoreDate.toMillis === 'function') return scoreDate.toMillis();
+  if (typeof scoreDate.seconds === 'number') return scoreDate.seconds * 1000;
+  if (scoreDate instanceof Date) return scoreDate.getTime();
+
+  const parsed = new Date(scoreDate).getTime();
+  return Number.isNaN(parsed) ? 0 : parsed;
+};
+
 // Initialize Analytics only on client side
 let analytics = null;
 
@@ -103,7 +113,7 @@ const getPlayerHandicaps = async () => {
   // Calculate handicap for each player (simplified - no Firestore updates)
   const playerHandicaps = Object.entries(playerScores).map(([playerName, scores]) => {
     // Sort differentials by date (newest first)
-    const sortedScores = scores.sort((a, b) => b.date - a.date);
+    const sortedScores = [...scores].sort((a, b) => getScoreDateMs(b.date) - getScoreDateMs(a.date));
     
     // Take the most recent 20 scores
     const recentScores = sortedScores.slice(0, 20);
@@ -117,7 +127,7 @@ const getPlayerHandicaps = async () => {
         return a.differential - b.differential;
       }
       // If differentials are equal, use more recent score
-      return b.date - a.date;
+      return getScoreDateMs(b.date) - getScoreDateMs(a.date);
     });
 
     // Take lowest 8 differentials
@@ -335,14 +345,14 @@ const calculateLeaderboard = (scores) => {
 
   const leaderboard = Object.keys(playerScores).map(playerName => {
     const playerScoreList = playerScores[playerName];
-    playerScoreList.sort((a, b) => new Date(b.date.seconds * 1000) - new Date(a.date.seconds * 1000));
+    playerScoreList.sort((a, b) => getScoreDateMs(b.date) - getScoreDateMs(a.date));
     const recentScores = playerScoreList.slice(0, 20);
 
     // Sort by differential and date for ties
     const sortedScores = recentScores
       .sort((a, b) => {
         if (a.differential === b.differential) {
-          return new Date(b.date.seconds * 1000) - new Date(a.date.seconds * 1000);
+          return getScoreDateMs(b.date) - getScoreDateMs(a.date);
         }
         return a.differential - b.differential;
       });

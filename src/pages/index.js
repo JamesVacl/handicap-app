@@ -7,6 +7,45 @@ import Image from 'next/image'; // Import the Image component from Next.js
 import NavigationMenu from 'src/components/NavigationMenu';
 
 const Home = () => {
+  const MAX_RECENT_ROUNDS = 20;
+  const DIFFERENTIALS_USED_COUNT = 8;
+
+  const getScoreDateMs = (scoreDate) => {
+    if (!scoreDate) return 0;
+    if (typeof scoreDate.toMillis === 'function') return scoreDate.toMillis();
+    if (typeof scoreDate.seconds === 'number') return scoreDate.seconds * 1000;
+    if (scoreDate instanceof Date) return scoreDate.getTime();
+
+    const parsed = new Date(scoreDate).getTime();
+    return Number.isNaN(parsed) ? 0 : parsed;
+  };
+
+  const getScoreKey = (score, index) => {
+    if (score.id) return score.id;
+    return `${score.player}-${getScoreDateMs(score.date)}-${score.differential}-${index}`;
+  };
+
+  const getSelectedDifferentialKeys = (playerScoreList) => {
+    const eligibleScores = playerScoreList
+      .filter((score) => score?.differential !== null && (score.holeType === '18' || score.isComposed))
+      .sort((a, b) => getScoreDateMs(b.date) - getScoreDateMs(a.date))
+      .slice(0, MAX_RECENT_ROUNDS);
+
+    const lowestDifferentials = [...eligibleScores]
+      .sort((a, b) => {
+        if (a.differential === b.differential) {
+          return getScoreDateMs(b.date) - getScoreDateMs(a.date);
+        }
+        return a.differential - b.differential;
+      })
+      .slice(0, DIFFERENTIALS_USED_COUNT);
+
+    return {
+      recentScores: eligibleScores,
+      selectedScores: lowestDifferentials
+    };
+  };
+
   const [players, setPlayers] = useState([]);
   const [courses, setCourses] = useState([]);
   const [scores, setScores] = useState([]);
@@ -88,71 +127,12 @@ const Home = () => {
       if (!playerScores[score.player]) {
         playerScores[score.player] = [];
       }
-      // Set ALL scores' isUsedForDifferential to false initially
-      score.isUsedForDifferential = false;
-      
-      if (score.differential !== null && (score.holeType === '18' || score.isComposed)) {
-        playerScores[score.player].push(score);
-      }
+      playerScores[score.player].push(score);
     });
 
     const leaderboard = Object.keys(playerScores).map(playerName => {
       const playerScoreList = playerScores[playerName];
-
-      // Sort ALL scores by date first
-      playerScoreList.sort((a, b) => new Date(b.date.seconds * 1000) - new Date(a.date.seconds * 1000));
-
-      // Take ONLY the 20 most recent scores BEFORE grouping differentials
-      const recentScores = playerScoreList.slice(0, 20);
-
-      // Initialize all scores as not used for differential
-      recentScores.forEach(score => {
-        score.isUsedForDifferential = false;
-      });
-
-      // Group differentials by value to handle ties
-      const differentialGroups = {};
-      recentScores.forEach((score, index) => {
-        const key = score.differential.toFixed(1);
-        if (!differentialGroups[key]) {
-          differentialGroups[key] = [];
-        }
-        differentialGroups[key].push({ score, index });
-      });
-
-      // Sort differential groups by value (lowest to highest)
-      const sortedDifferentials = Object.entries(differentialGroups)
-        .sort(([a], [b]) => parseFloat(a) - parseFloat(b));
-
-      // Select exactly 8 best differentials
-      let selectedIndices = new Set();
-      let selectedCount = 0;
-
-      for (const [, group] of sortedDifferentials) {
-        if (selectedCount >= 8) break;
-
-        if (selectedCount + group.length <= 8) {
-          // Include all scores in this group
-          group.forEach(({ index }) => selectedIndices.add(index));
-          selectedCount += group.length;
-        } else {
-          // Only take the most recent scores needed to complete 8
-          group.sort((a, b) => 
-            new Date(b.score.date.seconds * 1000) - new Date(a.score.date.seconds * 1000)
-          );
-          const remaining = 8 - selectedCount;
-          group.slice(0, remaining).forEach(({ index }) => selectedIndices.add(index));
-          selectedCount = 8;
-        }
-      }
-
-      // Mark only the selected scores as used for differential
-      recentScores.forEach((score, index) => {
-        score.isUsedForDifferential = selectedIndices.has(index);
-      });
-
-      // Calculate average handicap from selected scores
-      const selectedScores = Array.from(selectedIndices).map(index => recentScores[index]);
+      const { recentScores, selectedScores } = getSelectedDifferentialKeys(playerScoreList);
       const averageHandicap = selectedScores.length > 0
         ? selectedScores.reduce((acc, score) => acc + score.differential, 0) / selectedScores.length
         : 0;
@@ -276,6 +256,14 @@ const Home = () => {
       (!filterCourse || score.course === filterCourse)
     );
   });
+
+  const highlightedScoreKeys = new Set(
+    leaderboard.flatMap((entry) => {
+      const playerScoreList = scores.filter((score) => score.player === entry.name);
+      const { selectedScores } = getSelectedDifferentialKeys(playerScoreList);
+      return selectedScores.map((score, index) => getScoreKey(score, index));
+    })
+  );
 
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
@@ -460,11 +448,13 @@ const Home = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredScores.slice(currentPage * itemsPerPage, (currentPage + 1) * itemsPerPage).map((score) => (
+                    {filteredScores.slice(currentPage * itemsPerPage, (currentPage + 1) * itemsPerPage).map((score) => {
+                      const isUsedForDifferential = highlightedScoreKeys.has(getScoreKey(score));
+                      return (
                       <tr 
                         key={score.id} 
-                        data-used-for-differential={score.isUsedForDifferential}
-                        className={score.isUsedForDifferential ? 'used-for-differential' : ''}
+                        data-used-for-differential={isUsedForDifferential}
+                        className={isUsedForDifferential ? 'used-for-differential' : ''}
                       >
                         <td className="col-player">{score.player}</td>
                         <td className="col-course">{score.course}</td>
@@ -477,10 +467,11 @@ const Home = () => {
                           {parseFloat(score.differential).toFixed(2)}
                         </td>
                         <td className="col-date text-center">
-                          {new Date(score.date.seconds * 1000).toLocaleDateString()}
+                          {new Date(getScoreDateMs(score.date)).toLocaleDateString()}
                         </td>
                       </tr>
-                    ))}
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
