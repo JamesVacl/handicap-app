@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Button, Form, Badge, Modal } from 'react-bootstrap';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore, setDoc, doc, onSnapshot, deleteField } from 'firebase/firestore';
-import { getTeams, getPlayers, getPlayerHandicaps } from '../firebase';
+import { getTeams, getPlayers, getPlayerHandicaps, updateTeam } from '../firebase';
 import NavigationMenu from '../components/NavigationMenu';
 import FloatingNavigation from '../components/FloatingNavigation';
 import ChampionshipFormat from '../components/ChampionshipFormat';
@@ -19,6 +19,9 @@ const Teams = () => {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [isRefreshingHandicaps, setIsRefreshingHandicaps] = useState(false);
   const [lastHandicapUpdate, setLastHandicapUpdate] = useState(null);
+  const [teamRosterSelections, setTeamRosterSelections] = useState({});
+  const [savingTeamId, setSavingTeamId] = useState(null);
+  const [handicapByPlayerName, setHandicapByPlayerName] = useState({});
 
   // Schedule data - Main tournament only (no Friday warm-up round)
   const scheduleData = [
@@ -69,8 +72,13 @@ const Teams = () => {
         try {
           const teamsData = await getTeams();
           const playersData = await getPlayers();
+          const playerHandicaps = await getPlayerHandicaps();
+          const handicapMap = Object.fromEntries(
+            playerHandicaps.map((entry) => [entry.name, entry.handicap])
+          );
           setTeams(teamsData);
           setPlayers(playersData);
+          setHandicapByPlayerName(handicapMap);
         } catch (error) {
           console.error('Error loading data:', error);
         }
@@ -87,6 +95,9 @@ const Teams = () => {
     try {
       console.log('Fetching player handicaps...');
       const playerHandicaps = await getPlayerHandicaps();
+      const handicapMap = Object.fromEntries(
+        playerHandicaps.map((entry) => [entry.name, entry.handicap])
+      );
       console.log('Player handicaps received:', playerHandicaps);
       
       // Update teams with fresh handicaps
@@ -113,8 +124,18 @@ const Teams = () => {
         };
       });
       
+      await Promise.all(
+        updatedTeams.map((team) =>
+          updateTeam(team.id, {
+            players: team.players || [],
+            averageHandicap: team.averageHandicap || 0
+          })
+        )
+      );
+
       console.log('Updated teams:', updatedTeams);
       setTeams(updatedTeams);
+      setHandicapByPlayerName(handicapMap);
       setLastHandicapUpdate(new Date());
       console.log('Handicaps refreshed successfully');
     } catch (error) {
@@ -246,6 +267,95 @@ const Teams = () => {
     return (sum / teamPlayers.length).toFixed(1);
   };
 
+  const getAssignedPlayerNames = () => {
+    const assigned = new Set();
+    teams.forEach((team) => {
+      (team.players || []).forEach((player) => {
+        if (player?.name) assigned.add(player.name);
+      });
+    });
+    return assigned;
+  };
+
+  const getAvailablePlayersForTeam = (team) => {
+    const assignedPlayerNames = getAssignedPlayerNames();
+    const teamPlayerNames = new Set((team.players || []).map((player) => player.name));
+
+    return players
+      .filter((player) => {
+        if (teamPlayerNames.has(player.name)) return false;
+        return !assignedPlayerNames.has(player.name);
+      })
+      .sort((a, b) => a.name.localeCompare(b.name));
+  };
+
+  const handleAddPlayerToTeam = async (team) => {
+    if (!authenticated || !team?.id) return;
+
+    const selectedPlayerName = teamRosterSelections[team.id];
+    if (!selectedPlayerName) return;
+
+    const existingTeam = teams.find((t) =>
+      (t.players || []).some((player) => player.name === selectedPlayerName)
+    );
+
+    if (existingTeam) {
+      alert(`${selectedPlayerName} is already assigned to ${existingTeam.name}.`);
+      return;
+    }
+
+    const selectedPlayer = players.find((player) => player.name === selectedPlayerName);
+    if (!selectedPlayer) {
+      alert('Selected player not found.');
+      return;
+    }
+
+    const updatedPlayers = [
+      ...(team.players || []),
+      { name: selectedPlayer.name, handicap: handicapByPlayerName[selectedPlayer.name] ?? 0 }
+    ];
+
+    const averageHandicap = updatedPlayers.length
+      ? parseFloat((updatedPlayers.reduce((acc, p) => acc + (p.handicap || 0), 0) / updatedPlayers.length).toFixed(1))
+      : 0;
+
+    try {
+      setSavingTeamId(team.id);
+      await updateTeam(team.id, { players: updatedPlayers, averageHandicap });
+      setTeams((prevTeams) =>
+        prevTeams.map((t) => (t.id === team.id ? { ...t, players: updatedPlayers, averageHandicap } : t))
+      );
+      setTeamRosterSelections((prev) => ({ ...prev, [team.id]: '' }));
+    } catch (error) {
+      console.error('Error adding player to team:', error);
+      alert('Unable to add player right now. Please try again.');
+    } finally {
+      setSavingTeamId(null);
+    }
+  };
+
+  const handleRemovePlayerFromTeam = async (team, playerName) => {
+    if (!authenticated || !team?.id || !playerName) return;
+
+    const updatedPlayers = (team.players || []).filter((player) => player.name !== playerName);
+    const averageHandicap = updatedPlayers.length
+      ? parseFloat((updatedPlayers.reduce((acc, p) => acc + (p.handicap || 0), 0) / updatedPlayers.length).toFixed(1))
+      : 0;
+
+    try {
+      setSavingTeamId(team.id);
+      await updateTeam(team.id, { players: updatedPlayers, averageHandicap });
+      setTeams((prevTeams) =>
+        prevTeams.map((t) => (t.id === team.id ? { ...t, players: updatedPlayers, averageHandicap } : t))
+      );
+    } catch (error) {
+      console.error('Error removing player from team:', error);
+      alert('Unable to remove player right now. Please try again.');
+    } finally {
+      setSavingTeamId(null);
+    }
+  };
+
   // Group matches by course
   const matchesByCourse = {};
   Object.entries(scheduledMatches).forEach(([matchId, matchData]) => {
@@ -327,11 +437,50 @@ const Teams = () => {
                     
                     <div className="players-list my-3">
                       {team.players?.map(player => (
-                        <div key={player.name} className="player-item">
-                          {player.name} - Handicap: {player.handicap}
+                        <div key={player.name} className="player-item d-flex justify-content-between align-items-center gap-2">
+                          <span>{player.name} - Handicap: {player.handicap}</span>
+                          {authenticated && (
+                            <Button
+                              variant="outline-danger"
+                              size="sm"
+                              onClick={() => handleRemovePlayerFromTeam(team, player.name)}
+                              disabled={savingTeamId === team.id}
+                            >
+                              Remove
+                            </Button>
+                          )}
                         </div>
                       ))}
                     </div>
+
+                    {authenticated && (
+                      <div className="d-flex gap-2 align-items-center">
+                        <Form.Select
+                          value={teamRosterSelections[team.id] || ''}
+                          onChange={(e) =>
+                            setTeamRosterSelections((prev) => ({
+                              ...prev,
+                              [team.id]: e.target.value
+                            }))
+                          }
+                          disabled={savingTeamId === team.id}
+                        >
+                          <option value="">-- Add player to team --</option>
+                          {getAvailablePlayersForTeam(team).map((player) => (
+                            <option key={player.id || player.name} value={player.name}>
+                              {player.name}
+                            </option>
+                          ))}
+                        </Form.Select>
+                        <Button
+                          variant="outline-success"
+                          onClick={() => handleAddPlayerToTeam(team)}
+                          disabled={!teamRosterSelections[team.id] || savingTeamId === team.id}
+                        >
+                          Add Player
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
