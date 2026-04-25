@@ -522,13 +522,14 @@ body {
 
 .countdown-timer {
   color: rgba(255, 255, 255, 0.9) !important;
-  font-size: 1rem;
+  font-size: 0.95rem;
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 0.5rem 1rem;
+  justify-content: flex-start;
+  padding: 0;
   margin: 0;
   background: transparent;
+  white-space: nowrap;
 }
 
 .countdown-banner {
@@ -553,10 +554,29 @@ body {
   z-index: 10;
 }
 
+.countdown-nav-item {
+  display: flex;
+  align-items: center;
+  padding-left: 0.9rem !important;
+  padding-right: 0.9rem !important;
+  margin-left: 0.25rem;
+  border-left: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.countdown-nav-item:hover {
+  color: #fff !important;
+}
+
 /* Hide countdown when navbar is collapsed */
 @media (max-width: 991px) {
   .countdown-nav {
     display: none !important;
+  }
+
+  .countdown-nav-item {
+    border-left: none;
+    margin-left: 0;
+    padding-left: 0 !important;
   }
 }
 

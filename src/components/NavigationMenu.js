@@ -19,11 +19,6 @@ const NavigationMenu = () => {
 
   return (
     <>
-      {/* Countdown Timer Banner */}
-      <div className="countdown-banner" onClick={handleTimerClick}>
-        <CountdownTimer />
-      </div>
-      
       <Navbar bg="dark" variant="dark" expand="md" className="navbar-custom">
         <Container fluid>
           <Link href="/" passHref legacyBehavior>
@@ -47,6 +42,9 @@ const NavigationMenu = () => {
               <Link href="/results" passHref legacyBehavior>
                 <Nav.Link active={router.pathname === "/results"}>Results</Nav.Link>
               </Link>
+              <Nav.Link className="countdown-nav-item" onClick={handleTimerClick}>
+                <CountdownTimer />
+              </Nav.Link>
             </Nav>
 
             <Nav>
