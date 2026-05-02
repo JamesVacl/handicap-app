@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore, doc, setDoc, onSnapshot, collection, getDocs, deleteField } from 'firebase/firestore'; // Add this import
 import { useRouter } from 'next/router';
@@ -277,6 +277,34 @@ const Schedule = () => {
     });
   };
 
+  const matchesByTeeTimeKey = useMemo(() => {
+    const grouped = {};
+    Object.entries(matches).forEach(([key, match]) => {
+      const keyParts = key.split('-');
+      const teeKey = keyParts.length >= 2 ? `${keyParts[0]}-${keyParts[1]}` : key;
+      if (!grouped[teeKey]) grouped[teeKey] = [];
+      grouped[teeKey].push([key, match]);
+    });
+
+    Object.keys(grouped).forEach((teeKey) => {
+      grouped[teeKey].sort(([keyA], [keyB]) => keyA.localeCompare(keyB));
+    });
+
+    return grouped;
+  }, [matches]);
+
+  const assignedPlayersByTeeTimeKey = useMemo(() => {
+    const grouped = {};
+    Object.entries(teeTimeAssignments).forEach(([key, value]) => {
+      const parts = key.split('-');
+      if (parts.length < 3 || !value) return;
+      const teeKey = `${parts[0]}-${parts[1]}`;
+      if (!grouped[teeKey]) grouped[teeKey] = new Set();
+      grouped[teeKey].add(value);
+    });
+    return grouped;
+  }, [teeTimeAssignments]);
+
   return (
     <div className="app-wrapper">
       {authenticated && <NavigationMenu />}
@@ -317,9 +345,7 @@ const Schedule = () => {
             Set Match
           </button>
         </div>
-        {Object.entries(matches)
-  .filter(([key]) => key.startsWith(`${index}-${timeIndex}`))
-  .sort(([keyA], [keyB]) => keyA.localeCompare(keyB))
+        {(matchesByTeeTimeKey[`${index}-${timeIndex}`] || [])
   .map(([key, match], matchIndex) => (
     <div key={key} className="match-info mb-3 p-2 bg-success bg-opacity-10 rounded">
       <div className="d-flex justify-content-between align-items-center">
@@ -365,10 +391,8 @@ const Schedule = () => {
               <option value="">-- Select Player --</option>
               {players
                 .filter(player => {
-                  const teeTimePlayers = Object.entries(teeTimeAssignments)
-                    .filter(([key]) => key.startsWith(`${index}-${timeIndex}`))
-                    .map(([_, value]) => value);
-                  return !teeTimePlayers.includes(player) || 
+                  const teeTimePlayers = assignedPlayersByTeeTimeKey[`${index}-${timeIndex}`] || new Set();
+                  return !teeTimePlayers.has(player) || 
                          teeTimeAssignments[`${index}-${timeIndex}-${playerSlot}`] === player;
                 })
                 .map((player) => (

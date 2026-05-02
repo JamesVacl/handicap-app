@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
@@ -46,7 +46,6 @@ const Results = () => {
     const fetchPlayers = async () => {
       try {
         const playerList = await getPlayers();
-        console.log('Players loaded:', playerList);
         setPlayers(playerList);
       } catch (error) {
         console.error('Error fetching players:', error);
@@ -63,7 +62,6 @@ const Results = () => {
           id,
           ...match
         }));
-        console.log('Live matches loaded:', matches);
         setLiveMatches(matches);
       } else {
         setLiveMatches([]);
@@ -110,10 +108,8 @@ const Results = () => {
       const strokePlayUnsubscribe = onSnapshot(strokePlayRef, (doc) => {
         if (doc.exists()) {
           const data = doc.data();
-          console.log('Stroke play scores loaded:', data);
           setStrokePlayScores(data);
         } else {
-          console.log('No stroke play scores found');
           setStrokePlayScores({});
         }
       });
@@ -246,11 +242,8 @@ const Results = () => {
     if (!confirm('Are you sure you want to complete this match?')) return;
 
     try {
-      console.log('Completing match:', match);
       const db = getFirestore();
       const currentScore = match.currentScore || { player1Score: 0, player2Score: 0 };
-      
-      console.log('Current score:', currentScore);
       
       // Determine winner and final score
       let winner, loser, finalScore;
@@ -266,8 +259,6 @@ const Results = () => {
         // Simplified winner/loser logic
         const player1Score = currentScore.player1Score || 0;
         const player2Score = currentScore.player2Score || 0;
-        
-        console.log(`Player scores: ${player1Score} vs ${player2Score}`);
         
         if (match.matchType === 'alternating') {
           const soloPlayer = typeof match.soloPlayer === 'string' ? match.soloPlayer : (match.soloPlayer?.name || 'Unknown Player');
@@ -299,8 +290,6 @@ const Results = () => {
         }
       }
       
-      console.log(`Winner: ${winner}, Loser: ${loser}, Final Score: ${finalScore}`);
-
       // Calculate actual duration (only if match has started)
       let duration = '0h 0m';
       if (match.lastUpdate) {
@@ -356,9 +345,6 @@ const Results = () => {
           (typeof match.player2 === 'string' ? match.player2 : (match.player2?.name || 'Unknown Player'));
       }
       
-      console.log('History data:', historyData);
-      console.log('Match ID:', match.id);
-
       // Ensure match ID is valid
       const matchId = match.id || `match-${Date.now()}`;
       
@@ -397,6 +383,68 @@ const Results = () => {
     }
   };
 
+  const sortedPlayers = useMemo(
+    () => [...players].sort((a, b) => a.name.localeCompare(b.name)),
+    [players]
+  );
+
+  const sortedLiveMatches = useMemo(() => {
+    const statusPriority = {
+      in_progress: 1,
+      not_started: 2,
+      completed: 3,
+      match_ready_to_complete: 4
+    };
+
+    return [...liveMatches].sort((a, b) => {
+      const aPriority = statusPriority[a.status] || 5;
+      const bPriority = statusPriority[b.status] || 5;
+      if (aPriority !== bPriority) return aPriority - bPriority;
+      if (a.courseName !== b.courseName) return a.courseName.localeCompare(b.courseName);
+      return (a.teeTime || '').localeCompare(b.teeTime || '');
+    });
+  }, [liveMatches]);
+
+  const teamStandings = useMemo(() => {
+    return Object.entries(leaderboards)
+      .filter(([_, data]) => data && typeof data === 'object' && data.points !== undefined)
+      .map(([team, data]) => ({
+        name: team,
+        points: data.points || 0
+      }))
+      .sort((a, b) => b.points - a.points);
+  }, [leaderboards]);
+
+  const strokePlayStandings = useMemo(() => {
+    const playerCumulativeScores = {};
+
+    Object.entries(strokePlayScores)
+      .filter(([_, data]) => data && typeof data === 'object' && data.score !== undefined)
+      .forEach(([_, data]) => {
+        const player = data.player;
+        if (!playerCumulativeScores[player]) {
+          playerCumulativeScores[player] = {
+            player,
+            totalScore: 0,
+            rounds: []
+          };
+        }
+        playerCumulativeScores[player].totalScore += data.score;
+        playerCumulativeScores[player].rounds.push({
+          date: data.date,
+          score: data.score
+        });
+      });
+
+    return Object.values(playerCumulativeScores).sort((a, b) => a.totalScore - b.totalScore);
+  }, [strokePlayScores]);
+
+  const existingStrokeScores = useMemo(() => {
+    return Object.entries(strokePlayScores).filter(
+      ([_, data]) => data && typeof data === 'object' && data.score !== undefined
+    );
+  }, [strokePlayScores]);
+
   const LiveMatchesTab = () => (
     <div className="live-matches-section">
       <div className="section-header mb-4">
@@ -420,31 +468,7 @@ const Results = () => {
         </div>
       ) : (
         <Row>
-          {liveMatches
-            .sort((a, b) => {
-              // Sort by status priority: in_progress first, then not_started, then others
-              const statusPriority = {
-                'in_progress': 1,
-                'not_started': 2,
-                'completed': 3,
-                'match_ready_to_complete': 4
-              };
-              
-              const aPriority = statusPriority[a.status] || 5;
-              const bPriority = statusPriority[b.status] || 5;
-              
-              if (aPriority !== bPriority) {
-                return aPriority - bPriority;
-              }
-              
-              // If same status, sort by course name and tee time
-              if (a.courseName !== b.courseName) {
-                return a.courseName.localeCompare(b.courseName);
-              }
-              
-              return (a.teeTime || '').localeCompare(b.teeTime || '');
-            })
-            .map((match) => (
+          {sortedLiveMatches.map((match) => (
             <Col key={match.id} lg={6} md={12} className="mb-4">
               <Card className="match-card h-100">
                 <Card.Header className="match-header">
@@ -640,39 +664,6 @@ const Results = () => {
   );
 
   const LeaderboardsTab = () => {
-    // Process team points from leaderboards data
-    const teamStandings = Object.entries(leaderboards)
-      .filter(([key, data]) => data && typeof data === 'object' && data.points !== undefined)
-      .map(([team, data]) => ({
-        name: team,
-        points: data.points || 0
-      }))
-      .sort((a, b) => b.points - a.points);
-
-    // Process stroke play scores - calculate cumulative totals
-    const playerCumulativeScores = {};
-    
-    Object.entries(strokePlayScores)
-      .filter(([key, data]) => data && typeof data === 'object' && data.score !== undefined)
-      .forEach(([key, data]) => {
-        const player = data.player;
-        if (!playerCumulativeScores[player]) {
-          playerCumulativeScores[player] = {
-            player: player,
-            totalScore: 0,
-            rounds: []
-          };
-        }
-        playerCumulativeScores[player].totalScore += data.score;
-        playerCumulativeScores[player].rounds.push({
-          date: data.date,
-          score: data.score
-        });
-      });
-
-    const strokePlayStandings = Object.values(playerCumulativeScores)
-      .sort((a, b) => a.totalScore - b.totalScore); // Sort by best total score (lowest first)
-
     return (
       <div className="leaderboards-section">
         <div className="section-header mb-4">
@@ -816,17 +807,12 @@ const Results = () => {
       
       try {
         const db = getFirestore();
-        console.log('Deleting score with key:', scoreKey);
-        console.log('Score data:', strokePlayScores[scoreKey]);
         
         const scoreData = strokePlayScores[scoreKey];
         if (!scoreData) {
           alert('Score data not found. Please refresh and try again.');
           return;
         }
-        
-        const [date, player] = scoreKey.split('-');
-        const course = scoreData.course;
         
         // Remove from stroke play collection
         await setDoc(doc(db, 'strokePlay', '2025'), {
@@ -914,7 +900,7 @@ const Results = () => {
                   >
                     <option value="">-- Choose a Player --</option>
                     {players.length > 0 ? (
-                      players.sort((a, b) => a.name.localeCompare(b.name)).map((player) => (
+                      sortedPlayers.map((player) => (
                         <option key={player.id} value={player.name}>{player.name}</option>
                       ))
                     ) : (
@@ -964,14 +950,9 @@ const Results = () => {
                 <h5 className="mb-0">Existing Stroke Play Scores</h5>
               </Card.Header>
               <Card.Body>
-                {console.log('Rendering stroke play scores:', strokePlayScores)}
-                {Object.entries(strokePlayScores).length > 0 ? (
+                {existingStrokeScores.length > 0 ? (
                   <div className="existing-scores">
-                    {Object.entries(strokePlayScores)
-                      .filter(([key, data]) => {
-                        console.log('Filtering stroke play score:', key, data);
-                        return data && typeof data === 'object' && data.score !== undefined;
-                      })
+                    {existingStrokeScores
                       .map(([key, data]) => (
                         <div key={key} className="d-flex justify-content-between align-items-center py-2 border-bottom">
                           <div>
@@ -1081,7 +1062,7 @@ const Results = () => {
         match={selectedMatch}
         onSave={(updatedMatch) => {
           // Update local state if needed
-          console.log('Match updated:', updatedMatch);
+          setSelectedMatch(updatedMatch);
         }}
       />
     </>
