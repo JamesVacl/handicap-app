@@ -37,7 +37,7 @@ const NavigationMenu = () => {
                 <Nav.Link active={router.pathname === "/schedule"}>Schedule</Nav.Link>
               </Link>
               <Link href="/teams" passHref legacyBehavior>
-                <Nav.Link active={router.pathname === "/teams"}>Teams</Nav.Link>
+                <Nav.Link active={router.pathname === "/teams"}>Guyder Cup</Nav.Link>
               </Link>
               <Link href="/results" passHref legacyBehavior>
                 <Nav.Link active={router.pathname === "/results"}>Results</Nav.Link>
