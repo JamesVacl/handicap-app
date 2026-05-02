@@ -254,12 +254,12 @@ const Teams = () => {
       <div className="home-container">
         <div className="overlay"></div>
         <div className="content">
-          <h1 className="text-4xl font-semibold mb-8 cursive-font text-center">Team Setup</h1>
+          <h1 className="text-4xl font-semibold mb-8 cursive-font text-center">Guyder Cup</h1>
           
           {/* Teams Overview */}
           <div className="teams-section mb-8">
             <div className="d-flex justify-content-between align-items-center mb-6">
-              <h2 className="text-3xl font-semibold text-success">Teams Overview</h2>
+              <h2 className="text-3xl font-semibold text-success">Rosters</h2>
               {authenticated && (
                 <Button
                   variant="outline-success"
