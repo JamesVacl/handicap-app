@@ -922,8 +922,148 @@ body {
   border: 1px solid rgba(80, 200, 120, 0.3);
 }
 
+/* Second pass: minimal base + subtle premium accents */
+:root {
+  --ui-green-600: #2f9e62;
+  --ui-green-500: #3fb173;
+  --ui-surface-1: rgba(255, 255, 255, 0.96);
+  --ui-surface-2: #f7faf8;
+  --ui-border: rgba(22, 34, 27, 0.12);
+  --ui-shadow-soft: 0 8px 24px rgba(14, 21, 17, 0.1);
+}
+
+.home-container {
+  background-size: cover;
+}
+
+.overlay {
+  background: linear-gradient(180deg, rgba(7, 15, 10, 0.38) 0%, rgba(6, 10, 8, 0.44) 100%);
+}
+
+.content {
+  background: var(--ui-surface-1);
+  border: 1px solid var(--ui-border);
+  box-shadow: var(--ui-shadow-soft);
+}
+
+.btn,
+.form-control,
+.form-select,
+.input-group-text {
+  border-radius: 10px !important;
+}
+
+.btn {
+  transition: transform 0.15s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.btn-primary,
+.btn-success {
+  background-color: var(--ui-green-500) !important;
+  border-color: var(--ui-green-500) !important;
+  box-shadow: 0 4px 10px rgba(63, 177, 115, 0.28);
+}
+
+.btn-primary:hover,
+.btn-success:hover,
+.btn-primary:focus,
+.btn-success:focus {
+  background-color: var(--ui-green-600) !important;
+  border-color: var(--ui-green-600) !important;
+  box-shadow: 0 6px 14px rgba(47, 158, 98, 0.28) !important;
+}
+
+.btn-outline-success {
+  color: var(--ui-green-600) !important;
+  border-color: rgba(47, 158, 98, 0.55) !important;
+  background: rgba(255, 255, 255, 0.8) !important;
+}
+
+.btn-outline-success:hover {
+  color: #fff !important;
+  background: var(--ui-green-600) !important;
+  border-color: var(--ui-green-600) !important;
+}
+
+.form-control,
+.form-select {
+  background: #fff !important;
+  border: 1px solid rgba(16, 24, 19, 0.16) !important;
+  box-shadow: none !important;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: rgba(47, 158, 98, 0.6) !important;
+  box-shadow: 0 0 0 0.2rem rgba(63, 177, 115, 0.18) !important;
+}
+
+.table {
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.table th {
+  background: #f4f8f5;
+  color: #274233;
+  border-bottom-color: rgba(16, 24, 19, 0.1) !important;
+}
+
+.table td {
+  border-bottom-color: rgba(16, 24, 19, 0.08);
+}
+
+.table tbody tr:hover {
+  background: rgba(47, 158, 98, 0.045);
+}
+
+.team-section,
+.results-navigation,
+.match-card,
+.history-card,
+.leaderboard-card,
+.course-stats-card,
+.section-header {
+  background: var(--ui-surface-1) !important;
+  border: 1px solid var(--ui-border) !important;
+  box-shadow: 0 6px 18px rgba(14, 21, 17, 0.08) !important;
+}
+
+.match-header,
+.leaderboard-card .card-header,
+.course-stats-card .card-header,
+.score-entry-modal .modal-header {
+  background: linear-gradient(135deg, #46bc7d 0%, #36a86a 100%) !important;
+}
+
+.match-players,
+.match-score,
+.match-footer,
+.hole-progress,
+.stat-item,
+.empty-state,
+.match-info {
+  background: var(--ui-surface-2) !important;
+  border-color: rgba(47, 158, 98, 0.18) !important;
+}
+
+.section-header {
+  padding: 0.85rem 1rem;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
+  .btn,
+  .form-control,
+  .form-select {
+    min-height: 42px;
+  }
+
   .nav-tabs-container {
     flex-direction: column;
     align-items: center;
