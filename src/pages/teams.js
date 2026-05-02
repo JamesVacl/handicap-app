@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Container, Row, Col, Card, Button, Form, Badge } from 'react-bootstrap';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore, setDoc, doc, onSnapshot, deleteField } from 'firebase/firestore';
@@ -50,29 +50,24 @@ const Teams = () => {
 
   const refreshHandicaps = async () => {
     if (!authenticated) return;
-    
-    console.log('Starting handicap refresh...');
+
     setIsRefreshingHandicaps(true);
     try {
-      console.log('Fetching player handicaps...');
       const playerHandicaps = await getPlayerHandicaps();
       const handicapMap = Object.fromEntries(
         playerHandicaps.map((entry) => [entry.name, entry.handicap])
       );
-      console.log('Player handicaps received:', playerHandicaps);
-      
+
       // Update teams with fresh handicaps
-      const updatedTeams = teams.map(team => {
-        console.log(`Processing team: ${team.name}`);
-        const updatedPlayers = team.players?.map(player => {
-          const currentHandicap = playerHandicaps.find(p => p.name === player.name);
-          console.log(`Player ${player.name}: old handicap ${player.handicap}, new handicap ${currentHandicap?.handicap}`);
+      const updatedTeams = teams.map((team) => {
+        const updatedPlayers = team.players?.map((player) => {
+          const latestHandicap = handicapMap[player.name];
           return {
             ...player,
-            handicap: currentHandicap?.handicap || player.handicap
+            handicap: latestHandicap ?? player.handicap
           };
         }) || [];
-        
+
         // Recalculate team average
         const averageHandicap = updatedPlayers.length 
           ? parseFloat((updatedPlayers.reduce((acc, p) => acc + p.handicap, 0) / updatedPlayers.length).toFixed(1))
@@ -94,11 +89,9 @@ const Teams = () => {
         )
       );
 
-      console.log('Updated teams:', updatedTeams);
       setTeams(updatedTeams);
       setHandicapByPlayerName(handicapMap);
       setLastHandicapUpdate(new Date());
-      console.log('Handicaps refreshed successfully');
     } catch (error) {
       console.error('Error refreshing handicaps:', error);
     } finally {
@@ -126,8 +119,6 @@ const Teams = () => {
       await setDoc(doc(db, 'teamMatches', '2025-scheduled'), {
         [matchId]: deleteField()
       }, { merge: true });
-      
-      console.log('Deleted match:', matchId);
     } catch (error) {
       console.error('Error deleting match:', error);
     }
@@ -148,7 +139,7 @@ const Teams = () => {
     return (sum / teamPlayers.length).toFixed(1);
   };
 
-  const getAssignedPlayerNames = () => {
+  const assignedPlayerNames = useMemo(() => {
     const assigned = new Set();
     teams.forEach((team) => {
       (team.players || []).forEach((player) => {
@@ -156,19 +147,26 @@ const Teams = () => {
       });
     });
     return assigned;
-  };
+  }, [teams]);
 
-  const getAvailablePlayersForTeam = (team) => {
-    const assignedPlayerNames = getAssignedPlayerNames();
-    const teamPlayerNames = new Set((team.players || []).map((player) => player.name));
+  const sortedPlayers = useMemo(
+    () => [...players].sort((a, b) => a.name.localeCompare(b.name)),
+    [players]
+  );
 
-    return players
-      .filter((player) => {
+  const availablePlayersByTeamId = useMemo(() => {
+    const availableById = {};
+
+    teams.forEach((team) => {
+      const teamPlayerNames = new Set((team.players || []).map((player) => player.name));
+      availableById[team.id] = sortedPlayers.filter((player) => {
         if (teamPlayerNames.has(player.name)) return false;
         return !assignedPlayerNames.has(player.name);
-      })
-      .sort((a, b) => a.name.localeCompare(b.name));
-  };
+      });
+    });
+
+    return availableById;
+  }, [teams, sortedPlayers, assignedPlayerNames]);
 
   const handleAddPlayerToTeam = async (team) => {
     if (!authenticated || !team?.id) return;
@@ -238,14 +236,16 @@ const Teams = () => {
   };
 
   // Group matches by course
-  const matchesByCourse = {};
-  Object.entries(scheduledMatches).forEach(([matchId, matchData]) => {
-    const courseName = matchData.courseName;
-    if (!matchesByCourse[courseName]) {
-      matchesByCourse[courseName] = [];
-    }
-    matchesByCourse[courseName].push({ matchId, matchData });
-  });
+  const matchesByCourse = useMemo(() => {
+    return Object.entries(scheduledMatches).reduce((acc, [matchId, matchData]) => {
+      const courseName = matchData.courseName;
+      if (!acc[courseName]) {
+        acc[courseName] = [];
+      }
+      acc[courseName].push({ matchId, matchData });
+      return acc;
+    }, {});
+  }, [scheduledMatches]);
 
   return (
     <div className="app-wrapper">
@@ -286,7 +286,7 @@ const Teams = () => {
               // Teams data loaded - show actual content
               <div className="teams-grid">
                 {teams.map((team, index) => (
-                  <div key={index} className="team-section mb-4">
+                  <div key={team.id || index} className="team-section mb-4">
                     <div className="team-header">
                       <div className="team-logo-container">
                         <Image 
@@ -347,7 +347,7 @@ const Teams = () => {
                           disabled={savingTeamId === team.id}
                         >
                           <option value="">-- Add player to team --</option>
-                          {getAvailablePlayersForTeam(team).map((player) => (
+                          {(availablePlayersByTeamId[team.id] || []).map((player) => (
                             <option key={player.id || player.name} value={player.name}>
                               {player.name}
                             </option>
