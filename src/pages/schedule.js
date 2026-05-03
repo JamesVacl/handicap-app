@@ -3,7 +3,7 @@ import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore, doc, setDoc, onSnapshot, collection, getDocs, deleteField } from 'firebase/firestore'; // Add this import
 import { useRouter } from 'next/router';
 import Head from 'next/head';
-import { Navbar, Nav, Container } from 'react-bootstrap';
+import { Navbar, Nav, Container, Dropdown } from 'react-bootstrap';
 
 
 import NavigationMenu from '../components/NavigationMenu';
@@ -408,28 +408,27 @@ const Schedule = () => {
       <div key={timeIndex} className="tee-time-slot mb-4">
         <div className="tee-time-header d-flex justify-content-between align-items-center mb-3">
           <h4 className="text-xl font-semibold mb-0">{formatTime(time)}</h4>
-          <div className="d-flex gap-2">
-            <button 
-              className="btn btn-sm btn-outline-success"
-              onClick={() => {
+          <Dropdown align="end">
+            <Dropdown.Toggle variant="outline-success" size="sm" id={`dropdown-${index}-${timeIndex}`}>
+              ➕ Add Match
+            </Dropdown.Toggle>
+            <Dropdown.Menu>
+              <Dropdown.Item onClick={() => {
                 setSelectedEventIndex(index);
                 setSelectedTimeIndex(timeIndex);
                 setShowMatchModal(true);
-              }}
-            >
-              Set 1v1
-            </button>
-            <button 
-              className="btn btn-sm btn-outline-success"
-              onClick={() => {
+              }}>
+                1v1 Match
+              </Dropdown.Item>
+              <Dropdown.Item onClick={() => {
                 setSelectedEventIndex(index);
                 setSelectedTimeIndex(timeIndex);
                 setShowTeamMatchModal(true);
-              }}
-            >
-              Set 2v2
-            </button>
-          </div>
+              }}>
+                2v2 Match
+              </Dropdown.Item>
+            </Dropdown.Menu>
+          </Dropdown>
         </div>
         {(matchesByTeeTimeKey[`${index}-${timeIndex}`] || [])
           .map(([key, match], matchIndex) => (

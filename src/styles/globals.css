@@ -1666,3 +1666,38 @@ body {
   padding: 0.25rem 0.75rem;
   border-radius: 20px;
 }
+
+@media (max-width: 768px) {
+  .vs-matchup-card {
+    flex-direction: column;
+    padding: 1.25rem 1rem;
+    gap: 1rem;
+  }
+  
+  .vs-badge-container {
+    padding: 0.5rem 0;
+    width: 100%;
+    position: relative;
+  }
+
+  .vs-badge-container::before, .vs-badge-container::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 35%;
+    height: 1px;
+    background: rgba(80, 200, 120, 0.3);
+  }
+
+  .vs-badge-container::before {
+    left: 0;
+  }
+
+  .vs-badge-container::after {
+    right: 0;
+  }
+
+  .vs-player-side {
+    width: 100%;
+  }
+}
