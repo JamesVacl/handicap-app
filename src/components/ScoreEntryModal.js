@@ -234,6 +234,12 @@ const ScoreEntryModal = ({ show, onHide, match, onSave }) => {
       
       text = result.result === 'player1_win' ? `${matchData?.soloPlayer} wins` :
              result.result === 'player2_win' ? `${matchData?.team2Players?.join(' & ')} win` : 'Tie';
+    } else if (matchData?.matchType === '2v2') {
+      variant = result.result === 'player1_win' ? 'success' : 
+                result.result === 'player2_win' ? 'danger' : 'secondary';
+      
+      text = result.result === 'player1_win' ? `Putt Pirates win` :
+             result.result === 'player2_win' ? `Golden Boys win` : 'Tie';
     } else {
       variant = result.result === 'player1_win' ? 'success' : 
                 result.result === 'player2_win' ? 'danger' : 'secondary';
@@ -266,6 +272,8 @@ const ScoreEntryModal = ({ show, onHide, match, onSave }) => {
         // Player 1 is up
         if (matchData?.matchType === 'alternating') {
           return `${matchData.soloPlayer} ${diff}UP`;
+        } else if (matchData?.matchType === '2v2') {
+          return `Putt Pirates ${diff}UP`;
         } else {
           return `${matchData.player1} ${diff}UP`;
         }
@@ -273,6 +281,8 @@ const ScoreEntryModal = ({ show, onHide, match, onSave }) => {
         // Player 2 is up
         if (matchData?.matchType === 'alternating') {
           return `${matchData.team2Players?.join(' & ')} ${Math.abs(diff)}UP`;
+        } else if (matchData?.matchType === '2v2') {
+          return `Golden Boys ${Math.abs(diff)}UP`;
         } else {
           return `${matchData.player2} ${Math.abs(diff)}UP`;
         }
@@ -326,20 +336,20 @@ const ScoreEntryModal = ({ show, onHide, match, onSave }) => {
                                  <div>
                                    <div className="d-flex flex-column">
                                      <span className="fw-bold">
-                                       {matchData.matchType === 'alternating' ? matchData.soloPlayer : matchData.player1}
+                                       {matchData.matchType === 'alternating' ? matchData.soloPlayer : matchData.matchType === '2v2' ? 'Putt Pirates' : matchData.player1}
                                      </span>
                                      <small className="text-muted">
-                                       {matchData.matchType === 'alternating' ? matchData.soloPlayerTeam : matchData.player1Team}
+                                       {matchData.matchType === 'alternating' ? matchData.soloPlayerTeam : matchData.matchType === '2v2' ? matchData.team1?.join(' & ') : matchData.player1Team}
                                      </small>
                                    </div>
                                    <span className="mx-2">vs</span>
                                    <div className="d-flex flex-column">
                                      <span className="fw-bold">
-                                       {matchData.matchType === 'alternating' ? matchData.team2Players?.join(' & ') : matchData.player2}
+                                       {matchData.matchType === 'alternating' ? matchData.team2Players?.join(' & ') : matchData.matchType === '2v2' ? 'Golden Boys' : matchData.player2}
                                      </span>
                                      <small className="text-muted">
                                        {matchData.matchType === 'alternating' ? 
-                                         matchData.team2PlayerTeams?.join(' & ') : matchData.player2Team}
+                                         matchData.team2PlayerTeams?.join(' & ') : matchData.matchType === '2v2' ? matchData.team2?.join(' & ') : matchData.player2Team}
                                      </small>
                                    </div>
                                  </div>
@@ -413,7 +423,7 @@ const ScoreEntryModal = ({ show, onHide, match, onSave }) => {
                                      onClick={() => handleHoleResult(currentHole, 'player1_win')}
                                      active={holeResults[currentHole]?.result === 'player1_win'}
                                    >
-                                     {matchData.matchType === 'alternating' ? matchData.soloPlayer : matchData.player1} Wins
+                                     {matchData.matchType === 'alternating' ? matchData.soloPlayer : matchData.matchType === '2v2' ? 'Putt Pirates' : matchData.player1} Wins
                                    </Button>
                                  </Col>
                                  <Col xs={4}>
@@ -433,7 +443,7 @@ const ScoreEntryModal = ({ show, onHide, match, onSave }) => {
                                      onClick={() => handleHoleResult(currentHole, 'player2_win')}
                                      active={holeResults[currentHole]?.result === 'player2_win'}
                                    >
-                                     {matchData.matchType === 'alternating' ? matchData.team2Players?.join(' & ') : matchData.player2} Wins
+                                     {matchData.matchType === 'alternating' ? matchData.team2Players?.join(' & ') : matchData.matchType === '2v2' ? 'Golden Boys' : matchData.player2} Wins
                                    </Button>
                                  </Col>
                                </Row>
