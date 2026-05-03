@@ -405,21 +405,17 @@ const Home = () => {
                   />
                 </div>
 
-                <br/>
                 <button 
                   type="submit" 
-                  className="btn btn-success w-100"
+                  className="btn btn-success w-100 mt-3"
                 >
                   Submit Score
                 </button>
               </form>
-              
-              <br/>
-
 
               {/* Leaderboard Table */}
-              <h2 className="text-2xl font-semibold mb-4">Leaderboard</h2>
-              <table className="table table-bordered mb-8">
+              <h2 className="text-2xl font-semibold mt-4 mb-3">Leaderboard</h2>
+              <table className="table table-bordered">
                 <thead>
                   <tr>
                     <th>Player</th>
@@ -439,23 +435,30 @@ const Home = () => {
               </table>
 
               {/* Previous Scores Table */}
-              <h2 className="text-2xl font-semibold mb-4">Previous Scores</h2>
-              <select onChange={(e) => setFilterPlayer(e.target.value)} value={filterPlayer} className="form-control mb-4">
-                <option value="">-- Select Player --</option>
-                {players.map((player) => (
-                  <option key={player.id} value={player.name}>{player.name}</option>
-                ))}
-              </select>
-
-              <select onChange={(e) => setFilterCourse(e.target.value)} value={filterCourse} className="form-control mb-4">
-                <option value="">-- Select Course --</option>
-                {courses.map((course) => (
-                  <option key={course.id} value={course.course}>{course.course}</option>
-                ))}
-              </select>
+              <h2 className="text-2xl font-semibold mt-4 mb-3">Previous Scores</h2>
+              <div className="d-flex gap-3 mb-3">
+                <div className="flex-fill">
+                  <label className="form-label text-muted small mb-1">Filter by Player</label>
+                  <select onChange={(e) => setFilterPlayer(e.target.value)} value={filterPlayer} className="form-control">
+                    <option value="">All Players</option>
+                    {players.map((player) => (
+                      <option key={player.id} value={player.name}>{player.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex-fill">
+                  <label className="form-label text-muted small mb-1">Filter by Course</label>
+                  <select onChange={(e) => setFilterCourse(e.target.value)} value={filterCourse} className="form-control">
+                    <option value="">All Courses</option>
+                    {courses.map((course) => (
+                      <option key={course.id} value={course.course}>{course.course}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
 
               <div className="table-responsive-wrapper">
-                <table className="table table-bordered table-hover scores-table mb-4">
+                <table className="table table-bordered table-hover scores-table">
                   <thead>
                     <tr>
                       <th className="col-player">Player</th>
@@ -495,7 +498,7 @@ const Home = () => {
                 </table>
               </div>
 
-              <div className="pagination d-flex justify-content-center gap-4">
+              <div className="pagination d-flex justify-content-center align-items-center gap-3 mt-3">
                 <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 0} className="btn btn-success">Previous</button>
                 <span className="text-lg">Page {currentPage + 1} of {totalPages}</span>
                 <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages - 1} className="btn btn-success">Next</button>

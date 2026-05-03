@@ -193,10 +193,7 @@ body {
   padding: 0 !important;
 }
 
-/* Remove Bootstrap's default margins */
-.mb-4 {
-  margin-bottom: 0 !important;
-}
+
 
 .app-wrapper {
   display: flex;
