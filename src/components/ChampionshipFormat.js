@@ -17,7 +17,7 @@ const ChampionshipFormat = ({ event, players, onSave }) => {
     const unsubscribe = onSnapshot(teamsRef, (doc) => {
       if (doc.exists()) {
         const data = doc.data();
-        console.log('Teams data:', data); // Debug log
+
         setTeam1Players(data.puttPirates || []);
         setTeam2Players(data.goldenBoys || []);
       }
@@ -51,11 +51,7 @@ const ChampionshipFormat = ({ event, players, onSave }) => {
     return () => unsubscribe();
   }, [event.date]);
 
-  // Debug log when teams change
-  useEffect(() => {
-    console.log('Team1Players:', team1Players);
-    console.log('Team2Players:', team2Players);
-  }, [team1Players, team2Players]);
+
 
   // Add a team selection modal
   const [showTeamModal, setShowTeamModal] = useState(false);

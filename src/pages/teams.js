@@ -5,7 +5,7 @@ import { getFirestore, setDoc, doc, onSnapshot, deleteField } from 'firebase/fir
 import { getTeams, getPlayers, getPlayerHandicaps, updateTeam } from '../firebase';
 import NavigationMenu from '../components/NavigationMenu';
 import FloatingNavigation from '../components/FloatingNavigation';
-import 'bootstrap/dist/css/bootstrap.min.css';
+
 import Image from 'next/image';
 
 const Teams = () => {

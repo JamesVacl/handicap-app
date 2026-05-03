@@ -6,7 +6,6 @@ const HeadToHeadStats = ({ matches, matchResults }) => {
   useEffect(() => {
     const calculateH2H = () => {
       if (!matches || !matchResults) {
-        console.log('Missing data:', { matches, matchResults });
         return;
       }
 
@@ -18,13 +17,11 @@ const HeadToHeadStats = ({ matches, matchResults }) => {
       matchesArray.forEach(match => {
         // Skip if no match data or result
         if (!match?.id || !match?.player1 || !match?.player2) {
-          console.log('Invalid match data:', match);
           return;
         }
 
         const result = matchResults[match.id];
         if (!result?.winner) {
-          console.log('No result for match:', match.id);
           return;
         }
 
@@ -47,7 +44,6 @@ const HeadToHeadStats = ({ matches, matchResults }) => {
         records[pairKey].matches++;
       });
 
-      console.log('Final records:', records);
       setH2hRecords(records);
     };
 

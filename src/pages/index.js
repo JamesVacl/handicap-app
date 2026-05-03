@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getPlayers, getCourses, getScores, addScore, addCourse, signIn, signOutUser } from 'src/firebase';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
-import 'bootstrap/dist/css/bootstrap.min.css';
+
 import { Modal, Button } from 'react-bootstrap';
 import Image from 'next/image'; // Import the Image component from Next.js
 import NavigationMenu from 'src/components/NavigationMenu';
@@ -56,6 +56,8 @@ const Home = () => {
   const [rating, setRating] = useState('');
   const [slope, setSlope] = useState('');
   const [newCourse, setNewCourse] = useState('');
+  const [newCourseRating, setNewCourseRating] = useState('');
+  const [newCourseSlope, setNewCourseSlope] = useState('');
   const [showAddCourseModal, setShowAddCourseModal] = useState(false);
   const [authenticated, setAuthenticated] = useState(false);
   const [email, setEmail] = useState('');
@@ -238,7 +240,7 @@ const Home = () => {
 
   const handleAddCourseSubmit = async (e) => {
     e.preventDefault();
-    await addCourse({ course: newCourse, rating: parseFloat(rating), slope: parseFloat(slope) });
+    await addCourse({ course: newCourse, rating: parseFloat(newCourseRating), slope: parseFloat(newCourseSlope) });
     alert("New course added!");
     setShowAddCourseModal(false);
     // Refresh the courses list
@@ -246,8 +248,8 @@ const Home = () => {
     setCourses(courseList);
     // Reset the form fields
     setNewCourse('');
-    setRating('');
-    setSlope('');
+    setNewCourseRating('');
+    setNewCourseSlope('');
   };
 
   const filteredScores = scores.filter((score) => {
@@ -507,8 +509,8 @@ const Home = () => {
                   <input 
                     type="number" 
                     placeholder="Rating" 
-                    value={rating} 
-                    onChange={(e) => setRating(e.target.value)} 
+                    value={newCourseRating} 
+                    onChange={(e) => setNewCourseRating(e.target.value)} 
                     className="form-control" 
                   />
                 </div>
@@ -517,8 +519,8 @@ const Home = () => {
                   <input 
                     type="number" 
                     placeholder="Slope" 
-                    value={slope} 
-                    onChange={(e) => setSlope(e.target.value)} 
+                    value={newCourseSlope} 
+                    onChange={(e) => setNewCourseSlope(e.target.value)} 
                     className="form-control" 
                   />
                 </div>

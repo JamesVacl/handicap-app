@@ -3,7 +3,8 @@ import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore, doc, setDoc, onSnapshot, collection, getDocs, deleteField } from 'firebase/firestore'; // Add this import
 import { useRouter } from 'next/router';
 import { Navbar, Nav, Container } from 'react-bootstrap';
-import 'bootstrap/dist/css/bootstrap.min.css';  // Add this if not already in _app.js
+
+
 import NavigationMenu from '../components/NavigationMenu';
 import FloatingNavigation from '../components/FloatingNavigation';
 import WeatherForecast from '../components/WeatherForecast';

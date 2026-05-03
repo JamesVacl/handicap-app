@@ -8,7 +8,7 @@ import { getPlayerHandicaps, getPlayers } from '../firebase';
 import NavigationMenu from '../components/NavigationMenu';
 import FloatingNavigation from '../components/FloatingNavigation';
 import ScoreEntryModal from '../components/ScoreEntryModal';
-import 'bootstrap/dist/css/bootstrap.min.css';
+
 import Image from 'next/image';
 
 const Results = () => {

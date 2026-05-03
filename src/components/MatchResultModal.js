@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Modal, Button, Form } from 'react-bootstrap';
 
 const MatchResultModal = ({ show, onHide, match, onSave }) => {
