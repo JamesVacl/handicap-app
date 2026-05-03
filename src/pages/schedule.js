@@ -23,6 +23,11 @@ const Schedule = () => {
   const [selectedEventIndex, setSelectedEventIndex] = useState(null);
   const [selectedTimeIndex, setSelectedTimeIndex] = useState(null);
   const [playerHandicaps, setPlayerHandicaps] = useState({});
+  const [expandedGroups, setExpandedGroups] = useState({});
+
+  const toggleGroup = (key) => {
+    setExpandedGroups(prev => ({ ...prev, [key]: !prev[key] }));
+  };
 
   const formatTime = (timeString) => {
     const [hours, minutes] = timeString.split(':');
@@ -318,14 +323,18 @@ const Schedule = () => {
       <FloatingNavigation />
       <div className="home-container">
         <div className="overlay"></div>
-        <div className="content">
-          <h1 className="text-4xl font-semibold mb-8 cursive-font text-center">Schedule</h1>
+        <div className="content glass-panel" style={{ maxWidth: '1400px' }}>
+          <h1 className="text-5xl font-extrabold mb-2 text-center hero-title">Tournament Schedule</h1>
+          <p className="text-center text-gray-600 mb-8 font-medium">Guyscorp Golf Weekend 2026</p>
           
-          {/* Schedule Content */}
-          <div className="schedule-content mb-8">
-            {scheduleData.map((event, index) => (
-              <div key={index} className="schedule-section mb-6">
-                <div className="schedule-info mb-3">
+          <div className="schedule-layout">
+            {/* Left Column: Schedule Feed */}
+            <div className="schedule-content">
+              <div className="timeline-container">
+                {scheduleData.map((event, index) => (
+                  <div key={index} className="schedule-section glass-card mb-8 position-relative p-4 p-md-5">
+                    <div className="timeline-node"></div>
+                    <div className="schedule-info mb-4">
                   {event.date && (
                     <h2 className="text-3xl font-bold mb-4">{formatDate(event.date)}</h2>
                   )}
@@ -353,62 +362,74 @@ const Schedule = () => {
           </button>
         </div>
         {(matchesByTeeTimeKey[`${index}-${timeIndex}`] || [])
-  .map(([key, match], matchIndex) => (
-    <div key={key} className="match-info mb-3 p-2 bg-success bg-opacity-10 rounded">
-      <div className="d-flex justify-content-between align-items-center">
-        <div className="text-center">
-          <span className="d-block">{match.player1}</span>
-          <small className="text-muted">
-            ({playerHandicaps[match.player1]?.toFixed(1) || 'N/A'})
-          </small>
-        </div>
-        <small className="text-success mx-2">vs</small>
-        <div className="text-center">
-          <span className="d-block">{match.player2}</span>
-          <small className="text-muted">
-            ({playerHandicaps[match.player2]?.toFixed(1) || 'N/A'})
-          </small>
-        </div>
-        <button 
-          className="btn btn-sm btn-outline-danger ms-3"
-          onClick={() => handleDeleteMatch(index, timeIndex, key)}
-          title="Delete Match"
-        >
-          ×
-        </button>
-      </div>
-      <small className="d-block text-muted mt-1">
-        Format: {match.format} | 
-        {match.strokesGiven > 0 ? (
-          `${match.receivingStrokes} receives ${match.strokesGiven}`
-        ) : (
-          'Even Match'
-        )}
-      </small>
-    </div>
-  ))}
-        <div className="player-slots">
-          {[0, 1, 2, 3].map((playerSlot) => (
-            <select
-              key={playerSlot}
-              className="form-select mb-2"
-              value={teeTimeAssignments[`${index}-${timeIndex}-${playerSlot}`] || ''}
-              onChange={(e) => handlePlayerAssignment(index, timeIndex, playerSlot, e.target.value)}
-            >
-              <option value="">-- Select Player --</option>
-              {players
-                .filter(player => {
-                  const teeTimePlayers = assignedPlayersByTeeTimeKey[`${index}-${timeIndex}`] || new Set();
-                  return !teeTimePlayers.has(player) || 
-                         teeTimeAssignments[`${index}-${timeIndex}-${playerSlot}`] === player;
-                })
-                .map((player) => (
-                  <option key={player} value={player}>
-                    {player}
-                  </option>
-                ))}
-            </select>
+          .map(([key, match], matchIndex) => (
+            <div key={key} className="vs-matchup-card position-relative">
+              <div className="vs-player-side">
+                <span className="vs-player-name">{match.player1}</span>
+                <span className="vs-player-hdcp">HDCP: {playerHandicaps[match.player1]?.toFixed(1) || 'N/A'}</span>
+              </div>
+              
+              <div className="vs-badge-container">
+                <div className="vs-badge">VS</div>
+                {match.strokesGiven > 0 && (
+                  <div className="strokes-given-badge">
+                    {match.receivingStrokes} gets +{match.strokesGiven}
+                  </div>
+                )}
+              </div>
+              
+              <div className="vs-player-side">
+                <span className="vs-player-name">{match.player2}</span>
+                <span className="vs-player-hdcp">HDCP: {playerHandicaps[match.player2]?.toFixed(1) || 'N/A'}</span>
+              </div>
+              
+              <button 
+                className="btn btn-sm btn-outline-danger position-absolute"
+                style={{ top: '8px', right: '8px', padding: '0px 6px' }}
+                onClick={() => handleDeleteMatch(index, timeIndex, key)}
+                title="Delete Match"
+              >
+                ×
+              </button>
+            </div>
           ))}
+        
+        <div className="mt-3">
+          <button 
+            className="btn btn-outline-success btn-manage-group w-100 mb-2"
+            onClick={() => toggleGroup(`${index}-${timeIndex}`)}
+          >
+            {expandedGroups[`${index}-${timeIndex}`] ? 'Hide Group Management ▲' : 'Manage Tee Time Group ▼'}
+          </button>
+          
+          {expandedGroups[`${index}-${timeIndex}`] && (
+            <div className="player-slots p-3 bg-light rounded border w-100" style={{maxWidth: 'none'}}>
+              <div className="row g-2">
+                {[0, 1, 2, 3].map((playerSlot) => (
+                  <div className="col-12 col-md-6" key={playerSlot}>
+                    <select
+                      className="form-select shadow-sm"
+                      value={teeTimeAssignments[`${index}-${timeIndex}-${playerSlot}`] || ''}
+                      onChange={(e) => handlePlayerAssignment(index, timeIndex, playerSlot, e.target.value)}
+                    >
+                      <option value="">-- Select Player --</option>
+                      {players
+                        .filter(player => {
+                          const teeTimePlayers = assignedPlayersByTeeTimeKey[`${index}-${timeIndex}`] || new Set();
+                          return !teeTimePlayers.has(player) || 
+                                 teeTimeAssignments[`${index}-${timeIndex}-${playerSlot}`] === player;
+                        })
+                        .map((player) => (
+                          <option key={player} value={player}>
+                            {player}
+                          </option>
+                        ))}
+                    </select>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     ))}
@@ -426,24 +447,38 @@ const Schedule = () => {
                     <div className="tee-times">
                       {event.additionalRound.teeTimes.map((time, timeIndex) => (
                         <div key={timeIndex} className="tee-time-slot mb-4">
-                          <h4 className="text-xl font-semibold">{formatTime(time)}</h4>
-                          <div className="player-slots">
-                            {[0, 1, 2, 3].map((playerSlot) => (    // Changed from [0, 1, 2]
-                              <select
-                                key={playerSlot}
-                                className="form-select mb-2"
-                                value={teeTimeAssignments[`${index}-additional-${timeIndex}-${playerSlot}`] || ''}
-                                onChange={(e) => handlePlayerAssignment(index, `additional-${timeIndex}`, playerSlot, e.target.value)}
-                              >
-                                <option value="">-- Select Player --</option>
-                                {players.map((player) => (
-                                  <option key={player} value={player}>
-                                    {player}
-                                  </option>
-                                ))}
-                              </select>
-                            ))}
+                          <div className="d-flex justify-content-between align-items-center mb-2">
+                            <h4 className="text-xl font-semibold mb-0">{formatTime(time)}</h4>
+                            <button 
+                              className="btn btn-outline-success btn-manage-group"
+                              onClick={() => toggleGroup(`${index}-additional-${timeIndex}`)}
+                            >
+                              {expandedGroups[`${index}-additional-${timeIndex}`] ? 'Hide ▲' : 'Manage ▼'}
+                            </button>
                           </div>
+                          
+                          {expandedGroups[`${index}-additional-${timeIndex}`] && (
+                            <div className="player-slots p-3 bg-light rounded border w-100" style={{maxWidth: 'none'}}>
+                              <div className="row g-2">
+                                {[0, 1, 2, 3].map((playerSlot) => (
+                                  <div className="col-12 col-md-6" key={playerSlot}>
+                                    <select
+                                      className="form-select shadow-sm"
+                                      value={teeTimeAssignments[`${index}-additional-${timeIndex}-${playerSlot}`] || ''}
+                                      onChange={(e) => handlePlayerAssignment(index, `additional-${timeIndex}`, playerSlot, e.target.value)}
+                                    >
+                                      <option value="">-- Select Player --</option>
+                                      {players.map((player) => (
+                                        <option key={player} value={player}>
+                                          {player}
+                                        </option>
+                                      ))}
+                                    </select>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>
@@ -451,20 +486,22 @@ const Schedule = () => {
                 )}
               </div>
             ))}
-          </div>
+            </div> {/* End Timeline container */}
+          </div> {/* End Schedule Content Left Column */}
 
-          {/* Weather Section at bottom */}
-          <div className="weather-section mt-12 pt-8 border-t border-gray-200">
-            <h2 className="text-3xl font-bold mb-6 text-center">Weather Forecast</h2>
-            <div className="weather-grid">
+          {/* Right Sidebar - Weather */}
+          <aside className="weather-sidebar glass-panel border-0" style={{ background: 'rgba(255, 255, 255, 0.95)' }}>
+            <h3 className="text-2xl font-bold mb-4 text-dark text-center" style={{ borderBottom: '2px solid #50C878', paddingBottom: '0.5rem' }}>Course Conditions</h3>
+            <div className="d-flex flex-column gap-4 mt-4">
               {weatherCities.map((city, index) => (
-                <div key={index} className="weather-card">
-                  <h3 className="text-xl font-semibold mb-3">{city.split(',')[0]}</h3>
+                <div key={index} className="weather-card bg-white shadow-sm rounded p-3 border border-light">
+                  <h4 className="text-lg font-semibold mb-2 text-success" style={{ borderBottom: '1px solid #eee', paddingBottom: '0.25rem' }}>{city.split(',')[0]}</h4>
                   <WeatherForecast city={city} />
                 </div>
               ))}
             </div>
-          </div>
+          </aside>
+          </div> {/* End Schedule Layout Grid */}
         </div>
       </div>
       <MatchSetupModal 
