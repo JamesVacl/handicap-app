@@ -44,11 +44,9 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(
-    180deg,
-    rgba(0, 0, 0, 0.46) 0%,
-    rgba(0, 0, 0, 0.5) 100%
-  );
+  background: linear-gradient(180deg,
+      rgba(0, 0, 0, 0.46) 0%,
+      rgba(0, 0, 0, 0.5) 100%);
   z-index: 1;
 }
 
@@ -82,17 +80,21 @@ body {
 }
 
 .passcode-form {
-  width: 100%; /* Double the width of the form */
-  max-width: 600px; /* Ensure it doesn't exceed a reasonable width */
+  width: 100%;
+  /* Double the width of the form */
+  max-width: 600px;
+  /* Ensure it doesn't exceed a reasonable width */
 }
 
 .btn-primary {
-  background-color: #50C878; /* Emerald green */
+  background-color: #50C878;
+  /* Emerald green */
   border-color: #50C878;
 }
 
 .btn-primary:hover {
-  background-color: #3DAA6B; /* Darker emerald green */
+  background-color: #3DAA6B;
+  /* Darker emerald green */
   border-color: #3DAA6B;
 }
 
@@ -106,12 +108,14 @@ body {
 }
 
 .pagination .btn-primary {
-  background-color: #50C878; /* Emerald green */
+  background-color: #50C878;
+  /* Emerald green */
   border-color: #50C878;
 }
 
 .pagination .btn-primary:hover {
-  background-color: #3DAA6B; /* Darker emerald green */
+  background-color: #3DAA6B;
+  /* Darker emerald green */
   border-color: #3DAA6B;
 }
 
@@ -150,7 +154,7 @@ body {
 }
 
 .nav-link {
-  color: rgba(255,255,255,.8) !important;
+  color: rgba(255, 255, 255, .8) !important;
   border-radius: 999px;
   transition: background-color 0.2s ease, color 0.2s ease;
 }
@@ -207,14 +211,16 @@ body {
 }
 
 .schedule-info h2 {
-  color: #1a4731; /* Dark green for dates */
+  color: #1a4731;
+  /* Dark green for dates */
   font-weight: 600;
   margin-bottom: 1rem;
 }
 
 .schedule-info h3,
 .additional-round h3 {
-  color: #48bb78; /* Keep existing green for course names */
+  color: #48bb78;
+  /* Keep existing green for course names */
   font-weight: 600;
   margin-bottom: 1rem;
 }
@@ -314,14 +320,15 @@ body {
   background: rgba(255, 255, 255, 0.95);
   padding: 1rem;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  min-width: 250px; /* Increased min-width */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  min-width: 250px;
+  /* Increased min-width */
   margin-left: 1rem;
 }
 
 .forecast-day {
   padding: 0.5rem;
-  border-bottom: 1px solid rgba(0,0,0,0.1);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .forecast-day:last-child {
@@ -361,7 +368,7 @@ body {
   color: #2c5282;
   font-weight: 500;
   padding-left: 8px;
-  border-left: 1px solid rgba(0,0,0,0.1);
+  border-left: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .conditions {
@@ -398,7 +405,7 @@ body {
   padding-bottom: 0.5rem;
 }
 
-.weather-sidebar > div:last-child {
+.weather-sidebar>div:last-child {
   margin-bottom: 0;
 }
 
@@ -470,7 +477,7 @@ body {
 .uv-index {
   color: #805ad5;
   font-weight: 500;
-  border-left: 1px solid rgba(0,0,0,0.1);
+  border-left: 1px solid rgba(0, 0, 0, 0.1);
   padding-left: 8px;
 }
 
@@ -495,7 +502,8 @@ body {
 /* Add this after your existing styles */
 
 .used-for-differential {
-  color: #e53e3e !important; /* Red color for highlighted scores */
+  color: #e53e3e !important;
+  /* Red color for highlighted scores */
   font-weight: 500;
 }
 
@@ -519,18 +527,35 @@ body {
   width: 100%;
 }
 
-.scores-table th, 
+.scores-table th,
 .scores-table td {
   padding: 0.75rem !important;
 }
 
 /* Column width distributions */
-.col-player { width: 18%; }
-.col-course { width: 30%; }
-.col-score { width: 12%; }
-.col-type { width: 15%; }
-.col-differential { width: 12%; }
-.col-date { width: 13%; }
+.col-player {
+  width: 18%;
+}
+
+.col-course {
+  width: 30%;
+}
+
+.col-score {
+  width: 12%;
+}
+
+.col-type {
+  width: 15%;
+}
+
+.col-differential {
+  width: 12%;
+}
+
+.col-date {
+  width: 13%;
+}
 
 /* Table wrapper for horizontal scrolling on mobile */
 .table-responsive-wrapper {
@@ -862,16 +887,19 @@ body {
   border: none;
 }
 
-.team-row, .player-row {
+.team-row,
+.player-row {
   transition: all 0.2s ease;
 }
 
-.team-row:hover, .player-row:hover {
+.team-row:hover,
+.player-row:hover {
   background: rgba(80, 200, 120, 0.05);
   border-radius: 6px;
 }
 
-.team-name, .player-name {
+.team-name,
+.player-name {
   font-weight: 600;
   color: #2c5530;
 }
@@ -1130,6 +1158,7 @@ body {
 
 /* Responsive Design */
 @media (max-width: 768px) {
+
   .btn,
   .form-control,
   .form-select {
@@ -1154,16 +1183,16 @@ body {
     flex-direction: column;
     align-items: center;
   }
-  
+
   .nav-tab {
     width: 100%;
     max-width: 200px;
   }
-  
+
   .match-card {
     margin-bottom: 1rem;
   }
-  
+
   .stat-value {
     font-size: 1.5rem;
   }
@@ -1230,6 +1259,7 @@ body {
   0% {
     background-position: -200px 0;
   }
+
   100% {
     background-position: calc(200px + 100%) 0;
   }
@@ -1344,6 +1374,7 @@ body {
     opacity: 0;
     transform: translateX(-50%) translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateX(-50%) translateY(0);
@@ -1355,26 +1386,26 @@ body {
   .floating-nav-container {
     padding: 6px;
   }
-  
+
   .floating-nav-item {
     padding: 6px 8px;
     margin: 0 2px;
     min-width: 50px;
   }
-  
+
   .nav-icon {
     font-size: 1rem;
   }
-  
+
   .nav-label {
     font-size: 0.6rem;
   }
-  
+
   .drag-handle {
     font-size: 0.7rem;
     padding: 1px 6px;
   }
-  
+
   /* Prevent text selection during drag on mobile */
   .floating-navigation {
     -webkit-user-select: none;
