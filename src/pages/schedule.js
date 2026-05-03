@@ -9,8 +9,9 @@ import { Navbar, Nav, Container } from 'react-bootstrap';
 import NavigationMenu from '../components/NavigationMenu';
 import FloatingNavigation from '../components/FloatingNavigation';
 import WeatherForecast from '../components/WeatherForecast';
-import MatchSetupModal from '../components/MatchSetupModal'; // Add this import
-import { calculateLeaderboard } from '../firebase'; // Add this import at the top
+import MatchSetupModal from '../components/MatchSetupModal';
+import TeamMatchSetupModal from '../components/TeamMatchSetupModal';
+import { calculateLeaderboard } from '../firebase';
 
 
 const Schedule = () => {
@@ -20,6 +21,7 @@ const Schedule = () => {
   const [teeTimeAssignments, setTeeTimeAssignments] = useState({});
   const [matches, setMatches] = useState({});
   const [showMatchModal, setShowMatchModal] = useState(false);
+  const [showTeamMatchModal, setShowTeamMatchModal] = useState(false);
   const [selectedEventIndex, setSelectedEventIndex] = useState(null);
   const [selectedTimeIndex, setSelectedTimeIndex] = useState(null);
   const [playerHandicaps, setPlayerHandicaps] = useState({});
@@ -247,6 +249,63 @@ const Schedule = () => {
     }
   };
 
+  const handleTeamMatchSetup = async (eventIndex, timeIndex, matchData) => {
+    if (!authenticated) return;
+    
+    const db = getFirestore();
+    const baseKey = `${eventIndex}-${timeIndex}`;
+    
+    const existingMatches = Object.keys(matches)
+      .filter(key => key.startsWith(baseKey))
+      .length;
+    
+    const key = `${baseKey}-match${existingMatches + 1}`;
+    
+    const t1p1Hdcp = playerHandicaps[matchData.team1Player1] || 0;
+    const t1p2Hdcp = playerHandicaps[matchData.team1Player2] || 0;
+    const t2p1Hdcp = playerHandicaps[matchData.team2Player1] || 0;
+    const t2p2Hdcp = playerHandicaps[matchData.team2Player2] || 0;
+
+    const team1Hdcp = (t1p1Hdcp + t1p2Hdcp) / 2;
+    const team2Hdcp = (t2p1Hdcp + t2p2Hdcp) / 2;
+    const strokesGiven = Math.round(Math.abs(team1Hdcp - team2Hdcp));
+
+    try {
+      await setDoc(doc(db, 'matches', '2025-schedule'), {
+        ...matches,
+        [key]: {
+          matchType: '2v2',
+          format: matchData.format,
+          team1: [matchData.team1Player1, matchData.team1Player2],
+          team2: [matchData.team2Player1, matchData.team2Player2],
+          strokesGiven: strokesGiven,
+          receivingStrokes: team1Hdcp > team2Hdcp ? matchData.team1Player1 + ' & ' + matchData.team1Player2 : matchData.team2Player1 + ' & ' + matchData.team2Player2,
+          createdAt: new Date()
+        }
+      }, { merge: true });
+      
+      // Save to Live Matches as well
+      const liveMatchKey = `team-match-${Date.now()}`;
+      await setDoc(doc(db, 'liveMatches', '2025'), {
+        [liveMatchKey]: {
+          matchType: '2v2',
+          format: matchData.format,
+          team1: [matchData.team1Player1, matchData.team1Player2],
+          team2: [matchData.team2Player1, matchData.team2Player2],
+          courseName: scheduleData[eventIndex].courseName,
+          date: scheduleData[eventIndex].date,
+          teeTime: scheduleData[eventIndex].teeTimes[timeIndex],
+          status: 'not_started',
+          createdAt: new Date(),
+          currentScore: { player1Score: 0, player2Score: 0, holesPlayed: 0 }
+        }
+      }, { merge: true });
+      
+    } catch (error) {
+      console.error('Error saving team match:', error);
+    }
+  };
+
   // Modify the handleDeleteMatch function
   const handleDeleteMatch = async (eventIndex, timeIndex, key) => {
     if (!authenticated) return;
@@ -349,23 +408,39 @@ const Schedule = () => {
       <div key={timeIndex} className="tee-time-slot mb-4">
         <div className="tee-time-header d-flex justify-content-between align-items-center mb-3">
           <h4 className="text-xl font-semibold mb-0">{formatTime(time)}</h4>
-          <button 
-            className="btn btn-sm btn-outline-success"
-            onClick={() => {
-              setSelectedEventIndex(index);
-              setSelectedTimeIndex(timeIndex);
-              setShowMatchModal(true);
-            }}
-          >
-            Set Match
-          </button>
+          <div className="d-flex gap-2">
+            <button 
+              className="btn btn-sm btn-outline-success"
+              onClick={() => {
+                setSelectedEventIndex(index);
+                setSelectedTimeIndex(timeIndex);
+                setShowMatchModal(true);
+              }}
+            >
+              Set 1v1
+            </button>
+            <button 
+              className="btn btn-sm btn-outline-success"
+              onClick={() => {
+                setSelectedEventIndex(index);
+                setSelectedTimeIndex(timeIndex);
+                setShowTeamMatchModal(true);
+              }}
+            >
+              Set 2v2
+            </button>
+          </div>
         </div>
         {(matchesByTeeTimeKey[`${index}-${timeIndex}`] || [])
           .map(([key, match], matchIndex) => (
             <div key={key} className="vs-matchup-card position-relative">
               <div className="vs-player-side">
-                <span className="vs-player-name">{match.player1}</span>
-                <span className="vs-player-hdcp">HDCP: {playerHandicaps[match.player1]?.toFixed(1) || 'N/A'}</span>
+                <span className="vs-player-name text-break">
+                  {match.matchType === '2v2' ? match.team1?.join(' & ') : match.player1}
+                </span>
+                <span className="vs-player-hdcp">
+                  {match.matchType === '2v2' ? 'Putt Pirates' : `HDCP: ${playerHandicaps[match.player1]?.toFixed(1) || 'N/A'}`}
+                </span>
               </div>
               
               <div className="vs-badge-container">
@@ -375,11 +450,18 @@ const Schedule = () => {
                     {match.receivingStrokes} gets +{match.strokesGiven}
                   </div>
                 )}
+                {match.matchType === '2v2' && (
+                  <span className="badge bg-success mt-1">{match.format}</span>
+                )}
               </div>
               
               <div className="vs-player-side">
-                <span className="vs-player-name">{match.player2}</span>
-                <span className="vs-player-hdcp">HDCP: {playerHandicaps[match.player2]?.toFixed(1) || 'N/A'}</span>
+                <span className="vs-player-name text-break">
+                  {match.matchType === '2v2' ? match.team2?.join(' & ') : match.player2}
+                </span>
+                <span className="vs-player-hdcp">
+                  {match.matchType === '2v2' ? 'Golden Boys' : `HDCP: ${playerHandicaps[match.player2]?.toFixed(1) || 'N/A'}`}
+                </span>
               </div>
               
               <button 
@@ -508,6 +590,12 @@ const Schedule = () => {
         onHide={() => setShowMatchModal(false)}
         players={players}
         onSave={(matchData) => handleMatchSetup(selectedEventIndex, selectedTimeIndex, matchData)}
+      />
+      <TeamMatchSetupModal 
+        show={showTeamMatchModal}
+        onHide={() => setShowTeamMatchModal(false)}
+        players={players}
+        onSave={(matchData) => handleTeamMatchSetup(selectedEventIndex, selectedTimeIndex, matchData)}
       />
     </div>
     </>

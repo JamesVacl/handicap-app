@@ -152,15 +152,19 @@ const Results = () => {
         // Player 1 is up
         if (match.matchType === 'alternating') {
           return `${typeof match.soloPlayer === 'string' ? match.soloPlayer : match.soloPlayer.name} ${diff}UP`;
+        } else if (match.matchType === '2v2') {
+          return `${match.team1?.join(' & ') || 'Putt Pirates'} ${diff}UP`;
         } else {
-                      return `${typeof match.player1 === 'string' ? match.player1 : (match.player1?.name || 'Unknown Player')} ${diff}UP`;
+          return `${typeof match.player1 === 'string' ? match.player1 : (match.player1?.name || 'Unknown Player')} ${diff}UP`;
         }
       } else {
         // Player 2 is up
         if (match.matchType === 'alternating') {
           return `${match.team2Players?.map(p => typeof p === 'string' ? p : p.name).join(' & ')} ${Math.abs(diff)}UP`;
+        } else if (match.matchType === '2v2') {
+          return `${match.team2?.join(' & ') || 'Golden Boys'} ${Math.abs(diff)}UP`;
         } else {
-                      return `${typeof match.player2 === 'string' ? match.player2 : (match.player2?.name || 'Unknown Player')} ${Math.abs(diff)}UP`;
+          return `${typeof match.player2 === 'string' ? match.player2 : (match.player2?.name || 'Unknown Player')} ${Math.abs(diff)}UP`;
         }
       }
     }
@@ -226,6 +230,14 @@ const Results = () => {
       } else {
         return 'Tie';
       }
+    } else if (match.matchType === '2v2') {
+      if (hole.result === 'player1_win') {
+        return `${match.team1?.join(' & ') || 'Putt Pirates'} wins`;
+      } else if (hole.result === 'player2_win') {
+        return `${match.team2?.join(' & ') || 'Golden Boys'} wins`;
+      } else {
+        return 'Tie';
+      }
     } else {
       // 1v1 match
       if (hole.result === 'player1_win') {
@@ -271,6 +283,19 @@ const Results = () => {
           } else {
             winner = team2Players;
             loser = soloPlayer;
+            finalScore = `${player2Score}&${player1Score}`;
+          }
+        } else if (match.matchType === '2v2') {
+          const t1 = match.team1?.join(' & ') || 'Putt Pirates';
+          const t2 = match.team2?.join(' & ') || 'Golden Boys';
+          
+          if (player1Score > player2Score) {
+            winner = t1;
+            loser = t2;
+            finalScore = `${player1Score}&${player2Score}`;
+          } else {
+            winner = t2;
+            loser = t1;
             finalScore = `${player2Score}&${player1Score}`;
           }
         } else {
@@ -335,6 +360,12 @@ const Results = () => {
         historyData.team1 = match.team1 || {};
         historyData.team2 = match.team2 || {};
         historyData.holeResults = match.holeResults || {};
+      } else if (match.matchType === '2v2') {
+        historyData.teeTime = match.teeTime || 'Unknown';
+        historyData.matchType = '2v2';
+        historyData.format = match.format || '2v2 Match';
+        historyData.player1 = match.team1?.join(' & ') || 'Putt Pirates';
+        historyData.player2 = match.team2?.join(' & ') || 'Golden Boys';
       } else {
         historyData.teeTime = match.teeTime || 'Unknown';
         historyData.player1 = match.matchType === 'alternating' ? 
@@ -473,7 +504,12 @@ const Results = () => {
               <Card className="match-card h-100">
                 <Card.Header className="match-header">
                   <div className="d-flex justify-content-between align-items-center">
-                    <h5 className="mb-0">{match.courseName}</h5>
+                    <h5 className="mb-0">
+                      {match.courseName}
+                      {match.matchType === '2v2' && (
+                        <Badge bg="info" className="ms-2">{match.format || '2v2'}</Badge>
+                      )}
+                    </h5>
                     <Badge bg={getStatusBadgeVariant(match.status)}>
                       {getMatchStatus(match)}
                     </Badge>
@@ -512,11 +548,11 @@ const Results = () => {
                         <div className="player-row d-flex justify-content-between align-items-center">
                           <div className="d-flex flex-column">
                             <span className="player-name">
-                              {match.matchType === 'alternating' ? (typeof match.soloPlayer === 'string' ? match.soloPlayer : (match.soloPlayer?.name || 'Unknown Player')) : (typeof match.player1 === 'string' ? match.player1 : (match.player1?.name || 'Unknown Player'))}
+                              {match.matchType === 'alternating' ? (typeof match.soloPlayer === 'string' ? match.soloPlayer : (match.soloPlayer?.name || 'Unknown Player')) : match.matchType === '2v2' ? (match.team1?.join(' & ') || 'Putt Pirates') : (typeof match.player1 === 'string' ? match.player1 : (match.player1?.name || 'Unknown Player'))}
                             </span>
                             <small className="text-muted">
                               {match.matchType === 'alternating' ? 
-                                (match.soloPlayerTeam || 'Unknown Team') : 
+                                (match.soloPlayerTeam || 'Unknown Team') : match.matchType === '2v2' ? 'Putt Pirates' :
                                 (match.player1Team || 'Unknown Team')}
                             </small>
                           </div>
@@ -525,11 +561,11 @@ const Results = () => {
                         <div className="player-row d-flex justify-content-between align-items-center">
                           <div className="d-flex flex-column">
                             <span className="player-name">
-                              {match.matchType === 'alternating' ? match.team2Players?.map(p => typeof p === 'string' ? p : p.name).join(' & ') : (typeof match.player2 === 'string' ? match.player2 : (match.player2?.name || 'Unknown Player'))}
+                              {match.matchType === 'alternating' ? match.team2Players?.map(p => typeof p === 'string' ? p : p.name).join(' & ') : match.matchType === '2v2' ? (match.team2?.join(' & ') || 'Golden Boys') : (typeof match.player2 === 'string' ? match.player2 : (match.player2?.name || 'Unknown Player'))}
                             </span>
                             <small className="text-muted">
                               {match.matchType === 'alternating' ? 
-                                (match.team2PlayerTeams?.join(' & ') || 'Unknown Team') : 
+                                (match.team2PlayerTeams?.join(' & ') || 'Unknown Team') : match.matchType === '2v2' ? 'Golden Boys' :
                                 (match.player2Team || 'Unknown Team')}
                             </small>
                           </div>
@@ -635,7 +671,12 @@ const Results = () => {
               <Card.Body>
                 <div className="d-flex justify-content-between align-items-start">
                   <div className="match-info">
-                    <h5 className="mb-1">{match.courseName}</h5>
+                    <h5 className="mb-1">
+                      {match.courseName}
+                      {match.matchType === '2v2' && (
+                        <Badge bg="info" className="ms-2">{match.format || '2v2'}</Badge>
+                      )}
+                    </h5>
                     <p className="text-muted mb-2">
                       {match.date} • {formatTeeTime(match.teeTime)}
                     </p>
