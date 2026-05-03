@@ -102,7 +102,6 @@ const Schedule = () => {
 
   const weatherCities = [
     'Niagara Falls, CA',
-    'London, CA',
   ];
 
   useEffect(() => {
