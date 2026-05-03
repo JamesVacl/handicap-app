@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getPlayers, getCourses, getScores, addScore, addCourse, signIn, signOutUser } from 'src/firebase';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import Head from 'next/head';
 
 import { Modal, Button } from 'react-bootstrap';
 import Image from 'next/image'; // Import the Image component from Next.js
@@ -50,6 +51,7 @@ const Home = () => {
   const [courses, setCourses] = useState([]);
   const [scores, setScores] = useState([]);
   const [leaderboard, setLeaderboard] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [selectedPlayer, setSelectedPlayer] = useState('');
   const [selectedCourse, setSelectedCourse] = useState('');
   const [score, setScore] = useState('');
@@ -116,6 +118,9 @@ const Home = () => {
 
         const leaderboardData = calculateLeaderboard(scoreList);
         setLeaderboard(leaderboardData);
+        setLoading(false);
+      } else {
+        setLoading(false);
       }
     };
     fetchData();
@@ -274,7 +279,12 @@ const Home = () => {
   const totalPages = Math.ceil(filteredScores.length / itemsPerPage);
 
   return (
-    <div className="app-wrapper">
+    <>
+      <Head>
+        <title>Guyscorp Golf - Handicap Tracking</title>
+        <meta name="description" content="Track golf handicaps, scores, and tournament standings for the Guyscorp golf group." />
+      </Head>
+      <div className="app-wrapper">
       {authenticated && <NavigationMenu />}
       <div className="home-container">
         <div className="overlay"></div>
@@ -314,6 +324,13 @@ const Home = () => {
                 </div>
                 <button type="submit" className="btn btn-success w-50">Sign In</button>
               </form>
+            </div>
+          ) : loading ? (
+            <div className="text-center py-5">
+              <div className="spinner-border text-success" role="status">
+                <span className="visually-hidden">Loading...</span>
+              </div>
+              <p className="text-muted mt-3">Loading your data...</p>
             </div>
           ) : (
             <div className="content">
@@ -534,6 +551,7 @@ const Home = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 

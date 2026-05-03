@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Container, Row, Col, Card, Button, Form, Badge } from 'react-bootstrap';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore, setDoc, doc, onSnapshot, deleteField } from 'firebase/firestore';
+import Head from 'next/head';
 import { getTeams, getPlayers, getPlayerHandicaps, updateTeam } from '../firebase';
 import NavigationMenu from '../components/NavigationMenu';
 import FloatingNavigation from '../components/FloatingNavigation';
@@ -248,7 +249,12 @@ const Teams = () => {
   }, [scheduledMatches]);
 
   return (
-    <div className="app-wrapper">
+    <>
+      <Head>
+        <title>Guyder Cup - Guyscorp Golf</title>
+        <meta name="description" content="Guyder Cup team rosters, handicaps, and scheduled matches for Guyscorp golf." />
+      </Head>
+      <div className="app-wrapper">
       {authenticated && <NavigationMenu />}
       <FloatingNavigation />
       <div className="home-container">
@@ -453,6 +459,7 @@ const Teams = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 

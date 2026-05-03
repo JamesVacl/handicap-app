@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore, doc, setDoc, onSnapshot, collection, getDocs, deleteField } from 'firebase/firestore'; // Add this import
 import { useRouter } from 'next/router';
+import Head from 'next/head';
 import { Navbar, Nav, Container } from 'react-bootstrap';
 
 
@@ -307,7 +308,12 @@ const Schedule = () => {
   }, [teeTimeAssignments]);
 
   return (
-    <div className="app-wrapper">
+    <>
+      <Head>
+        <title>Schedule - Guyscorp Golf</title>
+        <meta name="description" content="Tournament schedule, tee times, and weather forecasts for Guyscorp golf events." />
+      </Head>
+      <div className="app-wrapper">
       {authenticated && <NavigationMenu />}
       <FloatingNavigation />
       <div className="home-container">
@@ -468,6 +474,7 @@ const Schedule = () => {
         onSave={(matchData) => handleMatchSetup(selectedEventIndex, selectedTimeIndex, matchData)}
       />
     </div>
+    </>
   );
 };
 
