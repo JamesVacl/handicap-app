@@ -436,7 +436,7 @@ const Home = () => {
 
               {/* Previous Scores Table */}
               <h2 className="text-2xl font-semibold mt-4 mb-3">Previous Scores</h2>
-              <div className="d-flex gap-3 mb-3">
+              <div className="d-flex flex-column flex-md-row gap-3 mb-3">
                 <div className="flex-fill">
                   <label className="form-label text-muted small mb-1">Filter by Player</label>
                   <select onChange={(e) => setFilterPlayer(e.target.value)} value={filterPlayer} className="form-control">
