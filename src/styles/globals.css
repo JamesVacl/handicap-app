@@ -1530,15 +1530,14 @@ body {
 /* --- Schedule Redesign Styles --- */
 .schedule-layout {
   display: grid;
-  grid-template-columns: 1fr 320px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 450px), 1fr));
   gap: 2rem;
-  align-items: start;
+  width: 100%;
 }
 
-@media (max-width: 992px) {
-  .schedule-layout {
-    grid-template-columns: 1fr;
-  }
+.event-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  overflow: hidden;
 }
 
 /* Glassmorphism Classes */
@@ -1563,35 +1562,7 @@ body {
   box-shadow: 0 10px 24px rgba(80, 200, 120, 0.15);
 }
 
-/* Timeline */
-.timeline-container {
-  position: relative;
-  padding-left: 2rem;
-}
 
-.timeline-container::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  width: 4px;
-  background: linear-gradient(180deg, #50C878 0%, rgba(80, 200, 120, 0.2) 100%);
-  border-radius: 4px;
-}
-
-.timeline-node {
-  position: absolute;
-  left: -2.35rem;
-  top: 1.5rem;
-  width: 20px;
-  height: 20px;
-  background: #50C878;
-  border: 4px solid white;
-  border-radius: 50%;
-  box-shadow: 0 0 10px rgba(80, 200, 120, 0.5);
-  z-index: 2;
-}
 
 /* Versus Matchup Card */
 .vs-matchup-card {
@@ -1600,10 +1571,17 @@ body {
   justify-content: space-between;
   background: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(240,255,240,0.9) 100%);
   border-radius: 12px;
-  padding: 1rem;
+  padding: 1.25rem 1rem;
   margin-bottom: 1rem;
-  border: 1px solid rgba(80, 200, 120, 0.4);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  border: 1px solid rgba(80, 200, 120, 0.3);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.vs-matchup-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(80, 200, 120, 0.15);
+  border-color: rgba(80, 200, 120, 0.6);
 }
 
 .vs-player-side {
