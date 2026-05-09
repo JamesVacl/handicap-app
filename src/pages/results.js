@@ -52,10 +52,10 @@ const formatMatchScore = (match) => {
 };
 
 const getMatchStatus = (match) => {
-  if (!match.status) return 'Not Started';
+  if (!match.status || match.status === 'not_started') return 'Not Started';
   if (match.status === 'completed') return 'Completed';
   if (match.status === 'in_progress') return 'In Progress';
-  return match.status;
+  return match.status.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
 };
 
 const getStatusBadgeVariant = (status) => {
