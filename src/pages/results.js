@@ -128,7 +128,7 @@ const LiveMatchesTab = ({
       <p className="text-muted">Real-time updates from the course</p>
     </div>
 
-    {liveMatches.length === 0 ? (
+    {sortedLiveMatches.length === 0 ? (
       <div className="no-matches text-center py-5">
         <div className="empty-state">
           <Image src="/grass-texture.jpg" alt="No matches" width={200} height={150} className="rounded opacity-50" />
@@ -513,7 +513,18 @@ const Results = () => {
     if (leaderboards['Putt Pirates']) setTeamPoints(prev => ({ ...prev, puttPirates: leaderboards['Putt Pirates'].points }));
   }, [leaderboards]);
 
-  const sortedLiveMatches = useMemo(() => [...liveMatches].sort((a, b) => a.teeTime?.localeCompare(b.teeTime)), [liveMatches]);
+  const sortedLiveMatches = useMemo(() => {
+    return liveMatches
+      .filter(match => {
+        // A match is only "active" if it has actual players assigned and a real course name
+        // This filters out placeholder/stale data that may exist in the DB
+        const hasPlayers = (match.player1 || (match.team1 && match.team1.length > 0)) && 
+                          (match.player2 || (match.team2 && match.team2.length > 0) || match.soloPlayer);
+        const hasCourse = match.courseName && match.courseName !== '.' && match.courseName !== 'Unknown';
+        return hasPlayers && hasCourse;
+      })
+      .sort((a, b) => a.teeTime?.localeCompare(b.teeTime));
+  }, [liveMatches]);
   const sortedPlayers = useMemo(() => [...players].sort((a, b) => a.name.localeCompare(b.name)), [players]);
   const existingStrokeScores = useMemo(() => Object.entries(strokePlayScores).sort((a, b) => b[1].date?.localeCompare(a[1].date)), [strokePlayScores]);
 
