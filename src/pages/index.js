@@ -290,7 +290,15 @@ const Home = () => {
         <div className="overlay"></div>
         <div className="content">
           <div className="logo-container">
-            <Image src="/logo.png" alt="Logo" width={300} height={300} className="rounded-logo" />
+            <div className="logo-wrapper">
+              <Image src="/logo.png" alt="Logo" width={300} height={300} className="rounded-logo" />
+              <div className="sparkle sparkle-1"></div>
+              <div className="sparkle sparkle-2"></div>
+              <div className="sparkle sparkle-3"></div>
+              <div className="sparkle sparkle-4"></div>
+              <div className="sparkle sparkle-5"></div>
+              <div className="sparkle sparkle-6"></div>
+            </div>
           </div>
           <h1 className="text-4xl font-semibold text-center mb-8 cursive-font">Guyscorp Handicap Tracking</h1>
           {!authenticated ? (

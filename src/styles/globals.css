@@ -72,11 +72,85 @@ body {
   display: flex;
   justify-content: center;
   margin-bottom: 20px;
+  position: relative;
+  width: 300px;
+  height: 300px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.logo-wrapper {
+  position: relative;
+  border-radius: 50%;
+  overflow: hidden;
+  width: 300px;
+  height: 300px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 0 20px rgba(80, 200, 120, 0.3);
 }
 
 .rounded-logo {
   border-radius: 50%;
+  transition: transform 0.5s ease;
 }
+
+.logo-wrapper:hover .rounded-logo {
+  transform: scale(1.05);
+}
+
+/* Shimmer effect */
+.logo-wrapper::after {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0) 40%,
+    rgba(255, 255, 255, 0.4) 50%,
+    rgba(255, 255, 255, 0) 60%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: rotate(25deg);
+  animation: shimmer-sweep 4s infinite linear;
+  pointer-events: none;
+}
+
+@keyframes shimmer-sweep {
+  0% { transform: translateX(-150%) rotate(25deg); }
+  20% { transform: translateX(150%) rotate(25deg); }
+  100% { transform: translateX(150%) rotate(25deg); }
+}
+
+/* Sparkle elements */
+.sparkle {
+  position: absolute;
+  width: 15px;
+  height: 15px;
+  background: white;
+  clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 3;
+}
+
+@keyframes sparkle-pop {
+  0%, 100% { transform: scale(0) rotate(0deg); opacity: 0; }
+  50% { transform: scale(1) rotate(90deg); opacity: 1; }
+}
+
+.sparkle-1 { top: 10%; left: 20%; animation: sparkle-pop 2.5s infinite 0.2s; }
+.sparkle-2 { top: 25%; left: 80%; animation: sparkle-pop 3s infinite 0.7s; }
+.sparkle-3 { top: 70%; left: 15%; animation: sparkle-pop 2.8s infinite 1.2s; }
+.sparkle-4 { top: 80%; left: 75%; animation: sparkle-pop 3.2s infinite 1.8s; }
+.sparkle-5 { top: 50%; left: 50%; animation: sparkle-pop 3.5s infinite 0.5s; }
+.sparkle-6 { top: 15%; left: 60%; animation: sparkle-pop 2.7s infinite 2.2s; }
+
 
 .passcode-container {
   display: flex;
@@ -1533,6 +1607,7 @@ body {
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 450px), 1fr));
   gap: 2rem;
   width: 100%;
+  align-items: start;
 }
 
 .event-card {
