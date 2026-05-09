@@ -118,7 +118,9 @@ const LiveMatchesTab = ({
   setSelectedMatch, 
   setShowScoreModal, 
   handleCompleteMatch, 
-  handleDeleteMatch 
+  handleDeleteMatch,
+  confirmingId,
+  setConfirmingId 
 }) => (
   <div className="live-matches-section">
     <div className="section-header mb-4">
@@ -214,9 +216,23 @@ const LiveMatchesTab = ({
                 <div className="match-footer mt-3 pt-3 border-top d-flex justify-content-between align-items-center">
                   <small className="text-muted">{match.lastUpdate ? `Last updated: ${formatTime(match.lastUpdate)}` : 'Match not started yet'}</small>
                   <div className="d-flex gap-2">
-                    <Button variant="outline-success" size="sm" onClick={() => { setSelectedMatch(match); setShowScoreModal(true); }}>Update</Button>
-                    <Button variant="outline-warning" size="sm" onClick={() => handleCompleteMatch(match)}>Complete</Button>
-                    <Button variant="outline-danger" size="sm" onClick={() => handleDeleteMatch(match)}>Delete</Button>
+                    {confirmingId === `${match.id}-delete` ? (
+                      <div className="d-flex gap-1">
+                        <Button variant="danger" size="sm" onClick={() => handleDeleteMatch(match)}>Confirm Delete</Button>
+                        <Button variant="secondary" size="sm" onClick={() => setConfirmingId(null)}>Cancel</Button>
+                      </div>
+                    ) : confirmingId === `${match.id}-complete` ? (
+                      <div className="d-flex gap-1">
+                        <Button variant="warning" size="sm" onClick={() => handleCompleteMatch(match)}>Confirm Complete</Button>
+                        <Button variant="secondary" size="sm" onClick={() => setConfirmingId(null)}>Cancel</Button>
+                      </div>
+                    ) : (
+                      <>
+                        <Button variant="outline-success" size="sm" onClick={() => { setSelectedMatch(match); setShowScoreModal(true); }}>Update</Button>
+                        <Button variant="outline-warning" size="sm" onClick={() => setConfirmingId(`${match.id}-complete`)}>Complete</Button>
+                        <Button variant="outline-danger" size="sm" onClick={() => setConfirmingId(`${match.id}-delete`)}>Delete</Button>
+                      </>
+                    )}
                   </div>
                 </div>
               </Card.Body>
@@ -298,7 +314,9 @@ const PointsManagementTab = ({
   setNewStrokeScore, 
   handleUpdateTeamPoints, 
   handleAddStrokeScore, 
-  handleDeleteStrokeScore 
+  handleDeleteStrokeScore,
+  confirmingId,
+  setConfirmingId 
 }) => (
   <div className="points-management-section">
     <div className="section-header mb-4">
@@ -372,7 +390,14 @@ const PointsManagementTab = ({
                         <strong>{data.player}</strong> <small className="text-muted">({data.date})</small>
                         <div className="text-success fw-bold">{data.score > 0 ? `+${data.score}` : data.score}</div>
                       </div>
-                      <Button variant="outline-danger" size="sm" onClick={() => handleDeleteStrokeScore(key)}>×</Button>
+                      {confirmingId === key ? (
+                        <div className="d-flex gap-1">
+                          <Button variant="danger" size="sm" onClick={() => handleDeleteStrokeScore(key)}>Confirm</Button>
+                          <Button variant="secondary" size="sm" onClick={() => setConfirmingId(null)}>Cancel</Button>
+                        </div>
+                      ) : (
+                        <Button variant="outline-danger" size="sm" onClick={() => setConfirmingId(key)}>×</Button>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -433,6 +458,7 @@ const Results = () => {
   const [updateMessage, setUpdateMessage] = useState('');
   const [teamPoints, setTeamPoints] = useState({ goldenBoys: 0, puttPirates: 0 });
   const [newStrokeScore, setNewStrokeScore] = useState({ player: '', date: '', score: '' });
+  const [confirmingId, setConfirmingId] = useState(null);
 
   const router = useRouter();
 
@@ -542,37 +568,40 @@ const Results = () => {
   };
 
   const handleDeleteStrokeScore = async (scoreKey) => {
-    if (!confirm('Are you sure?')) return;
     try {
       const db = getFirestore();
       await setDoc(doc(db, 'strokePlay', '2025'), { [scoreKey]: deleteField() }, { merge: true });
       setUpdateMessage('Score deleted successfully!');
+      setConfirmingId(null);
       setTimeout(() => setUpdateMessage(''), 5000);
     } catch (error) {
       setUpdateMessage('Error deleting score.');
+      setConfirmingId(null);
       setTimeout(() => setUpdateMessage(''), 5000);
     }
   };
 
   const handleCompleteMatch = async (match) => {
-    if (!confirm('Are you sure you want to complete this match?')) return;
     try {
       const db = getFirestore();
       const updatedMatch = { ...match, status: 'completed', completedAt: new Date() };
       await setDoc(doc(db, 'matchHistory', '2025'), { [match.id]: updatedMatch }, { merge: true });
       await setDoc(doc(db, 'liveMatches', '2025'), { [match.id]: deleteField() }, { merge: true });
+      setConfirmingId(null);
     } catch (error) {
       console.error('Error completing match:', error);
+      setConfirmingId(null);
     }
   };
 
   const handleDeleteMatch = async (match) => {
-    if (!confirm('Are you sure you want to delete this match?')) return;
     try {
       const db = getFirestore();
       await setDoc(doc(db, 'liveMatches', '2025'), { [match.id]: deleteField() }, { merge: true });
+      setConfirmingId(null);
     } catch (error) {
       console.error('Error deleting match:', error);
+      setConfirmingId(null);
     }
   };
 
@@ -601,9 +630,9 @@ const Results = () => {
 
             {loading ? <div className="text-center py-5 text-success"><h4>Loading...</h4></div> : (
               <div className="results-content">
-                {activeTab === 'live' && <LiveMatchesTab liveMatches={liveMatches} sortedLiveMatches={sortedLiveMatches} setSelectedMatch={setSelectedMatch} setShowScoreModal={setShowScoreModal} handleCompleteMatch={handleCompleteMatch} handleDeleteMatch={handleDeleteMatch} />}
+                {activeTab === 'live' && <LiveMatchesTab liveMatches={liveMatches} sortedLiveMatches={sortedLiveMatches} setSelectedMatch={setSelectedMatch} setShowScoreModal={setShowScoreModal} handleCompleteMatch={handleCompleteMatch} handleDeleteMatch={handleDeleteMatch} confirmingId={confirmingId} setConfirmingId={setConfirmingId} />}
                 {activeTab === 'leaderboards' && <LeaderboardsTab teamStandings={teamStandings} strokePlayStandings={strokePlayStandings} />}
-                {activeTab === 'management' && <PointsManagementTab players={players} sortedPlayers={sortedPlayers} existingStrokeScores={existingStrokeScores} teamPoints={teamPoints} setTeamPoints={setTeamPoints} updateMessage={updateMessage} newStrokeScore={newStrokeScore} setNewStrokeScore={setNewStrokeScore} handleUpdateTeamPoints={handleUpdateTeamPoints} handleAddStrokeScore={handleAddStrokeScore} handleDeleteStrokeScore={handleDeleteStrokeScore} />}
+                {activeTab === 'management' && <PointsManagementTab players={players} sortedPlayers={sortedPlayers} existingStrokeScores={existingStrokeScores} teamPoints={teamPoints} setTeamPoints={setTeamPoints} updateMessage={updateMessage} newStrokeScore={newStrokeScore} setNewStrokeScore={setNewStrokeScore} handleUpdateTeamPoints={handleUpdateTeamPoints} handleAddStrokeScore={handleAddStrokeScore} handleDeleteStrokeScore={handleDeleteStrokeScore} confirmingId={confirmingId} setConfirmingId={setConfirmingId} />}
                 {activeTab === 'history' && <MatchHistoryTab matchHistory={matchHistory} />}
               </div>
             )}
