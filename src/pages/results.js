@@ -1050,26 +1050,25 @@ const Results = () => {
                 Active Matches
               </Button>
               <Button
-                variant={activeTab === 'history' ? 'success' : 'outline-success'}
-                className="nav-tab"
-                onClick={() => setActiveTab('history')}
-              >
-                Match History
-              </Button>
-              <Button
                 variant={activeTab === 'leaderboards' ? 'success' : 'outline-success'}
                 className="nav-tab"
                 onClick={() => setActiveTab('leaderboards')}
               >
-                Leaderboards
+                Leaderboard
               </Button>
-
               <Button 
                 variant={activeTab === 'management' ? 'success' : 'outline-success'}
                 className="nav-tab"
                 onClick={() => setActiveTab('management')}
               >
                 Points Management
+              </Button>
+              <Button
+                variant={activeTab === 'history' ? 'success' : 'outline-success'}
+                className="nav-tab"
+                onClick={() => setActiveTab('history')}
+              >
+                Match History
               </Button>
             </div>
           </div>
@@ -1087,9 +1086,9 @@ const Results = () => {
           {!loading && (
                       <div className="results-content">
               {activeTab === 'live' && <LiveMatchesTab />}
-              {activeTab === 'history' && <MatchHistoryTab />}
               {activeTab === 'leaderboards' && <LeaderboardsTab />}
               {activeTab === 'management' && <PointsManagementTab />}
+              {activeTab === 'history' && <MatchHistoryTab />}
             </div>
           )}
         </div>
