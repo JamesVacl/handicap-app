@@ -23,7 +23,7 @@ const MatchSetupModal = ({ show, onHide, players, onSave }) => {
       </Modal.Header>
       <Modal.Body>
         <div className="mb-3">
-          <label className="form-label">Player 1</label>
+          <label className="form-label">Putt Pirates Player</label>
           <select 
             className="form-select" 
             value={player1} 
@@ -38,7 +38,7 @@ const MatchSetupModal = ({ show, onHide, players, onSave }) => {
           </select>
         </div>
         <div className="mb-3">
-          <label className="form-label">Player 2</label>
+          <label className="form-label">Golden Boys Player</label>
           <select 
             className="form-select" 
             value={player2} 

@@ -248,12 +248,34 @@ const Schedule = () => {
         [key]: {
           player1: matchData.player1,
           player2: matchData.player2,
+          player1Team: 'Putt Pirates',
+          player2Team: 'Golden Boys',
           format: 'Singles Match Play ',
           strokesGiven: strokesGiven,
           receivingStrokes: player1Handicap > player2Handicap ? matchData.player1 : matchData.player2,
           createdAt: new Date()
         }
       }, { merge: true });
+
+      // Save to Live Matches as well
+      const liveMatchKey = `singles-match-${Date.now()}`;
+      await setDoc(doc(db, 'liveMatches', '2025'), {
+        [liveMatchKey]: {
+          matchType: '1v1',
+          format: 'Singles Match Play',
+          player1: matchData.player1,
+          player2: matchData.player2,
+          player1Team: 'Putt Pirates',
+          player2Team: 'Golden Boys',
+          courseName: scheduleData[eventIndex].courseName,
+          date: scheduleData[eventIndex].date,
+          teeTime: scheduleData[eventIndex].teeTimes[timeIndex],
+          status: 'not_started',
+          createdAt: new Date(),
+          currentScore: { player1Score: 0, player2Score: 0, holesPlayed: 0 }
+        }
+      }, { merge: true });
+
     } catch (error) {
       console.error('Error saving match:', error);
     }
