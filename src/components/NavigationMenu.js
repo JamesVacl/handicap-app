@@ -2,7 +2,6 @@ import { Navbar, Nav, Container } from 'react-bootstrap';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { signOutUser } from 'src/firebase';
-import CountdownTimer from './CountdownTimer';
 
 const NavigationMenu = () => {
   const router = useRouter();
@@ -12,10 +11,7 @@ const NavigationMenu = () => {
     router.push('/');
   };
 
-  // Add handleTimerClick function
-  const handleTimerClick = () => {
-    router.push('/schedule');
-  };
+
 
   return (
     <>
@@ -45,9 +41,7 @@ const NavigationMenu = () => {
               <Link href="/redhawk" passHref legacyBehavior>
                 <Nav.Link active={router.pathname === "/redhawk"}>Redhawk Trials</Nav.Link>
               </Link>
-              <Nav.Link className="countdown-nav-item" onClick={handleTimerClick}>
-                <CountdownTimer />
-              </Nav.Link>
+
             </Nav>
 
             <Nav>
