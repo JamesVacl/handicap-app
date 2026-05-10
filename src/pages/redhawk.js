@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import Head from 'next/head';
+import Image from 'next/image';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import {
   getPlayers,
@@ -225,7 +226,15 @@ export default function RedhawkTrials() {
           <div className="content redhawk-content">
             {/* ── Header ──────────────────────────────────────────────────── */}
             <div className="redhawk-header">
-              <div className="redhawk-hawk-icon">🦅</div>
+              <div className="rh-rv-icon">
+                <Image
+                  src="/redhawk-rv.png"
+                  alt="Jayco Redhawk RV"
+                  width={90}
+                  height={90}
+                  style={{ objectFit: 'contain' }}
+                />
+              </div>
               <div>
                 <h1 className="redhawk-title">Redhawk Trials</h1>
                 <p className="redhawk-subtitle">
@@ -387,7 +396,9 @@ export default function RedhawkTrials() {
                   <div className="rh-panel-backdrop">
                     <div className="rh-edit-panel" ref={panelRef}>
                       <div className="rh-panel-header">
-                        <span className="rh-panel-hawk">🦅</span>
+                        <span className="rh-panel-hawk">
+                          <Image src="/redhawk-rv.png" alt="RV" width={28} height={28} style={{ objectFit: 'contain' }} />
+                        </span>
                         <h3 className="rh-panel-title">Adjust: {editing}</h3>
                         <button
                           className="rh-panel-close"
