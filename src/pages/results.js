@@ -206,7 +206,7 @@ const LiveMatchesTab = ({
                     <small className="text-muted d-block mb-2">Recent Holes:</small>
                     <div className="d-flex flex-wrap gap-1">
                       {match.currentScore.recentHoles?.slice(-6).map((hole, idx) => (
-                        <Badge key={idx} bg={hole.result === 'player1_win' || hole.result === 'team1_win' ? 'success' : hole.result === 'player2_win' || hole.result === 'team2_win' ? 'danger' : 'secondary'} className="hole-badge">
+                        <Badge key={idx} bg={hole.result === 'player1_win' || hole.result === 'team1_win' ? 'putt-pirates' : hole.result === 'player2_win' || hole.result === 'team2_win' ? 'golden-boys' : 'secondary'} className="hole-badge text-white">
                           H{hole.number}: {formatHoleResult(match, hole)}
                         </Badge>
                       ))}

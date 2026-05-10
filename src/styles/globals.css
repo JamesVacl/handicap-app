@@ -798,9 +798,41 @@ body {
 }
 
 .alt-match {
-  background: linear-gradient(135deg, #50C878 0%, #3DAA6B 100%) !important;
-  border: none;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* Custom Team Highlight Colors */
+.bg-putt-pirates {
+  background-color: #16a34a !important; /* Green */
+  color: #ffffff !important;
+}
+
+.bg-golden-boys {
+  background-color: #eab308 !important; /* Gold */
+  color: #000000 !important;
+}
+
+.btn-outline-putt-pirates {
+  color: #16a34a;
+  border-color: #16a34a;
+}
+.btn-outline-putt-pirates:hover,
+.btn-outline-putt-pirates.active {
+  color: #ffffff;
+  background-color: #16a34a;
+  border-color: #16a34a;
+}
+
+.btn-outline-golden-boys {
+  color: #ca8a04;
+  border-color: #ca8a04;
+}
+.btn-outline-golden-boys:hover,
+.btn-outline-golden-boys.active {
+  color: #000000;
+  background-color: #eab308;
+  border-color: #eab308;
 }
 
 .hole-assignments {

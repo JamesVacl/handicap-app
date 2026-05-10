@@ -216,8 +216,8 @@ const ScoreEntryModal = ({ show, onHide, match, onSave }) => {
     let variant, text;
     
     if (matchData?.matchType === 'championship') {
-      variant = result.result === 'team1_win' ? 'success' : 
-                result.result === 'team2_win' ? 'danger' : 'secondary';
+      variant = result.result === 'team1_win' ? 'putt-pirates' : 
+                result.result === 'team2_win' ? 'golden-boys' : 'secondary';
       
       // Show specific player matchup if available
       const holeAssignment = matchData?.holeAssignments?.[hole];
@@ -229,20 +229,20 @@ const ScoreEntryModal = ({ show, onHide, match, onSave }) => {
                result.result === 'team2_win' ? `${matchData?.team2?.name || 'Golden Boys'} win` : 'Tie';
       }
     } else if (matchData?.matchType === 'alternating') {
-      variant = result.result === 'player1_win' ? 'success' : 
-                result.result === 'player2_win' ? 'danger' : 'secondary';
+      variant = result.result === 'player1_win' ? 'putt-pirates' : 
+                result.result === 'player2_win' ? 'golden-boys' : 'secondary';
       
       text = result.result === 'player1_win' ? `${matchData?.soloPlayer} wins` :
              result.result === 'player2_win' ? `${matchData?.team2Players?.join(' & ')} win` : 'Tie';
     } else if (matchData?.matchType === '2v2') {
-      variant = result.result === 'player1_win' ? 'success' : 
-                result.result === 'player2_win' ? 'danger' : 'secondary';
+      variant = result.result === 'player1_win' ? 'putt-pirates' : 
+                result.result === 'player2_win' ? 'golden-boys' : 'secondary';
       
       text = result.result === 'player1_win' ? `Putt Pirates win` :
              result.result === 'player2_win' ? `Golden Boys win` : 'Tie';
     } else {
-      variant = result.result === 'player1_win' ? 'success' : 
-                result.result === 'player2_win' ? 'danger' : 'secondary';
+      variant = result.result === 'player1_win' ? 'putt-pirates' : 
+                result.result === 'player2_win' ? 'golden-boys' : 'secondary';
       
       text = result.result === 'player1_win' ? `${matchData?.player1} wins` :
              result.result === 'player2_win' ? `${matchData?.player2} wins` : 'Tie';
@@ -384,7 +384,7 @@ const ScoreEntryModal = ({ show, onHide, match, onSave }) => {
                                <Row>
                                  <Col xs={4}>
                                    <Button
-                                     variant="outline-success"
+                                     variant="outline-putt-pirates"
                                      className="w-100 mb-2"
                                      onClick={() => handleHoleResult(currentHole, 'team1_win')}
                                      active={holeResults[currentHole]?.result === 'team1_win'}
@@ -404,7 +404,7 @@ const ScoreEntryModal = ({ show, onHide, match, onSave }) => {
                                  </Col>
                                  <Col xs={4}>
                                    <Button
-                                     variant="outline-danger"
+                                     variant="outline-golden-boys"
                                      className="w-100 mb-2"
                                      onClick={() => handleHoleResult(currentHole, 'team2_win')}
                                      active={holeResults[currentHole]?.result === 'team2_win'}
@@ -418,7 +418,7 @@ const ScoreEntryModal = ({ show, onHide, match, onSave }) => {
                                <Row>
                                  <Col xs={4}>
                                    <Button
-                                     variant="outline-success"
+                                     variant="outline-putt-pirates"
                                      className="w-100 mb-2"
                                      onClick={() => handleHoleResult(currentHole, 'player1_win')}
                                      active={holeResults[currentHole]?.result === 'player1_win'}
@@ -438,7 +438,7 @@ const ScoreEntryModal = ({ show, onHide, match, onSave }) => {
                                  </Col>
                                  <Col xs={4}>
                                    <Button
-                                     variant="outline-danger"
+                                     variant="outline-golden-boys"
                                      className="w-100 mb-2"
                                      onClick={() => handleHoleResult(currentHole, 'player2_win')}
                                      active={holeResults[currentHole]?.result === 'player2_win'}
