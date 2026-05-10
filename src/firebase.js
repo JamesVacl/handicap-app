@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, addDoc, getDocs, orderBy, query, updateDoc, doc, where, setDoc } from 'firebase/firestore';
+import { getFirestore, collection, addDoc, getDocs, orderBy, query, updateDoc, doc, where, setDoc, deleteDoc } from 'firebase/firestore';
 import { getAuth, signInWithEmailAndPassword, signOut, setPersistence, browserLocalPersistence } from 'firebase/auth';
 import { getAnalytics, isSupported } from "firebase/analytics";
 
@@ -373,6 +373,59 @@ const calculateLeaderboard = (scores) => {
   return leaderboard;
 };
 
+// ── Redhawk Trials adjustments ──────────────────────────────────────────────
+// These functions exclusively use the `redhawkAdjustments` collection.
+// They never read or write to scores, players, or courses.
+
+// Fetch all Redhawk adjustments keyed by player name
+const getRedhawkAdjustments = async () => {
+  const snapshot = await getDocs(collection(db, 'redhawkAdjustments'));
+  const map = {};
+  snapshot.docs.forEach((d) => {
+    const data = d.data();
+    map[data.playerName] = { id: d.id, ...data };
+  });
+  return map; // { [playerName]: { id, playerName, delta, notes, updatedAt } }
+};
+
+// Save (upsert) a Redhawk adjustment for one player
+const saveRedhawkAdjustment = async (playerName, delta, notes = '') => {
+  // Check if a doc already exists for this player
+  const q = query(
+    collection(db, 'redhawkAdjustments'),
+    where('playerName', '==', playerName)
+  );
+  const existing = await getDocs(q);
+
+  const payload = {
+    playerName,
+    delta: parseFloat(delta),
+    notes: notes || '',
+    updatedAt: new Date(),
+  };
+
+  if (!existing.empty) {
+    // Update existing doc
+    await updateDoc(doc(db, 'redhawkAdjustments', existing.docs[0].id), payload);
+  } else {
+    // Create new doc
+    await addDoc(collection(db, 'redhawkAdjustments'), payload);
+  }
+};
+
+// Remove a Redhawk adjustment for one player
+const deleteRedhawkAdjustment = async (playerName) => {
+  const q = query(
+    collection(db, 'redhawkAdjustments'),
+    where('playerName', '==', playerName)
+  );
+  const existing = await getDocs(q);
+  for (const d of existing.docs) {
+    await deleteDoc(doc(db, 'redhawkAdjustments', d.id));
+  }
+};
+// ────────────────────────────────────────────────────────────────────────────
+
 // Add these functions to handle match results
 export const updateMatchResult = async (matchKey, resultData) => {
   const db = getFirestore();
@@ -417,5 +470,9 @@ export {
   updateTeam,
   getPlayerHandicaps,
   analytics,
-  calculateLeaderboard  // Include it only here
+  calculateLeaderboard,
+  // Redhawk Trials
+  getRedhawkAdjustments,
+  saveRedhawkAdjustment,
+  deleteRedhawkAdjustment,
 };

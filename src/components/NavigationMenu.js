@@ -42,6 +42,9 @@ const NavigationMenu = () => {
               <Link href="/results" passHref legacyBehavior>
                 <Nav.Link active={router.pathname === "/results"}>Results</Nav.Link>
               </Link>
+              <Link href="/redhawk" passHref legacyBehavior>
+                <Nav.Link active={router.pathname === "/redhawk"}>Redhawk Trials</Nav.Link>
+              </Link>
               <Nav.Link className="countdown-nav-item" onClick={handleTimerClick}>
                 <CountdownTimer />
               </Nav.Link>
