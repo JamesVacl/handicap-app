@@ -289,8 +289,8 @@ export default function RedhawkTrials() {
               <>
                 {/* ── Legend + Refresh ─────────────────────────────────────── */}
                 <div className="redhawk-legend">
-                  <span className="rh-badge rh-badge-improved">▼ Easier</span>
-                  <span className="rh-badge rh-badge-harder">▲ Harder</span>
+                  <span className="rh-badge rh-badge-harder">▼ Harder</span>
+                  <span className="rh-badge rh-badge-improved">▲ Easier</span>
                   <span className="rh-badge rh-badge-none">— No change</span>
                   <div className="rh-legend-right">
                     {lastUpdated && (
@@ -334,9 +334,9 @@ export default function RedhawkTrials() {
                         const deltaSign = player.delta > 0 ? '+' : '';
                         const dirClass =
                           player.delta < 0
-                            ? 'rh-row-improved'
-                            : player.delta > 0
                             ? 'rh-row-harder'
+                            : player.delta > 0
+                            ? 'rh-row-improved'
                             : '';
 
                         return (
@@ -358,8 +358,8 @@ export default function RedhawkTrials() {
                                 <span
                                   className={`rh-delta-badge ${
                                     player.delta < 0
-                                      ? 'rh-badge-improved'
-                                      : 'rh-badge-harder'
+                                      ? 'rh-badge-harder'
+                                      : 'rh-badge-improved'
                                   }`}
                                 >
                                   {deltaSign}{player.delta.toFixed(1)}
@@ -372,9 +372,9 @@ export default function RedhawkTrials() {
                               <span
                                 className={`rh-adjusted-value ${
                                   player.delta < 0
-                                    ? 'rh-adj-improved'
-                                    : player.delta > 0
                                     ? 'rh-adj-harder'
+                                    : player.delta > 0
+                                    ? 'rh-adj-improved'
                                     : ''
                                 }`}
                               >
