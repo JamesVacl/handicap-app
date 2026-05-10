@@ -168,8 +168,8 @@ const FloatingNavigation = () => {
 
   const navItems = [
     { href: '/', label: 'Handicap', icon: '📊' },
-    { href: '/schedule', label: 'Schedule', icon: '📅' },
     { href: '/teams', label: 'Teams', icon: '👥' },
+    { href: '/schedule', label: 'Schedule', icon: '📅' },
     { href: '/results', label: 'Results', icon: '🏆' }
   ];
 

@@ -29,11 +29,11 @@ const NavigationMenu = () => {
               <Link href="/" passHref legacyBehavior>
                 <Nav.Link active={router.pathname === "/"}>Handicap Tracker</Nav.Link>
               </Link>
-              <Link href="/schedule" passHref legacyBehavior>
-                <Nav.Link active={router.pathname === "/schedule"}>Schedule</Nav.Link>
-              </Link>
               <Link href="/teams" passHref legacyBehavior>
                 <Nav.Link active={router.pathname === "/teams"}>Guyder Cup</Nav.Link>
+              </Link>
+              <Link href="/schedule" passHref legacyBehavior>
+                <Nav.Link active={router.pathname === "/schedule"}>Schedule</Nav.Link>
               </Link>
               <Link href="/results" passHref legacyBehavior>
                 <Nav.Link active={router.pathname === "/results"}>Results</Nav.Link>
