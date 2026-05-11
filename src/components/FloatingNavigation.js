@@ -7,6 +7,7 @@ const FloatingNavigation = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
+  const [hasMoved, setHasMoved] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [isMobile, setIsMobile] = useState(false);
   const navRef = useRef(null);
@@ -33,114 +34,55 @@ const FloatingNavigation = () => {
     };
   }, []);
 
-  // Separate effect for initial positioning to ensure proper timing
-  useEffect(() => {
-    const setInitialPosition = () => {
-      // Use estimated dimensions if ref is not available yet
-      const navWidth = 300;
-      const navHeight = 80;
-      
-      let initialPosition;
-      if (isMobile) {
-        // Mobile: bottom left with proper bounds checking
-        initialPosition = {
-          x: Math.max(10, Math.min(20, window.innerWidth - navWidth - 10)),
-          y: Math.max(10, window.innerHeight - navHeight - 20)
-        };
-      } else {
-        // Desktop: top right with proper bounds checking
-        initialPosition = {
-          x: Math.max(10, window.innerWidth - navWidth - 20),
-          y: Math.max(10, Math.min(100, window.innerHeight - navHeight - 10))
-        };
-      }
-      
-      setPosition(initialPosition);
-    };
-
-    // Set initial position immediately, then refine after render
-    setInitialPosition();
-    
-    // Refine position after component renders
-    const timer = setTimeout(() => {
-      if (navRef.current) {
-        const navRect = navRef.current.getBoundingClientRect();
-        const navWidth = navRect.width;
-        const navHeight = navRect.height;
-        
-        let refinedPosition;
-        if (isMobile) {
-          refinedPosition = {
-            x: Math.max(10, Math.min(20, window.innerWidth - navWidth - 10)),
-            y: Math.max(10, window.innerHeight - navHeight - 20)
-          };
-        } else {
-          refinedPosition = {
-            x: Math.max(10, window.innerWidth - navWidth - 20),
-            y: Math.max(10, Math.min(100, window.innerHeight - navHeight - 10))
-          };
-        }
-        
-        setPosition(refinedPosition);
-      }
-    }, 100);
-    
-    return () => clearTimeout(timer);
-  }, [isMobile]);
+  const handleDragStart = (clientX, clientY, rect) => {
+    if (!hasMoved) {
+      setHasMoved(true);
+      setPosition({ x: rect.left, y: rect.top });
+    }
+    setIsDragging(true);
+    setDragOffset({
+      x: clientX - rect.left,
+      y: clientY - rect.top
+    });
+  };
 
   const handleMouseDown = (e) => {
     e.preventDefault();
-    setIsDragging(true);
-    const rect = e.currentTarget.getBoundingClientRect();
-    setDragOffset({
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top
-    });
+    handleDragStart(e.clientX, e.clientY, e.currentTarget.getBoundingClientRect());
   };
 
   const handleTouchStart = (e) => {
     e.preventDefault();
-    setIsDragging(true);
-    const rect = e.currentTarget.getBoundingClientRect();
     const touch = e.touches[0];
-    setDragOffset({
-      x: touch.clientX - rect.left,
-      y: touch.clientY - rect.top
+    handleDragStart(touch.clientX, touch.clientY, e.currentTarget.getBoundingClientRect());
+  };
+
+  const updatePosition = (clientX, clientY) => {
+    const newX = clientX - dragOffset.x;
+    const newY = clientY - dragOffset.y;
+    
+    const navWidth = navRef.current ? navRef.current.offsetWidth : 350;
+    const navHeight = navRef.current ? navRef.current.offsetHeight : 80;
+    
+    // Use document.documentElement.clientWidth to avoid scrollbar bounds issues
+    const maxX = document.documentElement.clientWidth - navWidth;
+    const maxY = document.documentElement.clientHeight - navHeight;
+    
+    setPosition({
+      x: Math.max(0, Math.min(newX, maxX)),
+      y: Math.max(0, Math.min(newY, maxY))
     });
   };
 
   const handleMouseMove = (e) => {
     if (!isDragging) return;
-    
-    const newX = e.clientX - dragOffset.x;
-    const newY = e.clientY - dragOffset.y;
-    
-    // Keep within viewport bounds
-    const maxX = window.innerWidth - 300; // Approximate nav width
-    const maxY = window.innerHeight - 80; // Approximate nav height
-    
-    setPosition({
-      x: Math.max(0, Math.min(newX, maxX)),
-      y: Math.max(0, Math.min(newY, maxY))
-    });
+    updatePosition(e.clientX, e.clientY);
   };
 
   const handleTouchMove = (e) => {
     if (!isDragging) return;
     e.preventDefault();
-    
-    const touch = e.touches[0];
-    const newX = touch.clientX - dragOffset.x;
-    const newY = touch.clientY - dragOffset.y;
-    
-    // Keep within viewport bounds
-    const maxX = window.innerWidth - 300;
-    const maxY = window.innerHeight - 80;
-    
-    setPosition({
-      x: Math.max(0, Math.min(newX, maxX)),
-      y: Math.max(0, Math.min(newY, maxY))
-    });
+    updatePosition(e.touches[0].clientX, e.touches[0].clientY);
   };
 
   const handleMouseUp = () => {
@@ -164,7 +106,7 @@ const FloatingNavigation = () => {
         document.removeEventListener('touchend', handleTouchEnd);
       };
     }
-  }, [isDragging, dragOffset]);
+  }, [isDragging, dragOffset, hasMoved]);
 
   const navItems = [
     { href: '/', label: 'Handicap', icon: '📊' },
@@ -173,18 +115,30 @@ const FloatingNavigation = () => {
     { href: '/results', label: 'Results', icon: '🏆' }
   ];
 
-  // Don't render until we have a valid position to prevent off-screen issues
-  if (!isVisible || (position.x === 0 && position.y === 0)) return null;
+  // Don't render until visible
+  if (!isVisible) return null;
+
+  const style = hasMoved ? {
+    left: `${position.x}px`,
+    top: `${position.y}px`,
+    cursor: isDragging ? 'grabbing' : 'grab'
+  } : {
+    ...(isMobile ? {
+      bottom: '20px',
+      left: '50%',
+      transform: 'translateX(-50%)'
+    } : {
+      top: '100px',
+      right: '20px'
+    }),
+    cursor: isDragging ? 'grabbing' : 'grab'
+  };
 
   return (
     <div 
       ref={navRef}
       className="floating-navigation"
-      style={{
-        left: `${position.x}px`,
-        top: `${position.y}px`,
-        cursor: isDragging ? 'grabbing' : 'grab'
-      }}
+      style={style}
       onMouseDown={handleMouseDown}
       onTouchStart={handleTouchStart}
     >
