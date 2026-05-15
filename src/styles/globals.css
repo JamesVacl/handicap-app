@@ -1,23 +1,25 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
 :root {
   --background: #ffffff;
   --foreground: #171717;
-  --surface: rgba(255, 255, 255, 0.92);
-  --surface-border: rgba(80, 200, 120, 0.2);
-  --surface-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
-  --radius-lg: 16px;
+  --surface: rgba(255, 255, 255, 0.94);
+  --surface-border: rgba(80, 200, 120, 0.15);
+  --surface-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
+  --radius-lg: 20px;
+  --font-display: 'Playfair Display', serif;
+  --font-body: 'Outfit', sans-serif;
+  --primary: #50C878;
+  --primary-dark: #3DAA6B;
 }
-
-
 
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  font-family: var(--font-body);
   margin: 0;
   padding: 0;
-  line-height: 1.45;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Professional theme styles */
@@ -198,8 +200,76 @@ body {
   border-color: #3DAA6B;
 }
 
-.cursive-font {
-  font-family: 'Fugaz One'
+.cursive-font,
+h1, h2, h3, h4, h5, h6,
+.hero-title,
+.redhawk-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+h1.cursive-font,
+.hero-title,
+.redhawk-title {
+  background: linear-gradient(135deg, #1a1a1a 0%, #4a4a4a 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  position: relative;
+  display: block;
+  width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
+  padding-bottom: 0.75rem;
+  margin-bottom: 2.5rem;
+}
+
+h1.cursive-font::after,
+.hero-title::after,
+.redhawk-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100px;
+  height: 4px;
+  background: linear-gradient(90deg, transparent, var(--primary), transparent);
+  border-radius: 2px;
+}
+
+h2 {
+  color: #2c3e50;
+  font-size: 2rem;
+  margin-top: 2.5rem;
+  margin-bottom: 1.75rem;
+  position: relative;
+}
+
+h2.text-success {
+  color: var(--primary-dark) !important;
+}
+
+.text-success {
+  color: var(--primary-dark) !important;
+}
+
+/* Card Flare */
+.content {
+  border: 1px solid rgba(80, 200, 120, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.card, .glass-card {
+  border-radius: 16px !important;
+  border: 1px solid rgba(0, 0, 0, 0.05) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04) !important;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover, .glass-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08) !important;
 }
 
 .navbar {
@@ -1099,30 +1169,36 @@ body {
 
 .btn-primary,
 .btn-success {
-  background-color: var(--ui-green-500) !important;
-  border-color: var(--ui-green-500) !important;
-  box-shadow: 0 4px 10px rgba(63, 177, 115, 0.28);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%) !important;
+  border: none !important;
+  box-shadow: 0 4px 15px rgba(80, 200, 120, 0.25) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  font-weight: 600 !important;
+  border-radius: 12px !important;
+  padding: 0.6rem 1.5rem !important;
 }
 
 .btn-primary:hover,
 .btn-success:hover,
 .btn-primary:focus,
 .btn-success:focus {
-  background-color: var(--ui-green-600) !important;
-  border-color: var(--ui-green-600) !important;
-  box-shadow: 0 6px 14px rgba(47, 158, 98, 0.28) !important;
+  transform: translateY(-2px);
+  background: linear-gradient(135deg, var(--primary-dark) 0%, #2a8a4f 100%) !important;
+  box-shadow: 0 8px 25px rgba(80, 200, 120, 0.35) !important;
 }
 
 .btn-outline-success {
-  color: var(--ui-green-600) !important;
-  border-color: rgba(47, 158, 98, 0.55) !important;
-  background: rgba(255, 255, 255, 0.8) !important;
+  color: var(--primary-dark) !important;
+  border-color: var(--primary) !important;
+  border-radius: 12px !important;
+  font-weight: 500 !important;
+  transition: all 0.2s ease !important;
 }
 
 .btn-outline-success:hover {
-  color: #fff !important;
-  background: var(--ui-green-600) !important;
-  border-color: var(--ui-green-600) !important;
+  background-color: var(--primary) !important;
+  color: white !important;
+  transform: translateY(-1px);
 }
 
 .form-control,
