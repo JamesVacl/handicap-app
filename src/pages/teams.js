@@ -323,7 +323,7 @@ const Teams = () => {
                     </div>
                     
                     <div className="players-list my-3">
-                      {team.players?.map(player => (
+                      {[...(team.players || [])].sort((a, b) => (a.handicap || 0) - (b.handicap || 0)).map(player => (
                         <div key={player.name} className="player-item d-flex justify-content-between align-items-center gap-2">
                           <span>{player.name} - Handicap: {player.handicap}</span>
                           {authenticated && (
