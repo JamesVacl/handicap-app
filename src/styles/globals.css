@@ -40,9 +40,17 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  background: url('/grass-texture.jpg') no-repeat center center;
+  background: url('/golf-bg.png') no-repeat center center;
   background-size: cover;
   z-index: 0;
+  transform: scale(1.04);
+  animation: bg-slow-drift 30s ease-in-out infinite alternate;
+}
+
+@keyframes bg-slow-drift {
+  0%   { transform: scale(1.04) translate(0, 0); }
+  50%  { transform: scale(1.06) translate(-1%, 0.5%); }
+  100% { transform: scale(1.04) translate(1%, -0.5%); }
 }
 
 .overlay {
@@ -51,9 +59,18 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(180deg,
-      rgba(0, 0, 0, 0.46) 0%,
-      rgba(0, 0, 0, 0.5) 100%);
+  background:
+    /* Soft white haze at the very top so the navbar blends cleanly */
+    linear-gradient(to bottom,
+      rgba(255, 255, 255, 0.18) 0%,
+      rgba(255, 255, 255, 0.0) 18%,
+      rgba(255, 255, 255, 0.0) 70%,
+      rgba(255, 255, 255, 0.12) 100%),
+    /* Very subtle green-white tint to unify with the site palette */
+    linear-gradient(160deg,
+      rgba(240, 248, 242, 0.08) 0%,
+      rgba(255, 255, 255, 0.04) 50%,
+      rgba(236, 245, 239, 0.1) 100%);
   z-index: 1;
 }
 
