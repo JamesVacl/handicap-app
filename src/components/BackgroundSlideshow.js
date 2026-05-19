@@ -13,8 +13,7 @@ const images = [
   '/backgrounds/SV.jpeg',
   '/backgrounds/Smith Sign.jpg',
   '/backgrounds/TheHoot.jpg.webp',
-  // HEIC last — Safari only, acts as a bonus slide on supported browsers
-  '/backgrounds/Atunyote.heic',
+  '/backgrounds/Atunyote.jpg',
 ];
 
 export default function BackgroundSlideshow() {
