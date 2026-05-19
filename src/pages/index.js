@@ -194,10 +194,19 @@ const Home = () => {
   };
 
   const handleCourseSelect = (e) => {
-    const selected = courses.find(course => course.course === e.target.value);
-    setSelectedCourse(selected.course);
-    setRating(selected.rating);
-    setSlope(selected.slope);
+    const value = e.target.value;
+    if (!value) {
+      setSelectedCourse('');
+      setRating('');
+      setSlope('');
+      return;
+    }
+    const selected = courses.find(course => course.course === value);
+    if (selected) {
+      setSelectedCourse(selected.course);
+      setRating(selected.rating);
+      setSlope(selected.slope);
+    }
   };
 
   const handleSubmit = async (e) => {
