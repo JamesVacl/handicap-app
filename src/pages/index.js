@@ -6,7 +6,6 @@ import Head from 'next/head';
 import { Modal, Button } from 'react-bootstrap';
 import Image from 'next/image'; // Import the Image component from Next.js
 import NavigationMenu from 'src/components/NavigationMenu';
-import BackgroundSlideshow from 'src/components/BackgroundSlideshow';
 
 const Home = () => {
   const MAX_RECENT_ROUNDS = 20;
@@ -297,8 +296,6 @@ const Home = () => {
       <div className="app-wrapper">
       {authenticated && <NavigationMenu />}
       <div className="home-container">
-        <BackgroundSlideshow />
-        <div className="overlay"></div>
         <div className="content">
           <div className="logo-container">
             <div className="logo-wrapper">
