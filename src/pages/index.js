@@ -51,6 +51,7 @@ const Home = () => {
   const [courses, setCourses] = useState([]);
   const [scores, setScores] = useState([]);
   const [leaderboard, setLeaderboard] = useState([]);
+  const [scoreView, setScoreView] = useState('allTime');
   const [loading, setLoading] = useState(true);
   const [selectedPlayer, setSelectedPlayer] = useState('');
   const [selectedCourse, setSelectedCourse] = useState('');
@@ -149,10 +150,23 @@ const Home = () => {
       const totalScore = fullRoundScores.reduce((acc, score) => acc + score.score, 0);
       const averageScore = fullRoundScores.length > 0 ? totalScore / fullRoundScores.length : 0;
 
+      // Last 10 and Last 20 averages (already sorted by date desc in recentScores)
+      const last10Scores = fullRoundScores.slice(0, 10);
+      const last10Average = last10Scores.length > 0
+        ? last10Scores.reduce((acc, s) => acc + s.score, 0) / last10Scores.length
+        : 0;
+
+      const last20Scores = fullRoundScores.slice(0, 20);
+      const last20Average = last20Scores.length > 0
+        ? last20Scores.reduce((acc, s) => acc + s.score, 0) / last20Scores.length
+        : 0;
+
       return {
         name: playerName,
         handicap: parseFloat(averageHandicap.toFixed(1)),
         averageScore: parseFloat(averageScore.toFixed(1)),
+        last10AverageScore: last10Scores.length > 0 ? parseFloat(last10Average.toFixed(1)) : null,
+        last20AverageScore: last20Scores.length > 0 ? parseFloat(last20Average.toFixed(1)) : null,
         recentScores: recentScores
       };
     });
@@ -430,23 +444,46 @@ const Home = () => {
               </form>
 
               {/* Leaderboard Table */}
-              <h2 className="text-2xl font-semibold mt-4 mb-3">Leaderboard</h2>
+              <div className="d-flex justify-content-between align-items-center mt-4 mb-3">
+                <h2 className="text-2xl font-semibold mb-0">Leaderboard</h2>
+                <select
+                  id="scoreViewDropdown"
+                  value={scoreView}
+                  onChange={(e) => setScoreView(e.target.value)}
+                  className="form-control"
+                  style={{ width: 'auto' }}
+                >
+                  <option value="allTime">All-time Avg Score</option>
+                  <option value="last20">Last 20 Avg Score</option>
+                  <option value="last10">Last 10 Avg Score</option>
+                </select>
+              </div>
               <table className="table table-bordered">
                 <thead>
                   <tr>
                     <th>Player</th>
                     <th>Handicap</th>
-                    <th>Average 18-Hole Score</th>
+                    <th>
+                      {scoreView === 'last10' ? 'Last 10 Avg' :
+                       scoreView === 'last20' ? 'Last 20 Avg' :
+                       'All-time Avg'}
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
-                  {leaderboard.map((entry, index) => (
-                    <tr key={index}>
-                      <td>{entry.name}</td>
-                      <td>{entry.handicap}</td>
-                      <td>{entry.averageScore}</td>
-                    </tr>
-                  ))}
+                  {leaderboard.map((entry, index) => {
+                    const displayScore =
+                      scoreView === 'last10' ? (entry.last10AverageScore ?? '—') :
+                      scoreView === 'last20' ? (entry.last20AverageScore ?? '—') :
+                      entry.averageScore;
+                    return (
+                      <tr key={index}>
+                        <td>{entry.name}</td>
+                        <td>{entry.handicap}</td>
+                        <td>{displayScore}</td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
 
