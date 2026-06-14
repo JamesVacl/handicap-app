@@ -35,9 +35,9 @@ body {
 }
 
 /* Ken Burns variants for slideshow slides */
-.bg-slide {
-  will-change: transform, opacity;
-}
+/* No will-change on the base class — inactive slides don't need a compositor layer.
+   The browser promotes the active slide automatically when the kb animation starts. */
+.bg-slide {}
 
 .kb-variant-0 { animation: kb0 28s ease-in-out infinite alternate; }
 .kb-variant-1 { animation: kb1 28s ease-in-out infinite alternate; }

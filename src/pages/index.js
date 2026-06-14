@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { getPlayers, getCourses, getScores, addScore, addCourse, signIn, signOutUser } from 'src/firebase';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import Head from 'next/head';
@@ -7,46 +7,97 @@ import { Modal, Button } from 'react-bootstrap';
 import Image from 'next/image'; // Import the Image component from Next.js
 import NavigationMenu from 'src/components/NavigationMenu';
 
-const Home = () => {
-  const MAX_RECENT_ROUNDS = 20;
-  const DIFFERENTIALS_USED_COUNT = 8;
+// ── Pure helpers (defined outside the component so they are never re-created) ──
 
-  const getScoreDateMs = (scoreDate) => {
-    if (!scoreDate) return 0;
-    if (typeof scoreDate.toMillis === 'function') return scoreDate.toMillis();
-    if (typeof scoreDate.seconds === 'number') return scoreDate.seconds * 1000;
-    if (scoreDate instanceof Date) return scoreDate.getTime();
+const MAX_RECENT_ROUNDS = 20;
+const DIFFERENTIALS_USED_COUNT = 8;
 
-    const parsed = new Date(scoreDate).getTime();
-    return Number.isNaN(parsed) ? 0 : parsed;
+const getScoreDateMs = (scoreDate) => {
+  if (!scoreDate) return 0;
+  if (typeof scoreDate.toMillis === 'function') return scoreDate.toMillis();
+  if (typeof scoreDate.seconds === 'number') return scoreDate.seconds * 1000;
+  if (scoreDate instanceof Date) return scoreDate.getTime();
+
+  const parsed = new Date(scoreDate).getTime();
+  return Number.isNaN(parsed) ? 0 : parsed;
+};
+
+const getScoreKey = (score, index = 0) => {
+  if (score.id) return score.id;
+  return `${score.player}-${getScoreDateMs(score.date)}-${score.differential}-${index}`;
+};
+
+const getSelectedDifferentialKeys = (playerScoreList) => {
+  const eligibleScores = playerScoreList
+    .filter((score) => score?.differential !== null && (score.holeType === '18' || score.isComposed))
+    .sort((a, b) => getScoreDateMs(b.date) - getScoreDateMs(a.date))
+    .slice(0, MAX_RECENT_ROUNDS);
+
+  const lowestDifferentials = [...eligibleScores]
+    .sort((a, b) => {
+      if (a.differential === b.differential) {
+        return getScoreDateMs(b.date) - getScoreDateMs(a.date);
+      }
+      return a.differential - b.differential;
+    })
+    .slice(0, DIFFERENTIALS_USED_COUNT);
+
+  return {
+    recentScores: eligibleScores,
+    selectedScores: lowestDifferentials
   };
+};
 
-  const getScoreKey = (score, index) => {
-    if (score.id) return score.id;
-    return `${score.player}-${getScoreDateMs(score.date)}-${score.differential}-${index}`;
-  };
+const calculateLeaderboard = (scores) => {
+  const playerScores = {};
 
-  const getSelectedDifferentialKeys = (playerScoreList) => {
-    const eligibleScores = playerScoreList
-      .filter((score) => score?.differential !== null && (score.holeType === '18' || score.isComposed))
-      .sort((a, b) => getScoreDateMs(b.date) - getScoreDateMs(a.date))
-      .slice(0, MAX_RECENT_ROUNDS);
+  // First group scores by player
+  scores.forEach(score => {
+    if (!playerScores[score.player]) {
+      playerScores[score.player] = [];
+    }
+    playerScores[score.player].push(score);
+  });
 
-    const lowestDifferentials = [...eligibleScores]
-      .sort((a, b) => {
-        if (a.differential === b.differential) {
-          return getScoreDateMs(b.date) - getScoreDateMs(a.date);
-        }
-        return a.differential - b.differential;
-      })
-      .slice(0, DIFFERENTIALS_USED_COUNT);
+  const leaderboard = Object.keys(playerScores).map(playerName => {
+    const playerScoreList = playerScores[playerName];
+    const { recentScores, selectedScores } = getSelectedDifferentialKeys(playerScoreList);
+    const averageHandicap = selectedScores.length > 0
+      ? selectedScores.reduce((acc, score) => acc + score.differential, 0) / selectedScores.length
+      : 0;
+
+    // Calculate average score from full rounds only
+    const fullRoundScores = recentScores.filter(score => score.holeType === '18' || score.isComposed);
+    const totalScore = fullRoundScores.reduce((acc, score) => acc + score.score, 0);
+    const averageScore = fullRoundScores.length > 0 ? totalScore / fullRoundScores.length : 0;
+
+    // Last 10 and Last 20 averages (already sorted by date desc in recentScores)
+    const last10Scores = fullRoundScores.slice(0, 10);
+    const last10Average = last10Scores.length > 0
+      ? last10Scores.reduce((acc, s) => acc + s.score, 0) / last10Scores.length
+      : 0;
+
+    const last20Scores = fullRoundScores.slice(0, 20);
+    const last20Average = last20Scores.length > 0
+      ? last20Scores.reduce((acc, s) => acc + s.score, 0) / last20Scores.length
+      : 0;
 
     return {
-      recentScores: eligibleScores,
-      selectedScores: lowestDifferentials
+      name: playerName,
+      handicap: parseFloat(averageHandicap.toFixed(1)),
+      averageScore: parseFloat(averageScore.toFixed(1)),
+      last10AverageScore: last10Scores.length > 0 ? parseFloat(last10Average.toFixed(1)) : null,
+      last20AverageScore: last20Scores.length > 0 ? parseFloat(last20Average.toFixed(1)) : null,
+      recentScores: recentScores
     };
-  };
+  });
 
+  return leaderboard.sort((a, b) => a.handicap - b.handicap);
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+
+const Home = () => {
   const [players, setPlayers] = useState([]);
   const [courses, setCourses] = useState([]);
   const [scores, setScores] = useState([]);
@@ -127,52 +178,59 @@ const Home = () => {
     fetchData();
   }, [authenticated]);
 
-  const calculateLeaderboard = (scores) => {
-    const playerScores = {};
+  // ── Memoized derived data ──────────────────────────────────────────────────
 
-    // First group scores by player
+  // Sort players/courses once whenever the underlying arrays change, not on every render
+  const sortedPlayers = useMemo(
+    () => [...players].sort((a, b) => a.name.localeCompare(b.name)),
+    [players]
+  );
+
+  const sortedCourses = useMemo(
+    () => [...courses].sort((a, b) => a.course.localeCompare(b.course)),
+    [courses]
+  );
+
+  // Filter scores — only recomputes when scores/filterPlayer/filterCourse change
+  const filteredScores = useMemo(
+    () => scores.filter((score) =>
+      (!filterPlayer || score.player === filterPlayer) &&
+      (!filterCourse || score.course === filterCourse)
+    ),
+    [scores, filterPlayer, filterCourse]
+  );
+
+  // Build the highlighted-keys Set — only recomputes when scores or leaderboard change
+  const highlightedScoreKeys = useMemo(() => {
+    // Build a lookup map once: playerName → all their scores
+    const scoresByPlayer = {};
     scores.forEach(score => {
-      if (!playerScores[score.player]) {
-        playerScores[score.player] = [];
-      }
-      playerScores[score.player].push(score);
+      if (!scoresByPlayer[score.player]) scoresByPlayer[score.player] = [];
+      scoresByPlayer[score.player].push(score);
     });
 
-    const leaderboard = Object.keys(playerScores).map(playerName => {
-      const playerScoreList = playerScores[playerName];
-      const { recentScores, selectedScores } = getSelectedDifferentialKeys(playerScoreList);
-      const averageHandicap = selectedScores.length > 0
-        ? selectedScores.reduce((acc, score) => acc + score.differential, 0) / selectedScores.length
-        : 0;
-
-      // Calculate average score from full rounds only
-      const fullRoundScores = recentScores.filter(score => score.holeType === '18' || score.isComposed);
-      const totalScore = fullRoundScores.reduce((acc, score) => acc + score.score, 0);
-      const averageScore = fullRoundScores.length > 0 ? totalScore / fullRoundScores.length : 0;
-
-      // Last 10 and Last 20 averages (already sorted by date desc in recentScores)
-      const last10Scores = fullRoundScores.slice(0, 10);
-      const last10Average = last10Scores.length > 0
-        ? last10Scores.reduce((acc, s) => acc + s.score, 0) / last10Scores.length
-        : 0;
-
-      const last20Scores = fullRoundScores.slice(0, 20);
-      const last20Average = last20Scores.length > 0
-        ? last20Scores.reduce((acc, s) => acc + s.score, 0) / last20Scores.length
-        : 0;
-
-      return {
-        name: playerName,
-        handicap: parseFloat(averageHandicap.toFixed(1)),
-        averageScore: parseFloat(averageScore.toFixed(1)),
-        last10AverageScore: last10Scores.length > 0 ? parseFloat(last10Average.toFixed(1)) : null,
-        last20AverageScore: last20Scores.length > 0 ? parseFloat(last20Average.toFixed(1)) : null,
-        recentScores: recentScores
-      };
+    const keys = new Set();
+    leaderboard.forEach((entry) => {
+      const playerScoreList = scoresByPlayer[entry.name] || [];
+      const { selectedScores } = getSelectedDifferentialKeys(playerScoreList);
+      selectedScores.forEach((score, index) => keys.add(getScoreKey(score, index)));
     });
+    return keys;
+  }, [scores, leaderboard]);
 
-    return leaderboard.sort((a, b) => a.handicap - b.handicap);
-  };
+  // Pre-format the visible page rows to avoid repeated work inside JSX
+  const pagedRows = useMemo(() => {
+    const start = currentPage * itemsPerPage;
+    return filteredScores.slice(start, start + itemsPerPage).map((score) => ({
+      ...score,
+      _isHighlighted: highlightedScoreKeys.has(getScoreKey(score)),
+      _formattedDiff: parseFloat(score.differential).toFixed(2),
+      _formattedDate: new Date(getScoreDateMs(score.date)).toLocaleDateString(),
+      _typeLabel: score.isComposed ? 'Combined 9s' : score.holeType === '9' ? '9-Hole' : '18-Hole',
+    }));
+  }, [filteredScores, currentPage, highlightedScoreKeys]);
+
+  // ──────────────────────────────────────────────────────────────────────────
 
   const handleSignIn = async (e) => {
     e.preventDefault();
@@ -280,21 +338,6 @@ const Home = () => {
     setNewCourseSlope('');
   };
 
-  const filteredScores = scores.filter((score) => {
-    return (
-      (!filterPlayer || score.player === filterPlayer) &&
-      (!filterCourse || score.course === filterCourse)
-    );
-  });
-
-  const highlightedScoreKeys = new Set(
-    leaderboard.flatMap((entry) => {
-      const playerScoreList = scores.filter((score) => score.player === entry.name);
-      const { selectedScores } = getSelectedDifferentialKeys(playerScoreList);
-      return selectedScores.map((score, index) => getScoreKey(score, index));
-    })
-  );
-
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
   };
@@ -373,7 +416,7 @@ const Home = () => {
                     className="form-control"
                   >
                     <option value="">-- Choose a Player --</option>
-                    {players.sort((a, b) => a.name.localeCompare(b.name)).map((player) => (
+                    {sortedPlayers.map((player) => (
                       <option key={player.id} value={player.name}>{player.name}</option>
                     ))}
                   </select>
@@ -388,7 +431,7 @@ const Home = () => {
                     className="form-control"
                   >
                     <option value="">-- Choose a Course --</option>
-                    {courses.sort((a, b) => a.course.localeCompare(b.course)).map((course) => (
+                    {sortedCourses.map((course) => (
                       <option key={course.id} value={course.course}>{course.course}</option>
                     ))}
                   </select>
@@ -492,7 +535,7 @@ const Home = () => {
               <div className="d-flex flex-column flex-md-row gap-3 mb-3">
                 <div className="flex-fill">
                   <label className="form-label text-muted small mb-1">Filter by Player</label>
-                  <select onChange={(e) => setFilterPlayer(e.target.value)} value={filterPlayer} className="form-control">
+                  <select onChange={(e) => { setFilterPlayer(e.target.value); setCurrentPage(0); }} value={filterPlayer} className="form-control">
                     <option value="">All Players</option>
                     {players.map((player) => (
                       <option key={player.id} value={player.name}>{player.name}</option>
@@ -501,7 +544,7 @@ const Home = () => {
                 </div>
                 <div className="flex-fill">
                   <label className="form-label text-muted small mb-1">Filter by Course</label>
-                  <select onChange={(e) => setFilterCourse(e.target.value)} value={filterCourse} className="form-control">
+                  <select onChange={(e) => { setFilterCourse(e.target.value); setCurrentPage(0); }} value={filterCourse} className="form-control">
                     <option value="">All Courses</option>
                     {courses.map((course) => (
                       <option key={course.id} value={course.course}>{course.course}</option>
@@ -523,30 +566,20 @@ const Home = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredScores.slice(currentPage * itemsPerPage, (currentPage + 1) * itemsPerPage).map((score) => {
-                      const isUsedForDifferential = highlightedScoreKeys.has(getScoreKey(score));
-                      return (
+                    {pagedRows.map((row) => (
                       <tr 
-                        key={score.id} 
-                        data-used-for-differential={isUsedForDifferential}
-                        className={isUsedForDifferential ? 'used-for-differential' : ''}
+                        key={row.id} 
+                        data-used-for-differential={row._isHighlighted}
+                        className={row._isHighlighted ? 'used-for-differential' : ''}
                       >
-                        <td className="col-player">{score.player}</td>
-                        <td className="col-course">{score.course}</td>
-                        <td className="col-score text-center">{score.score}</td>
-                        <td className="col-type text-center">
-                          {score.isComposed ? 'Combined 9s' : 
-                          score.holeType === '9' ? '9-Hole' : '18-Hole'}
-                        </td>
-                        <td className="col-differential text-center">
-                          {parseFloat(score.differential).toFixed(2)}
-                        </td>
-                        <td className="col-date text-center">
-                          {new Date(getScoreDateMs(score.date)).toLocaleDateString()}
-                        </td>
+                        <td className="col-player">{row.player}</td>
+                        <td className="col-course">{row.course}</td>
+                        <td className="col-score text-center">{row.score}</td>
+                        <td className="col-type text-center">{row._typeLabel}</td>
+                        <td className="col-differential text-center">{row._formattedDiff}</td>
+                        <td className="col-date text-center">{row._formattedDate}</td>
                       </tr>
-                      );
-                    })}
+                    ))}
                   </tbody>
                 </table>
               </div>
