@@ -44,14 +44,14 @@ const Schedule = () => {
       courseName: 'Legends on the Niagara - Ushers Creek',
       city: 'Niagara Falls, CA',
       teeTimes: ['12:30', '12:40','12:50'],
-      notes: '2.5 hour drive from London - 20 minutes from Lucas - White Tees - Modified Strokeplay - $120'
+      notes: '2.5 hour drive from London - 20 minutes from Lucas - Hybrid Tees (6486) - Modified Strokeplay - $120'
     },
     {
       date: '2026-08-15',
       courseName: 'Thundering Waters',
       city: 'Niagara Falls, CA',
       teeTimes: ['8:10', '8:20', '8:30'],
-      notes: 'TEAM DAY - Black Tees - 2V2 Scrambles- 5 minutes from hotel - $75',
+      notes: 'TEAM DAY - Black Tees (6153) - 2V2 Scrambles- 5 minutes from hotel - $75',
       matches: [
         {
           teeTime: '7:30',
@@ -77,14 +77,14 @@ const Schedule = () => {
       courseName: 'Thundering Waters',
       city: 'Niagara Falls, CA',
       teeTimes: ['14:30', '14:40', '14:50'],
-      notes: 'Black Tees - 2v2 Alt Shot - $75'
+      notes: 'Daly Tees (6530) - 2v2 Alt Shot - $75'
     },
     {
       date: '2026-08-16',
       courseName: 'Whirlpool',
       city: 'Niagara Falls, CA',
       teeTimes: ['10:10', '10:20', '10:30'],
-      notes: 'White tees - Modified strokeplay - $110 - 5 minutes from hotel'
+      notes: 'Hybrid Tees (6507) - Modified strokeplay - $110 - 5 minutes from hotel'
     },
     {
       courseName: 'Rainforest Cafe',
@@ -97,7 +97,7 @@ const Schedule = () => {
       courseName: 'Legends on the Niagara - Battlefield',
       city: 'Niagara Falls, CA',
       teeTimes: ['8:30', '8:40', '8:50'],
-      notes: 'Championship day - Modified Strokeplay'
+      notes: 'Championship day - Hybrid Tees (6498) - Modified Strokeplay'
     }
   ];
 

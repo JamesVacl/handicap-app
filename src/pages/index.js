@@ -161,7 +161,7 @@ const Home = () => {
     try {
       const savedEmail = localStorage.getItem('guyscorp_email');
       const savedRemember = localStorage.getItem('guyscorp_remember');
-      
+
       if (savedEmail && savedRemember === 'true') {
         setEmail(savedEmail);
         setRememberMe(true);
@@ -252,7 +252,7 @@ const Home = () => {
     try {
       await signIn(email, password);
       setAuthenticated(true);
-      
+
       // Handle remember me functionality
       if (rememberMe) {
         localStorage.setItem('guyscorp_email', email);
@@ -269,7 +269,7 @@ const Home = () => {
   const handleSignOut = async () => {
     await signOutUser();
     setAuthenticated(false);
-    
+
     // Clear saved credentials on sign out
     try {
       localStorage.removeItem('guyscorp_email');
@@ -408,347 +408,347 @@ const Home = () => {
         <meta name="description" content="Track golf handicaps, scores, and tournament standings for the Guyscorp golf group." />
       </Head>
       <div className="app-wrapper">
-      {authenticated && <NavigationMenu />}
-      <div className="home-container">
-        <div className="content">
-          <div className="logo-container">
-            <div className="logo-wrapper">
-              <Image src="/logo.png" alt="Logo" width={300} height={300} className="rounded-logo" />
-              <div className="sparkle sparkle-1"></div>
-              <div className="sparkle sparkle-2"></div>
-              <div className="sparkle sparkle-3"></div>
-              <div className="sparkle sparkle-4"></div>
-              <div className="sparkle sparkle-5"></div>
-              <div className="sparkle sparkle-6"></div>
+        {authenticated && <NavigationMenu />}
+        <div className="home-container">
+          <div className="content">
+            <div className="logo-container">
+              <div className="logo-wrapper">
+                <Image src="/logo.png" alt="Logo" width={300} height={300} className="rounded-logo" />
+                <div className="sparkle sparkle-1"></div>
+                <div className="sparkle sparkle-2"></div>
+                <div className="sparkle sparkle-3"></div>
+                <div className="sparkle sparkle-4"></div>
+                <div className="sparkle sparkle-5"></div>
+                <div className="sparkle sparkle-6"></div>
+              </div>
             </div>
-          </div>
-          <h1 className="text-4xl font-semibold text-center mb-8 cursive-font">Guyscorp Handicap Tracking</h1>
-          {!authenticated ? (
-            <div className="auth-container">
-              <form onSubmit={handleSignIn} className="d-flex flex-column align-items-center mb-8 auth-form">
-                <input
-                  type="email"
-                  placeholder="Enter Email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="mb-4 p-3 form-control w-50"
-                />
-                <input
-                  type="password"
-                  placeholder="Enter Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="mb-4 p-3 form-control w-50"
-                />
-                <div className="form-check mb-3 w-50">
+            <h1 className="text-4xl font-semibold text-center mb-8 cursive-font">Guyscorp Handicap Tracking</h1>
+            {!authenticated ? (
+              <div className="auth-container">
+                <form onSubmit={handleSignIn} className="d-flex flex-column align-items-center mb-8 auth-form">
                   <input
-                    className="form-check-input"
-                    type="checkbox"
-                    id="rememberMe"
-                    checked={rememberMe}
-                    onChange={(e) => setRememberMe(e.target.checked)}
+                    type="email"
+                    placeholder="Enter Email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="mb-4 p-3 form-control w-50"
                   />
-                  <label className="form-check-label" htmlFor="rememberMe">
-                    Remember me (stay logged in)
-                  </label>
-                </div>
-                <button type="submit" className="btn btn-success w-50">Sign In</button>
-              </form>
-            </div>
-          ) : loading ? (
-            <div className="text-center py-5">
-              <div className="spinner-border text-success" role="status">
-                <span className="visually-hidden">Loading...</span>
+                  <input
+                    type="password"
+                    placeholder="Enter Password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="mb-4 p-3 form-control w-50"
+                  />
+                  <div className="form-check mb-3 w-50">
+                    <input
+                      className="form-check-input"
+                      type="checkbox"
+                      id="rememberMe"
+                      checked={rememberMe}
+                      onChange={(e) => setRememberMe(e.target.checked)}
+                    />
+                    <label className="form-check-label" htmlFor="rememberMe">
+                      Remember me (stay logged in)
+                    </label>
+                  </div>
+                  <button type="submit" className="btn btn-success w-50">Sign In</button>
+                </form>
               </div>
-              <p className="text-muted mt-3">Loading your data...</p>
-            </div>
-          ) : (
-            <div className="content">
-              <form onSubmit={handleSubmit} className="space-y-4 mb-8">
-                <div className="form-group">
-                  <label className="form-label">Select a Player:</label>
-                  <select 
-                    onChange={(e) => setSelectedPlayer(e.target.value)} 
-                    value={selectedPlayer} 
-                    className="form-control"
-                  >
-                    <option value="">-- Choose a Player --</option>
-                    {sortedPlayers.map((player) => (
-                      <option key={player.id} value={player.name}>{player.name}</option>
-                    ))}
-                  </select>
+            ) : loading ? (
+              <div className="text-center py-5">
+                <div className="spinner-border text-success" role="status">
+                  <span className="visually-hidden">Loading...</span>
                 </div>
+                <p className="text-muted mt-3">Loading your data...</p>
+              </div>
+            ) : (
+              <div className="content">
+                <form onSubmit={handleSubmit} className="space-y-4 mb-8">
+                  <div className="form-group">
+                    <label className="form-label">Select a Player:</label>
+                    <select
+                      onChange={(e) => setSelectedPlayer(e.target.value)}
+                      value={selectedPlayer}
+                      className="form-control"
+                    >
+                      <option value="">-- Choose a Player --</option>
+                      {sortedPlayers.map((player) => (
+                        <option key={player.id} value={player.name}>{player.name}</option>
+                      ))}
+                    </select>
+                  </div>
 
-                {/* Select or Add New Course */}
-                <div className="form-group">
-                  <label className="form-label">Select a Course or Add New:</label>
-                  <select 
-                    onChange={handleCourseSelect} 
-                    value={selectedCourse} 
-                    className="form-control"
+                  {/* Select or Add New Course */}
+                  <div className="form-group">
+                    <label className="form-label">Select a Course or Add New:</label>
+                    <select
+                      onChange={handleCourseSelect}
+                      value={selectedCourse}
+                      className="form-control"
+                    >
+                      <option value="">-- Choose a Course --</option>
+                      {sortedCourses.map((course) => (
+                        <option key={course.id} value={course.course}>{course.course}</option>
+                      ))}
+                    </select>
+                    <button
+                      type="button"
+                      onClick={() => setShowAddCourseModal(true)}
+                      className="btn btn-link mt-2"
+                    >
+                      Add New Course
+                    </button>
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">Score:</label>
+                    <input
+                      type="number"
+                      placeholder="Score"
+                      value={score}
+                      onChange={(e) => setScore(e.target.value)}
+                      className="form-control"
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">Hole Type:</label>
+                    <select
+                      onChange={(e) => setHoleType(e.target.value)}
+                      value={holeType}
+                      className="form-control"
+                    >
+                      <option value="">-- Select Hole Type --</option>
+                      <option value="18">18 Holes</option>
+                      <option value="9">9 Holes</option>
+                    </select>
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">Date Played:</label>
+                    <input
+                      type="date"
+                      value={datePlayed}
+                      onChange={(e) => setDatePlayed(e.target.value)}
+                      className="form-control"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="btn btn-success w-100 mt-3"
                   >
-                    <option value="">-- Choose a Course --</option>
-                    {sortedCourses.map((course) => (
-                      <option key={course.id} value={course.course}>{course.course}</option>
-                    ))}
-                  </select>
-                  <button 
-                    type="button" 
-                    onClick={() => setShowAddCourseModal(true)} 
-                    className="btn btn-link mt-2"
-                  >
-                    Add New Course
+                    Submit Score
                   </button>
-                </div>
+                </form>
 
-                <div className="form-group">
-                  <label className="form-label">Score:</label>
-                  <input 
-                    type="number" 
-                    placeholder="Score" 
-                    value={score} 
-                    onChange={(e) => setScore(e.target.value)} 
-                    className="form-control" 
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Hole Type:</label>
-                  <select 
-                    onChange={(e) => setHoleType(e.target.value)} 
-                    value={holeType} 
+                {/* Leaderboard Table */}
+                <div className="d-flex justify-content-between align-items-center mt-4 mb-3">
+                  <h2 className="text-2xl font-semibold mb-0">Leaderboard</h2>
+                  <select
+                    id="scoreViewDropdown"
+                    value={scoreView}
+                    onChange={(e) => setScoreView(e.target.value)}
                     className="form-control"
+                    style={{ width: 'auto' }}
                   >
-                    <option value="">-- Select Hole Type --</option>
-                    <option value="18">18 Holes</option>
-                    <option value="9">9 Holes</option>
+                    <option value="allTime">All-time Avg Score</option>
+                    <option value="last20">Last 20 Avg Score</option>
+                    <option value="last10">Last 10 Avg Score</option>
                   </select>
                 </div>
-
-                <div className="form-group">
-                  <label className="form-label">Date Played:</label>
-                  <input 
-                    type="date" 
-                    value={datePlayed} 
-                    onChange={(e) => setDatePlayed(e.target.value)} 
-                    className="form-control" 
-                  />
-                </div>
-
-                <button 
-                  type="submit" 
-                  className="btn btn-success w-100 mt-3"
-                >
-                  Submit Score
-                </button>
-              </form>
-
-              {/* Leaderboard Table */}
-              <div className="d-flex justify-content-between align-items-center mt-4 mb-3">
-                <h2 className="text-2xl font-semibold mb-0">Leaderboard</h2>
-                <select
-                  id="scoreViewDropdown"
-                  value={scoreView}
-                  onChange={(e) => setScoreView(e.target.value)}
-                  className="form-control"
-                  style={{ width: 'auto' }}
-                >
-                  <option value="allTime">All-time Avg Score</option>
-                  <option value="last20">Last 20 Avg Score</option>
-                  <option value="last10">Last 10 Avg Score</option>
-                </select>
-              </div>
-              <table className="table table-bordered">
-                <thead>
-                  <tr>
-                    <th>Player</th>
-                    <th>Handicap</th>
-                    <th>
-                      {scoreView === 'last10' ? 'Last 10 Avg' :
-                       scoreView === 'last20' ? 'Last 20 Avg' :
-                       'All-time Avg'}
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {leaderboard.map((entry, index) => {
-                    const displayScore =
-                      scoreView === 'last10' ? (entry.last10AverageScore ?? '—') :
-                      scoreView === 'last20' ? (entry.last20AverageScore ?? '—') :
-                      entry.averageScore;
-                    return (
-                      <tr key={index}>
-                        <td>{entry.name}</td>
-                        <td>{entry.handicap}</td>
-                        <td>{displayScore}</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-
-              {/* Previous Scores Table */}
-              <h2 className="text-2xl font-semibold mt-4 mb-3">Previous Scores</h2>
-              <div className="d-flex flex-column flex-md-row gap-3 mb-3">
-                <div className="flex-fill">
-                  <label className="form-label text-muted small mb-1">Filter by Player</label>
-                  <select onChange={(e) => { setFilterPlayer(e.target.value); setCurrentPage(0); }} value={filterPlayer} className="form-control">
-                    <option value="">All Players</option>
-                    {players.map((player) => (
-                      <option key={player.id} value={player.name}>{player.name}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="flex-fill">
-                  <label className="form-label text-muted small mb-1">Filter by Course</label>
-                  <select onChange={(e) => { setFilterCourse(e.target.value); setCurrentPage(0); }} value={filterCourse} className="form-control">
-                    <option value="">All Courses</option>
-                    {courses.map((course) => (
-                      <option key={course.id} value={course.course}>{course.course}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className="table-responsive-wrapper">
-                <table className="table table-bordered table-hover scores-table">
+                <table className="table table-bordered">
                   <thead>
                     <tr>
-                      <th className="col-player">Player</th>
-                      <th className="col-course">Course</th>
-                      <th className="col-score text-center">Score</th>
-                      <th className="col-type text-center">Type</th>
-                      <th className="col-differential text-center">Diff</th>
-                      <th className="col-date text-center">Date</th>
+                      <th>Player</th>
+                      <th>Handicap</th>
+                      <th>
+                        {scoreView === 'last10' ? 'Last 10 Avg' :
+                          scoreView === 'last20' ? 'Last 20 Avg' :
+                            'All-time Avg'}
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
-                    {pagedRows.map((row) => (
-                      <tr 
-                        key={row.id} 
-                        data-used-for-differential={row._isHighlighted}
-                        className={row._isHighlighted ? 'used-for-differential' : ''}
-                        onContextMenu={(e) => openDeletePopover(e, row)}
-                        onTouchStart={(e) => startLongPress(e, row)}
-                        onTouchEnd={cancelLongPress}
-                        onTouchMove={cancelLongPress}
-                      >
-                        <td className="col-player">{row.player}</td>
-                        <td className="col-course">{row.course}</td>
-                        <td className="col-score text-center">{row.score}</td>
-                        <td className="col-type text-center">{row._typeLabel}</td>
-                        <td className="col-differential text-center">{row._formattedDiff}</td>
-                        <td className="col-date text-center">{row._formattedDate}</td>
-                      </tr>
-                    ))}
+                    {leaderboard.map((entry, index) => {
+                      const displayScore =
+                        scoreView === 'last10' ? (entry.last10AverageScore ?? '—') :
+                          scoreView === 'last20' ? (entry.last20AverageScore ?? '—') :
+                            entry.averageScore;
+                      return (
+                        <tr key={index}>
+                          <td>{entry.name}</td>
+                          <td>{entry.handicap}</td>
+                          <td>{displayScore}</td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
-              </div>
 
-              <div className="pagination d-flex justify-content-center align-items-center gap-3 mt-3">
-                <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 0} className="btn btn-success">Previous</button>
-                <span className="text-lg">Page {currentPage + 1} of {totalPages}</span>
-                <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages - 1} className="btn btn-success">Next</button>
-              </div>
-            </div>
-          )}
+                {/* Previous Scores Table */}
+                <h2 className="text-2xl font-semibold mt-4 mb-3">Previous Scores</h2>
+                <div className="d-flex flex-column flex-md-row gap-3 mb-3">
+                  <div className="flex-fill">
+                    <label className="form-label text-muted small mb-1">Filter by Player</label>
+                    <select onChange={(e) => { setFilterPlayer(e.target.value); setCurrentPage(0); }} value={filterPlayer} className="form-control">
+                      <option value="">All Players</option>
+                      {players.map((player) => (
+                        <option key={player.id} value={player.name}>{player.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="flex-fill">
+                    <label className="form-label text-muted small mb-1">Filter by Course</label>
+                    <select onChange={(e) => { setFilterCourse(e.target.value); setCurrentPage(0); }} value={filterCourse} className="form-control">
+                      <option value="">All Courses</option>
+                      {courses.map((course) => (
+                        <option key={course.id} value={course.course}>{course.course}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
 
-          {/* ── Toast notification ── */}
-          {toast && (
-            <div className={`app-toast app-toast--${toast.type}`} role="status">
-              {toast.type === 'success' && <span className="app-toast-icon">✓</span>}
-              {toast.type === 'info' && <span className="app-toast-icon">ℹ</span>}
-              {toast.type === 'error' && <span className="app-toast-icon">✕</span>}
-              <span>{toast.message}</span>
-            </div>
-          )}
+                <div className="table-responsive-wrapper">
+                  <table className="table table-bordered table-hover scores-table">
+                    <thead>
+                      <tr>
+                        <th className="col-player">Player</th>
+                        <th className="col-course">Course</th>
+                        <th className="col-score text-center">Score</th>
+                        <th className="col-type text-center">Type</th>
+                        <th className="col-differential text-center">Diff</th>
+                        <th className="col-date text-center">Date</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {pagedRows.map((row) => (
+                        <tr
+                          key={row.id}
+                          data-used-for-differential={row._isHighlighted}
+                          className={row._isHighlighted ? 'used-for-differential' : ''}
+                          onContextMenu={(e) => openDeletePopover(e, row)}
+                          onTouchStart={(e) => startLongPress(e, row)}
+                          onTouchEnd={cancelLongPress}
+                          onTouchMove={cancelLongPress}
+                        >
+                          <td className="col-player">{row.player}</td>
+                          <td className="col-course">{row.course}</td>
+                          <td className="col-score text-center">{row.score}</td>
+                          <td className="col-type text-center">{row._typeLabel}</td>
+                          <td className="col-differential text-center">{row._formattedDiff}</td>
+                          <td className="col-date text-center">{row._formattedDate}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
 
-          {/* ── Secret Delete Popover ── */}
-          {deletePopover && (
-            <>
-              {/* Backdrop to dismiss */}
-              <div
-                style={{ position: 'fixed', inset: 0, zIndex: 9998 }}
-                onClick={() => setDeletePopover(null)}
-              />
-              <div
-                ref={popoverRef}
-                className="delete-popover"
-                style={{
-                  position: 'fixed',
-                  left: Math.min(deletePopover.x, window.innerWidth - 260),
-                  top: Math.min(deletePopover.y, window.innerHeight - 130),
-                  zIndex: 9999,
-                }}
-              >
-                <p className="delete-popover-label">Remove this score?</p>
-                <p className="delete-popover-score">{deletePopover.scoreLabel}</p>
-                <div className="delete-popover-actions">
-                  <button
-                    className="delete-popover-btn delete-popover-btn--cancel"
-                    onClick={() => setDeletePopover(null)}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    className="delete-popover-btn delete-popover-btn--confirm"
-                    onClick={handleDeleteConfirm}
-                  >
-                    Remove
-                  </button>
+                <div className="pagination d-flex justify-content-center align-items-center gap-3 mt-3">
+                  <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 0} className="btn btn-success">Previous</button>
+                  <span className="text-lg">Page {currentPage + 1} of {totalPages}</span>
+                  <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages - 1} className="btn btn-success">Next</button>
                 </div>
               </div>
-            </>
-          )}
+            )}
 
-          {/* Add Course Modal */}
-          <Modal show={showAddCourseModal} onHide={() => setShowAddCourseModal(false)}>
-            <Modal.Header closeButton>
-              <Modal.Title>Add New Course</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-              <p>Visit <a href="https://ncrdb.usga.org" target="_blank" rel="noopener noreferrer">USGA</a> for rating and slope information.</p>
-              <form onSubmit={handleAddCourseSubmit}>
-                <div className="form-group">
-                  <label className="form-label">New Course Name:</label>
-                  <input 
-                    type="text" 
-                    placeholder="Course Name" 
-                    value={newCourse} 
-                    onChange={(e) => setNewCourse(e.target.value)} 
-                    className="form-control" 
-                  />
+            {/* ── Toast notification ── */}
+            {toast && (
+              <div className={`app-toast app-toast--${toast.type}`} role="status">
+                {toast.type === 'success' && <span className="app-toast-icon">✓</span>}
+                {toast.type === 'info' && <span className="app-toast-icon">ℹ</span>}
+                {toast.type === 'error' && <span className="app-toast-icon">✕</span>}
+                <span>{toast.message}</span>
+              </div>
+            )}
+
+            {/* ── Secret Delete Popover ── */}
+            {deletePopover && (
+              <>
+                {/* Backdrop to dismiss */}
+                <div
+                  style={{ position: 'fixed', inset: 0, zIndex: 9998 }}
+                  onClick={() => setDeletePopover(null)}
+                />
+                <div
+                  ref={popoverRef}
+                  className="delete-popover"
+                  style={{
+                    position: 'fixed',
+                    left: Math.min(deletePopover.x, window.innerWidth - 260),
+                    top: Math.min(deletePopover.y, window.innerHeight - 130),
+                    zIndex: 9999,
+                  }}
+                >
+                  <p className="delete-popover-label">Remove this score?</p>
+                  <p className="delete-popover-score">{deletePopover.scoreLabel}</p>
+                  <div className="delete-popover-actions">
+                    <button
+                      className="delete-popover-btn delete-popover-btn--cancel"
+                      onClick={() => setDeletePopover(null)}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      className="delete-popover-btn delete-popover-btn--confirm"
+                      onClick={handleDeleteConfirm}
+                    >
+                      Remove
+                    </button>
+                  </div>
                 </div>
-                <div className="form-group">
-                  <label className="form-label">Course Rating:</label>
-                  <input 
-                    type="number" 
-                    placeholder="Rating" 
-                    value={newCourseRating} 
-                    onChange={(e) => setNewCourseRating(e.target.value)} 
-                    className="form-control" 
-                  />
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Course Slope:</label>
-                  <input 
-                    type="number" 
-                    placeholder="Slope" 
-                    value={newCourseSlope} 
-                    onChange={(e) => setNewCourseSlope(e.target.value)} 
-                    className="form-control" 
-                  />
-                </div>
-                <br />
-                <Button variant="success" type="submit">
-                  Add Course
-                </Button>
-              </form>
-            </Modal.Body>
-          </Modal>
+              </>
+            )}
+
+            {/* Add Course Modal */}
+            <Modal show={showAddCourseModal} onHide={() => setShowAddCourseModal(false)}>
+              <Modal.Header closeButton>
+                <Modal.Title>Add New Course</Modal.Title>
+              </Modal.Header>
+              <Modal.Body>
+                <p>Visit <a href="https://ncrdb.usga.org" target="_blank" rel="noopener noreferrer">USGA</a> for rating and slope information.</p>
+                <form onSubmit={handleAddCourseSubmit}>
+                  <div className="form-group">
+                    <label className="form-label">New Course Name:</label>
+                    <input
+                      type="text"
+                      placeholder="Course Name"
+                      value={newCourse}
+                      onChange={(e) => setNewCourse(e.target.value)}
+                      className="form-control"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Course Rating:</label>
+                    <input
+                      type="number"
+                      placeholder="Rating"
+                      value={newCourseRating}
+                      onChange={(e) => setNewCourseRating(e.target.value)}
+                      className="form-control"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Course Slope:</label>
+                    <input
+                      type="number"
+                      placeholder="Slope"
+                      value={newCourseSlope}
+                      onChange={(e) => setNewCourseSlope(e.target.value)}
+                      className="form-control"
+                    />
+                  </div>
+                  <br />
+                  <Button variant="success" type="submit">
+                    Add Course
+                  </Button>
+                </form>
+              </Modal.Body>
+            </Modal>
+          </div>
         </div>
       </div>
-    </div>
     </>
   );
 };
