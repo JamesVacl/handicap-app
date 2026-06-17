@@ -59,27 +59,7 @@ const Schedule = () => {
       tees: 'Black Tees (6153)',
       soloFormat: '--',
       teamFormat: '2V2 Scrambles',
-      cost: '$75',
-      matches: [
-        {
-          teeTime: '7:30',
-          format: 'Singles Match Play',
-          stakes: '5-3-2',
-          allowance: '100%'
-        },
-        {
-          teeTime: '7:40',
-          format: 'Singles Match Play',
-          stakes: '5-3-2',
-          allowance: '100%'
-        },
-        {
-          teeTime: '7:50',
-          format: 'Singles Match Play',
-          stakes: '5-3-2',
-          allowance: '100%'
-        }
-      ]
+      cost: '$75'
     },
     {
       courseName: 'Thundering Waters',
@@ -243,6 +223,13 @@ const Schedule = () => {
     }
   };
 
+  const getEventDate = (index) => {
+    for (let i = index; i >= 0; i--) {
+      if (scheduleData[i].date) return scheduleData[i].date;
+    }
+    return '';
+  };
+
   // Modify handleMatchSetup to save to Firebase
   const handleMatchSetup = async (eventIndex, timeIndex, matchData) => {
     if (!authenticated) return;
@@ -278,9 +265,8 @@ const Schedule = () => {
       }, { merge: true });
 
       // Save to Live Matches as well
-      const liveMatchKey = `singles-match-${Date.now()}`;
       await setDoc(doc(db, 'liveMatches', '2025'), {
-        [liveMatchKey]: {
+        [key]: {
           matchType: '1v1',
           format: 'Singles Match Play',
           player1: matchData.player1,
@@ -288,7 +274,7 @@ const Schedule = () => {
           player1Team: 'Putt Pirates',
           player2Team: 'Golden Boys',
           courseName: scheduleData[eventIndex].courseName,
-          date: scheduleData[eventIndex].date,
+          date: getEventDate(eventIndex),
           teeTime: scheduleData[eventIndex].teeTimes[timeIndex],
           status: 'not_started',
           createdAt: new Date(),
@@ -337,15 +323,14 @@ const Schedule = () => {
       }, { merge: true });
 
       // Save to Live Matches as well
-      const liveMatchKey = `team-match-${Date.now()}`;
       await setDoc(doc(db, 'liveMatches', '2025'), {
-        [liveMatchKey]: {
+        [key]: {
           matchType: '2v2',
           format: matchData.format,
           team1: [matchData.team1Player1, matchData.team1Player2],
           team2: [matchData.team2Player1, matchData.team2Player2],
           courseName: scheduleData[eventIndex].courseName,
-          date: scheduleData[eventIndex].date,
+          date: getEventDate(eventIndex),
           teeTime: scheduleData[eventIndex].teeTimes[timeIndex],
           status: 'not_started',
           createdAt: new Date(),
@@ -374,6 +359,11 @@ const Schedule = () => {
 
       // Delete the result if it exists
       await setDoc(doc(db, 'matchResults', '2025-results'), {
+        [key]: deleteField()
+      }, { merge: true });
+
+      // Also delete from Live Matches to keep it in sync
+      await setDoc(doc(db, 'liveMatches', '2025'), {
         [key]: deleteField()
       }, { merge: true });
 
