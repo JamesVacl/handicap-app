@@ -2583,4 +2583,42 @@ body {
 .scores-table tbody tr {
   cursor: default;
 }
+
+/* Schedule Page Details */
+.round-details-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  background: rgba(0, 0, 0, 0.03);
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  margin: 1rem auto 0;
+  text-align: left;
+  max-width: 600px;
+}
+
+.round-detail-row {
+  display: flex;
+  flex-direction: column;
+  color: #4a5568;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+@media (min-width: 600px) {
+  .round-detail-row {
+    flex-direction: row;
+    align-items: baseline;
+  }
+  .round-detail-row strong {
+    min-width: 120px;
+    margin-right: 0.5rem;
+  }
+}
+
+.round-detail-row strong {
+  color: #2d3748;
+  font-weight: 600;
+}
 /* ─────────────────────────────────────────────────────────────────────────── */

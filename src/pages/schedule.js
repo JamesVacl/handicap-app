@@ -44,14 +44,22 @@ const Schedule = () => {
       courseName: 'Legends on the Niagara - Ushers Creek',
       city: 'Niagara Falls, CA',
       teeTimes: ['12:30', '12:40', '12:50'],
-      notes: '2.5 hour drive from London - 20 minutes from Lucas - Hybrid Tees (6486) - Modified Strokeplay - $120'
+      distance: '2.5 hour drive from London - 20 minutes from Lucas',
+      tees: 'Hybrid Tees (6486)',
+      soloFormat: 'Modified Strokeplay',
+      teamFormat: 'Four Ball',
+      cost: '$120'
     },
     {
       date: '2026-08-15',
-      courseName: 'Thundering Waters',
+      courseName: 'Thundering Waters (TEAM DAY)',
       city: 'Niagara Falls, CA',
       teeTimes: ['8:10', '8:20', '8:30'],
-      notes: 'TEAM DAY - Black Tees (6153) - 2V2 Scrambles- 5 minutes from hotel - $75',
+      distance: '5 minutes from hotel',
+      tees: 'Black Tees (6153)',
+      soloFormat: '--',
+      teamFormat: '2V2 Scrambles',
+      cost: '$75',
       matches: [
         {
           teeTime: '7:30',
@@ -77,14 +85,22 @@ const Schedule = () => {
       courseName: 'Thundering Waters',
       city: 'Niagara Falls, CA',
       teeTimes: ['14:30', '14:40', '14:50'],
-      notes: 'Daly Tees (6530) - 2v2 Alt Shot - $75'
+      distance: '5 minutes from hotel',
+      tees: 'Daly Tees (6530)',
+      soloFormat: '--',
+      teamFormat: '2v2 Alt Shot',
+      cost: '$75'
     },
     {
       date: '2026-08-16',
       courseName: 'Whirlpool',
       city: 'Niagara Falls, CA',
       teeTimes: ['10:10', '10:20', '10:30'],
-      notes: 'Hybrid Tees (6507) - Modified strokeplay - $110 - 5 minutes from hotel'
+      distance: '5 minutes from hotel',
+      tees: 'Hybrid Tees (6507)',
+      soloFormat: 'Modified Strokeplay',
+      teamFormat: '1v1 singles',
+      cost: '$110'
     },
     {
       courseName: 'Rainforest Cafe',
@@ -94,10 +110,14 @@ const Schedule = () => {
     },
     {
       date: '2026-08-17',
-      courseName: 'Legends on the Niagara - Battlefield',
+      courseName: 'Legends on the Niagara - Battlefield (CHAMPIONSHIP DAY)',
       city: 'Niagara Falls, CA',
       teeTimes: ['8:30', '8:40', '8:50'],
-      notes: 'Championship day - Hybrid Tees (6498) - Modified Strokeplay'
+      distance: '10 minutes from hotel - 2.5 hours back to London',
+      tees: 'Hybrid Tees (6498)',
+      soloFormat: 'Modified Strokeplay',
+      teamFormat: '--',
+      cost: '$120'
     }
   ];
 
@@ -428,8 +448,15 @@ const Schedule = () => {
                     <div key={roundIndex} className={roundIndex > 0 ? "mt-5 pt-4 border-top" : ""}>
                       <div className="text-center mb-4">
                         <h3 className="text-2xl text-success mb-2">{round.courseName}</h3>
-                        {round.notes && (
-                          <p className="text-gray-600 italic mb-0">{round.notes}</p>
+                        {(round.distance || round.tees || round.soloFormat || round.teamFormat || round.cost || round.notes) && (
+                          <div className="round-details-grid">
+                            {round.distance && <div className="round-detail-row"><strong>Distance:</strong> <span>{round.distance}</span></div>}
+                            {round.tees && <div className="round-detail-row"><strong>Tees:</strong> <span>{round.tees}</span></div>}
+                            {round.soloFormat && <div className="round-detail-row"><strong>Solo Format:</strong> <span>{round.soloFormat}</span></div>}
+                            {round.teamFormat && <div className="round-detail-row"><strong>Team Format:</strong> <span>{round.teamFormat}</span></div>}
+                            {round.cost && <div className="round-detail-row"><strong>Cost:</strong> <span>{round.cost}</span></div>}
+                            {round.notes && <div className="round-detail-row" style={{ fontStyle: 'italic', justifyContent: 'center' }}>{round.notes}</div>}
+                          </div>
                         )}
                       </div>
 
