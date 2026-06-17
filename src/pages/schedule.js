@@ -26,13 +26,30 @@ const Schedule = () => {
   const [playerHandicaps, setPlayerHandicaps] = useState({});
   const [expandedGroups, setExpandedGroups] = useState({});
   const [isMobile, setIsMobile] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
+    const saved = localStorage.getItem('expandedGroupsPref');
+    if (saved) {
+      try {
+        setExpandedGroups(JSON.parse(saved));
+      } catch (e) {
+        console.error("Error parsing saved expanded groups", e);
+      }
+    }
+    setIsLoaded(true);
+
     const handleResize = () => setIsMobile(window.innerWidth < 768);
     handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  useEffect(() => {
+    if (isLoaded) {
+      localStorage.setItem('expandedGroupsPref', JSON.stringify(expandedGroups));
+    }
+  }, [expandedGroups, isLoaded]);
 
   const isGroupExpanded = (key) => {
     if (expandedGroups[key] !== undefined) {
