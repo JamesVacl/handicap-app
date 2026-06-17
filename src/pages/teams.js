@@ -3,7 +3,7 @@ import { Container, Row, Col, Card, Button, Form, Badge } from 'react-bootstrap'
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore, setDoc, doc, onSnapshot, deleteField } from 'firebase/firestore';
 import Head from 'next/head';
-import { getTeams, getPlayers, getPlayerHandicaps, updateTeam } from '../firebase';
+import { getTeams, getPlayers, getPlayerHandicaps, updateTeam, getRedhawkAdjustments } from '../firebase';
 import NavigationMenu from '../components/NavigationMenu';
 import FloatingNavigation from '../components/FloatingNavigation';
 
@@ -19,6 +19,7 @@ const Teams = () => {
   const [teamRosterSelections, setTeamRosterSelections] = useState({});
   const [savingTeamId, setSavingTeamId] = useState(null);
   const [handicapByPlayerName, setHandicapByPlayerName] = useState({});
+  const [redhawkAdjustments, setRedhawkAdjustments] = useState({});
 
   useEffect(() => {
     const auth = getAuth();
@@ -38,9 +39,11 @@ const Teams = () => {
           const handicapMap = Object.fromEntries(
             playerHandicaps.map((entry) => [entry.name, entry.handicap])
           );
+          const adjustments = await getRedhawkAdjustments();
           setTeams(teamsData);
           setPlayers(playersData);
           setHandicapByPlayerName(handicapMap);
+          setRedhawkAdjustments(adjustments);
         } catch (error) {
           console.error('Error loading data:', error);
         }
@@ -392,6 +395,84 @@ const Teams = () => {
                   </div>
                 </div>
                 
+                <div className="team-section mb-4">
+                  <div className="team-header">
+                    <div className="team-logo-container">
+                      <div className="skeleton-logo" style={{ width: '150px', height: '150px', backgroundColor: '#e9ecef', borderRadius: '8px' }}></div>
+                    </div>
+                    <div className="team-info">
+                      <div className="skeleton-title" style={{ width: '200px', height: '32px', backgroundColor: '#e9ecef', borderRadius: '4px', marginBottom: '8px' }}></div>
+                      <div className="skeleton-subtitle" style={{ width: '150px', height: '24px', backgroundColor: '#e9ecef', borderRadius: '4px' }}></div>
+                    </div>
+                  </div>
+                  
+                  <div className="players-list my-3">
+                    {[1, 2, 3].map(i => (
+                      <div key={i} className="skeleton-player" style={{ width: '100%', height: '20px', backgroundColor: '#e9ecef', borderRadius: '4px', marginBottom: '8px' }}></div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Tournament Handicaps Overview */}
+          <div className="teams-section mb-8">
+            <div className="d-flex justify-content-between align-items-center mb-6">
+              <h2 className="text-3xl font-semibold text-success">Tournament Handicaps</h2>
+            </div>
+            
+            {teams.length > 0 ? (
+              <div className="teams-grid">
+                {teams.map((team, index) => {
+                  const adjustedPlayers = (team.players || []).map(player => {
+                    const adjustment = redhawkAdjustments[player.name]?.delta || 0;
+                    return {
+                      ...player,
+                      handicap: parseFloat(((player.handicap || 0) + adjustment).toFixed(1))
+                    };
+                  });
+                  const adjustedAverage = adjustedPlayers.length
+                    ? parseFloat((adjustedPlayers.reduce((acc, p) => acc + p.handicap, 0) / adjustedPlayers.length).toFixed(1))
+                    : 0;
+
+                  return (
+                    <div key={`tournament-${team.id || index}`} className="team-section mb-4">
+                      <div className="team-header">
+                        <div className="team-logo-container">
+                          <Image 
+                            src={team.name === "Putt Pirates" ? "/putt-pirates-logo.jpg" : "/golden-boys-logo.jpg"}
+                            alt={`${team.name} Logo`}
+                            width={150} 
+                            height={150} 
+                            className="team-logo" 
+                          />
+                        </div>
+                        <div className="team-info">
+                          <h3 className="text-2xl font-bold">{team.name}</h3>
+                          <p className="text-xl text-success">
+                            Tournament Average: {adjustedAverage}
+                          </p>
+                          <small className="text-muted">
+                            Handicaps shown are adjusted using Redhawk Trial data.
+                          </small>
+                        </div>
+                      </div>
+                      
+                      <div className="players-list my-3">
+                        {[...adjustedPlayers].sort((a, b) => a.handicap - b.handicap).map(player => (
+                          <div key={`tourn-${player.name}`} className="player-item d-flex justify-content-between align-items-center gap-2">
+                            <span>{player.name} - Adjusted Handicap: {player.handicap}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              // Loading skeleton for tournament teams
+              <div className="teams-loading-skeleton">
                 <div className="team-section mb-4">
                   <div className="team-header">
                     <div className="team-logo-container">

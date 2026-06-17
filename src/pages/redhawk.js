@@ -174,21 +174,56 @@ export default function RedhawkTrials() {
       alert('Please enter a valid adjustment value (e.g. +1.5 or -2).');
       return;
     }
-    setSaving(true);
-    await saveRedhawkAdjustment(editing, parseFloat(draftDelta), draftNotes);
-    const updated = await getRedhawkAdjustments();
-    setAdjustments(updated);
-    setSaving(false);
-    setEditing(null);
+    
+    const targetPlayer = editing;
+    const newDelta = parseFloat(draftDelta);
+    const newNotes = draftNotes;
+    
+    // 1. Optimistic Update - feel instant
+    setAdjustments((prev) => ({
+      ...prev,
+      [targetPlayer]: {
+        ...prev[targetPlayer],
+        playerName: targetPlayer,
+        delta: newDelta,
+        notes: newNotes,
+        updatedAt: new Date()
+      }
+    }));
+    setEditing(null); // Close panel immediately
+
+    // 2. Background Save
+    try {
+      await saveRedhawkAdjustment(targetPlayer, newDelta, newNotes);
+    } catch (err) {
+      console.error('Failed to save adjustment:', err);
+      alert('Failed to save adjustment. Reverting changes.');
+      // Revert on failure
+      const updated = await getRedhawkAdjustments();
+      setAdjustments(updated);
+    }
   };
 
   const handleClear = async () => {
-    setSaving(true);
-    await deleteRedhawkAdjustment(editing);
-    const updated = await getRedhawkAdjustments();
-    setAdjustments(updated);
-    setSaving(false);
+    const targetPlayer = editing;
+    
+    // 1. Optimistic Update
+    setAdjustments((prev) => {
+      const next = { ...prev };
+      delete next[targetPlayer];
+      return next;
+    });
     setEditing(null);
+
+    // 2. Background Delete
+    try {
+      await deleteRedhawkAdjustment(targetPlayer);
+    } catch (err) {
+      console.error('Failed to clear adjustment:', err);
+      alert('Failed to clear adjustment. Reverting changes.');
+      const updated = await getRedhawkAdjustments();
+      setAdjustments(updated);
+    }
   };
 
   // ── Derived leaderboard ─────────────────────────────────────────────────────
