@@ -43,7 +43,7 @@ const Schedule = () => {
       date: '2026-08-14',
       courseName: 'Legends on the Niagara - Ushers Creek',
       city: 'Niagara Falls, CA',
-      teeTimes: ['12:30', '12:40','12:50'],
+      teeTimes: ['12:30', '12:40', '12:50'],
       notes: '2.5 hour drive from London - 20 minutes from Lucas - Hybrid Tees (6486) - Modified Strokeplay - $120'
     },
     {
@@ -133,7 +133,7 @@ const Schedule = () => {
     if (authenticated) {
       const db = getFirestore();
       const assignmentsRef = doc(db, 'teeTimeAssignments', '2025-schedule');
-      
+
       const unsubscribe = onSnapshot(assignmentsRef, (doc) => {
         if (doc.exists()) {
           setTeeTimeAssignments(doc.data());
@@ -194,7 +194,7 @@ const Schedule = () => {
     if (authenticated) {
       const db = getFirestore();
       const matchesRef = doc(db, 'matches', '2025-schedule');
-      
+
       const unsubscribe = onSnapshot(matchesRef, (doc) => {
         if (doc.exists()) {
           setMatches(doc.data());
@@ -206,13 +206,13 @@ const Schedule = () => {
       return () => unsubscribe();
     }
   }, [authenticated]);
-  
+
   const handlePlayerAssignment = async (eventIndex, timeIndex, playerSlot, player) => {
     if (!authenticated) return;
-    
+
     const db = getFirestore();
     const key = `${eventIndex}-${timeIndex}-${playerSlot}`;
-    
+
     try {
       await setDoc(doc(db, 'teeTimeAssignments', '2025-schedule'), {
         ...teeTimeAssignments,
@@ -226,17 +226,17 @@ const Schedule = () => {
   // Modify handleMatchSetup to save to Firebase
   const handleMatchSetup = async (eventIndex, timeIndex, matchData) => {
     if (!authenticated) return;
-    
+
     const db = getFirestore();
     const baseKey = `${eventIndex}-${timeIndex}`;
-    
+
     // Find the next available match number for this tee time
     const existingMatches = Object.keys(matches)
       .filter(key => key.startsWith(baseKey))
       .length;
-    
+
     const key = `${baseKey}-match${existingMatches + 1}`;
-    
+
     // Round handicaps for match play strokes
     const player1Handicap = Math.round(playerHandicaps[matchData.player1] || 0);
     const player2Handicap = Math.round(playerHandicaps[matchData.player2] || 0);
@@ -283,16 +283,16 @@ const Schedule = () => {
 
   const handleTeamMatchSetup = async (eventIndex, timeIndex, matchData) => {
     if (!authenticated) return;
-    
+
     const db = getFirestore();
     const baseKey = `${eventIndex}-${timeIndex}`;
-    
+
     const existingMatches = Object.keys(matches)
       .filter(key => key.startsWith(baseKey))
       .length;
-    
+
     const key = `${baseKey}-match${existingMatches + 1}`;
-    
+
     const t1p1Hdcp = playerHandicaps[matchData.team1Player1] || 0;
     const t1p2Hdcp = playerHandicaps[matchData.team1Player2] || 0;
     const t2p1Hdcp = playerHandicaps[matchData.team2Player1] || 0;
@@ -315,7 +315,7 @@ const Schedule = () => {
           createdAt: new Date()
         }
       }, { merge: true });
-      
+
       // Save to Live Matches as well
       const liveMatchKey = `team-match-${Date.now()}`;
       await setDoc(doc(db, 'liveMatches', '2025'), {
@@ -332,7 +332,7 @@ const Schedule = () => {
           currentScore: { player1Score: 0, player2Score: 0, holesPlayed: 0 }
         }
       }, { merge: true });
-      
+
     } catch (error) {
       console.error('Error saving team match:', error);
     }
@@ -341,14 +341,14 @@ const Schedule = () => {
   // Modify the handleDeleteMatch function
   const handleDeleteMatch = async (eventIndex, timeIndex, key) => {
     if (!authenticated) return;
-    
+
     const db = getFirestore();
-    
+
     try {
       // Create a new object without the deleted match
       const updatedMatches = { ...matches };
       delete updatedMatches[key];
-      
+
       // Save the updated matches object
       await setDoc(doc(db, 'matches', '2025-schedule'), updatedMatches);
 
@@ -409,164 +409,164 @@ const Schedule = () => {
         <meta name="description" content="Tournament schedule, tee times, and weather forecasts for Guyscorp golf events." />
       </Head>
       <div className="app-wrapper">
-      {authenticated && <NavigationMenu />}
-      <FloatingNavigation />
-      <div className="home-container">
-        <div className="overlay"></div>
-        <div className="content glass-panel" style={{ maxWidth: '1400px' }}>
-          <h1 className="text-5xl font-extrabold mb-2 text-center hero-title">Tournament Schedule</h1>
-          <p className="text-center text-gray-600 mb-8 font-medium">Guyscorp Golf Weekend 2026</p>
-          
-          <div className="schedule-layout">
-            {groupedSchedule.map((day, dayIndex) => (
-              <div key={dayIndex} className="event-card glass-card d-flex flex-column h-100 p-4 p-md-5">
-                <div className="schedule-info mb-4 text-center">
-                  <h2 className="text-3xl font-bold mb-4">{formatDate(day.date)}</h2>
-                </div>
-                
-                {day.rounds.map((round, roundIndex) => (
-                  <div key={roundIndex} className={roundIndex > 0 ? "mt-5 pt-4 border-top" : ""}>
-                    <div className="text-center mb-4">
-                      <h3 className="text-2xl text-success mb-2">{round.courseName}</h3>
-                      {round.notes && (
-                        <p className="text-gray-600 italic mb-0">{round.notes}</p>
-                      )}
-                    </div>
-                    
-                    <div className="tee-times">
-                      {round.teeTimes.map((time, timeIndex) => {
-                        const originalIndex = round.originalIndex;
-                        return (
-                          <div key={timeIndex} className="tee-time-slot mb-4">
-                            <div className="tee-time-header d-flex justify-content-between align-items-center mb-3">
-                              <h4 className="text-xl font-semibold mb-0">{formatTime(time)}</h4>
-                              <Dropdown align="end">
-                                <Dropdown.Toggle variant="outline-success" size="sm" id={`dropdown-${originalIndex}-${timeIndex}`}>
-                                  ➕ Add Match
-                                </Dropdown.Toggle>
-                                <Dropdown.Menu>
-                                  <Dropdown.Item onClick={() => {
-                                    setSelectedEventIndex(originalIndex);
-                                    setSelectedTimeIndex(timeIndex);
-                                    setShowMatchModal(true);
-                                  }}>
-                                    1v1 Match
-                                  </Dropdown.Item>
-                                  <Dropdown.Item onClick={() => {
-                                    setSelectedEventIndex(originalIndex);
-                                    setSelectedTimeIndex(timeIndex);
-                                    setShowTeamMatchModal(true);
-                                  }}>
-                                    2v2 Match
-                                  </Dropdown.Item>
-                                </Dropdown.Menu>
-                              </Dropdown>
-                            </div>
-                            {(matchesByTeeTimeKey[`${originalIndex}-${timeIndex}`] || [])
-                              .map(([key, match], matchIndex) => (
-                                <div key={key} className="vs-matchup-card position-relative">
-                                  <div className="vs-player-side">
-                                    <span className="vs-player-name text-break">
-                                      {match.matchType === '2v2' ? match.team1?.join(' & ') : match.player1}
-                                    </span>
-                                    <span className="vs-player-hdcp">
-                                      {match.matchType === '2v2' ? 'Putt Pirates' : `HDCP: ${playerHandicaps[match.player1]?.toFixed(1) || 'N/A'}`}
-                                    </span>
-                                  </div>
-                                  
-                                  <div className="vs-badge-container">
-                                    <div className="vs-badge">VS</div>
-                                    {match.strokesGiven > 0 && (
-                                      <div className="strokes-given-badge">
-                                        {match.receivingStrokes} gets +{match.strokesGiven}
-                                      </div>
-                                    )}
-                                    {match.matchType === '2v2' && (
-                                      <span className="badge bg-success mt-1">{match.format}</span>
-                                    )}
-                                  </div>
-                                  
-                                  <div className="vs-player-side">
-                                    <span className="vs-player-name text-break">
-                                      {match.matchType === '2v2' ? match.team2?.join(' & ') : match.player2}
-                                    </span>
-                                    <span className="vs-player-hdcp">
-                                      {match.matchType === '2v2' ? 'Golden Boys' : `HDCP: ${playerHandicaps[match.player2]?.toFixed(1) || 'N/A'}`}
-                                    </span>
-                                  </div>
-                                  
-                                  <button 
-                                    className="btn btn-sm btn-outline-danger position-absolute"
-                                    style={{ top: '8px', right: '8px', padding: '0px 6px' }}
-                                    onClick={() => handleDeleteMatch(originalIndex, timeIndex, key)}
-                                    title="Delete Match"
-                                  >
-                                    ×
-                                  </button>
-                                </div>
-                              ))}
-                            
-                            <div className="mt-3">
-                              <button 
-                                className="btn btn-outline-success btn-manage-group w-100 mb-2"
-                                onClick={() => toggleGroup(`${originalIndex}-${timeIndex}`)}
-                              >
-                                {expandedGroups[`${originalIndex}-${timeIndex}`] ? 'Hide Group Management ▲' : 'Manage Tee Time Group ▼'}
-                              </button>
-                              
-                              {expandedGroups[`${originalIndex}-${timeIndex}`] && (
-                                <div className="player-slots p-3 bg-light rounded border w-100" style={{maxWidth: 'none'}}>
-                                  <div className="row g-2">
-                                    {[0, 1, 2, 3].map((playerSlot) => (
-                                      <div className="col-12 col-md-6" key={playerSlot}>
-                                        <select
-                                          className="form-select shadow-sm"
-                                          value={teeTimeAssignments[`${originalIndex}-${timeIndex}-${playerSlot}`] || ''}
-                                          onChange={(e) => handlePlayerAssignment(originalIndex, timeIndex, playerSlot, e.target.value)}
-                                        >
-                                          <option value="">-- Select Player --</option>
-                                          {players
-                                            .filter(player => {
-                                              const teeTimePlayers = assignedPlayersByTeeTimeKey[`${originalIndex}-${timeIndex}`] || new Set();
-                                              return !teeTimePlayers.has(player) || 
-                                                     teeTimeAssignments[`${originalIndex}-${timeIndex}-${playerSlot}`] === player;
-                                            })
-                                            .map((player) => (
-                                              <option key={player} value={player}>
-                                                {player}
-                                              </option>
-                                            ))}
-                                        </select>
-                                      </div>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
+        {authenticated && <NavigationMenu />}
+        <FloatingNavigation />
+        <div className="home-container">
+          <div className="overlay"></div>
+          <div className="content glass-panel" style={{ maxWidth: '1400px' }}>
+            <h1 className="text-5xl font-extrabold mb-2 text-center hero-title">Tournament Schedule</h1>
+            <p className="text-center text-gray-600 mb-8 font-medium">Guyscorp Golf Weekend 2026</p>
+
+            <div className="schedule-layout">
+              {groupedSchedule.map((day, dayIndex) => (
+                <div key={dayIndex} className="event-card glass-card d-flex flex-column h-100 p-4 p-md-5">
+                  <div className="schedule-info mb-4 text-center">
+                    <h2 className="text-3xl font-bold mb-4">{formatDate(day.date)}</h2>
                   </div>
-                ))}
-              </div>
-            ))}
-          </div> {/* End Schedule Layout Grid */}
+
+                  {day.rounds.map((round, roundIndex) => (
+                    <div key={roundIndex} className={roundIndex > 0 ? "mt-5 pt-4 border-top" : ""}>
+                      <div className="text-center mb-4">
+                        <h3 className="text-2xl text-success mb-2">{round.courseName}</h3>
+                        {round.notes && (
+                          <p className="text-gray-600 italic mb-0">{round.notes}</p>
+                        )}
+                      </div>
+
+                      <div className="tee-times">
+                        {round.teeTimes.map((time, timeIndex) => {
+                          const originalIndex = round.originalIndex;
+                          return (
+                            <div key={timeIndex} className="tee-time-slot mb-4">
+                              <div className="tee-time-header d-flex justify-content-between align-items-center mb-3">
+                                <h4 className="text-xl font-semibold mb-0">{formatTime(time)}</h4>
+                                <Dropdown align="end">
+                                  <Dropdown.Toggle variant="outline-success" size="sm" id={`dropdown-${originalIndex}-${timeIndex}`}>
+                                    ➕ Add Match
+                                  </Dropdown.Toggle>
+                                  <Dropdown.Menu>
+                                    <Dropdown.Item onClick={() => {
+                                      setSelectedEventIndex(originalIndex);
+                                      setSelectedTimeIndex(timeIndex);
+                                      setShowMatchModal(true);
+                                    }}>
+                                      1v1 Match
+                                    </Dropdown.Item>
+                                    <Dropdown.Item onClick={() => {
+                                      setSelectedEventIndex(originalIndex);
+                                      setSelectedTimeIndex(timeIndex);
+                                      setShowTeamMatchModal(true);
+                                    }}>
+                                      2v2 Match
+                                    </Dropdown.Item>
+                                  </Dropdown.Menu>
+                                </Dropdown>
+                              </div>
+                              {(matchesByTeeTimeKey[`${originalIndex}-${timeIndex}`] || [])
+                                .map(([key, match], matchIndex) => (
+                                  <div key={key} className="vs-matchup-card position-relative">
+                                    <div className="vs-player-side">
+                                      <span className="vs-player-name text-break">
+                                        {match.matchType === '2v2' ? match.team1?.join(' & ') : match.player1}
+                                      </span>
+                                      <span className="vs-player-hdcp">
+                                        {match.matchType === '2v2' ? 'Putt Pirates' : `HDCP: ${playerHandicaps[match.player1]?.toFixed(1) || 'N/A'}`}
+                                      </span>
+                                    </div>
+
+                                    <div className="vs-badge-container">
+                                      <div className="vs-badge">VS</div>
+                                      {match.strokesGiven > 0 && (
+                                        <div className="strokes-given-badge">
+                                          {match.receivingStrokes} gets +{match.strokesGiven}
+                                        </div>
+                                      )}
+                                      {match.matchType === '2v2' && (
+                                        <span className="badge bg-success mt-1">{match.format}</span>
+                                      )}
+                                    </div>
+
+                                    <div className="vs-player-side">
+                                      <span className="vs-player-name text-break">
+                                        {match.matchType === '2v2' ? match.team2?.join(' & ') : match.player2}
+                                      </span>
+                                      <span className="vs-player-hdcp">
+                                        {match.matchType === '2v2' ? 'Golden Boys' : `HDCP: ${playerHandicaps[match.player2]?.toFixed(1) || 'N/A'}`}
+                                      </span>
+                                    </div>
+
+                                    <button
+                                      className="btn btn-sm btn-outline-danger position-absolute"
+                                      style={{ top: '8px', right: '8px', padding: '0px 6px' }}
+                                      onClick={() => handleDeleteMatch(originalIndex, timeIndex, key)}
+                                      title="Delete Match"
+                                    >
+                                      ×
+                                    </button>
+                                  </div>
+                                ))}
+
+                              <div className="mt-3">
+                                <button
+                                  className="btn btn-outline-success btn-manage-group w-100 mb-2"
+                                  onClick={() => toggleGroup(`${originalIndex}-${timeIndex}`)}
+                                >
+                                  {expandedGroups[`${originalIndex}-${timeIndex}`] ? 'Hide Group Management ▲' : 'Manage Tee Time Group ▼'}
+                                </button>
+
+                                {expandedGroups[`${originalIndex}-${timeIndex}`] && (
+                                  <div className="player-slots p-3 bg-light rounded border w-100" style={{ maxWidth: 'none' }}>
+                                    <div className="row g-2">
+                                      {[0, 1, 2, 3].map((playerSlot) => (
+                                        <div className="col-12 col-md-6" key={playerSlot}>
+                                          <select
+                                            className="form-select shadow-sm"
+                                            value={teeTimeAssignments[`${originalIndex}-${timeIndex}-${playerSlot}`] || ''}
+                                            onChange={(e) => handlePlayerAssignment(originalIndex, timeIndex, playerSlot, e.target.value)}
+                                          >
+                                            <option value="">-- Select Player --</option>
+                                            {players
+                                              .filter(player => {
+                                                const teeTimePlayers = assignedPlayersByTeeTimeKey[`${originalIndex}-${timeIndex}`] || new Set();
+                                                return !teeTimePlayers.has(player) ||
+                                                  teeTimeAssignments[`${originalIndex}-${timeIndex}-${playerSlot}`] === player;
+                                              })
+                                              .map((player) => (
+                                                <option key={player} value={player}>
+                                                  {player}
+                                                </option>
+                                              ))}
+                                          </select>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div> {/* End Schedule Layout Grid */}
+          </div>
         </div>
+        <MatchSetupModal
+          show={showMatchModal}
+          onHide={() => setShowMatchModal(false)}
+          players={players}
+          onSave={(matchData) => handleMatchSetup(selectedEventIndex, selectedTimeIndex, matchData)}
+        />
+        <TeamMatchSetupModal
+          show={showTeamMatchModal}
+          onHide={() => setShowTeamMatchModal(false)}
+          players={players}
+          onSave={(matchData) => handleTeamMatchSetup(selectedEventIndex, selectedTimeIndex, matchData)}
+        />
       </div>
-      <MatchSetupModal 
-        show={showMatchModal}
-        onHide={() => setShowMatchModal(false)}
-        players={players}
-        onSave={(matchData) => handleMatchSetup(selectedEventIndex, selectedTimeIndex, matchData)}
-      />
-      <TeamMatchSetupModal 
-        show={showTeamMatchModal}
-        onHide={() => setShowTeamMatchModal(false)}
-        players={players}
-        onSave={(matchData) => handleTeamMatchSetup(selectedEventIndex, selectedTimeIndex, matchData)}
-      />
-    </div>
     </>
   );
 };

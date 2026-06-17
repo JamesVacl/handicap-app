@@ -60,33 +60,58 @@ const signOutUser = async () => {
   }
 };
 
+// ── Simple API Cache ────────────────────────────────────────────────────────
+const apiCache = {};
+const withCache = (key, fetcher, ttlMs = 300000) => {
+  return async (forceRefresh = false) => {
+    const now = Date.now();
+    const entry = apiCache[key];
+    if (!forceRefresh && entry && entry.data && (now - entry.time < ttlMs)) {
+      return entry.data;
+    }
+    if (!forceRefresh && entry && entry.promise) {
+      return entry.promise;
+    }
+    const promise = fetcher().then(data => {
+      apiCache[key] = { data, time: Date.now(), promise: null };
+      return data;
+    });
+    apiCache[key] = { ...(apiCache[key] || {}), promise };
+    return promise;
+  };
+};
+const invalidateCache = (key) => {
+  delete apiCache[key];
+};
+// ────────────────────────────────────────────────────────────────────────────
+
 // Fetch the predefined player list from Firestore
-const getPlayers = async () => {
+const getPlayers = withCache('players', async () => {
   const querySnapshot = await getDocs(collection(db, "players"));
   return querySnapshot.docs.map((doc) => ({
     id: doc.id,
     name: doc.data().name
   }));
-};
+});
 
 // Fetch courses from Firestore
-const getCourses = async () => {
+const getCourses = withCache('courses', async () => {
   const querySnapshot = await getDocs(collection(db, "courses"));
   return querySnapshot.docs.map((doc) => ({
     id: doc.id,
     ...doc.data(),
   }));
-};
+});
 
 // Fetch all scores from Firestore, ordered by date (newest first)
-const getScores = async () => {
+const getScores = withCache('scores', async () => {
   const scoresQuery = query(collection(db, "scores"), orderBy("date", "desc"));
   const querySnapshot = await getDocs(scoresQuery);
   return querySnapshot.docs.map((doc) => ({
     id: doc.id,
     ...doc.data(),
   }));
-};
+});
 
 // Update the getPlayerHandicaps function (simplified for faster refresh)
 const getPlayerHandicaps = async () => {
@@ -199,6 +224,7 @@ const addScore = async ({ score, course, rating, slope, player, holeType, date }
       await addDoc(collection(db, "scores"), scoreData);
     }
 
+    invalidateCache('scores');
     console.log("Score added successfully!");
   } catch (e) {
     console.error("Error adding score: ", e);
@@ -289,6 +315,7 @@ const addCourse = async ({ course, rating, slope }) => {
       rating: parseFloat(rating) || 0, 
       slope: parseFloat(slope) || 0 
     });
+    invalidateCache('courses');
     console.log("Course added successfully!");
   } catch (e) {
     console.error("Error adding course: ", e);
@@ -296,7 +323,7 @@ const addCourse = async ({ course, rating, slope }) => {
 };
 
 // Fetch teams from Firestore (optimized - no real-time handicap calculation)
-const getTeams = async () => {
+const getTeams = withCache('teams', async () => {
   const teamsRef = collection(db, 'Teams');
   const snapshot = await getDocs(teamsRef);
   const teams = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -316,18 +343,22 @@ const getTeams = async () => {
       averageHandicap
     };
   });
-};
+});
 
 // Add a new team to Firestore
 const addTeam = async (teamData) => {
   const teamsRef = collection(db, 'Teams');
-  return await addDoc(teamsRef, teamData);
+  const res = await addDoc(teamsRef, teamData);
+  invalidateCache('teams');
+  return res;
 };
 
 // Update an existing team in Firestore
 const updateTeam = async (teamId, teamData) => {
   const teamRef = doc(db, 'Teams', teamId);
-  return await updateDoc(teamRef, teamData);
+  const res = await updateDoc(teamRef, teamData);
+  invalidateCache('teams');
+  return res;
 };
 
 // Remove the separate export and add the function definition here
@@ -378,7 +409,7 @@ const calculateLeaderboard = (scores) => {
 // They never read or write to scores, players, or courses.
 
 // Fetch all Redhawk adjustments keyed by player name
-const getRedhawkAdjustments = async () => {
+const getRedhawkAdjustments = withCache('redhawk', async () => {
   const snapshot = await getDocs(collection(db, 'redhawkAdjustments'));
   const map = {};
   snapshot.docs.forEach((d) => {
@@ -386,7 +417,7 @@ const getRedhawkAdjustments = async () => {
     map[data.playerName] = { id: d.id, ...data };
   });
   return map; // { [playerName]: { id, playerName, delta, notes, updatedAt } }
-};
+});
 
 // Save (upsert) a Redhawk adjustment for one player
 const saveRedhawkAdjustment = async (playerName, delta, notes = '') => {
@@ -411,6 +442,7 @@ const saveRedhawkAdjustment = async (playerName, delta, notes = '') => {
     // Create new doc
     await addDoc(collection(db, 'redhawkAdjustments'), payload);
   }
+  invalidateCache('redhawk');
 };
 
 // Remove a Redhawk adjustment for one player
@@ -423,6 +455,7 @@ const deleteRedhawkAdjustment = async (playerName) => {
   for (const d of existing.docs) {
     await deleteDoc(doc(db, 'redhawkAdjustments', d.id));
   }
+  invalidateCache('redhawk');
 };
 // ────────────────────────────────────────────────────────────────────────────
 
@@ -459,6 +492,7 @@ export const archiveMatch = async (match, result) => {
 const deleteScore = async (scoreId) => {
   try {
     await deleteDoc(doc(db, 'scores', scoreId));
+    invalidateCache('scores');
     console.log('Score deleted:', scoreId);
   } catch (e) {
     console.error('Error deleting score:', e);
