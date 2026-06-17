@@ -25,9 +25,27 @@ const Schedule = () => {
   const [selectedTimeIndex, setSelectedTimeIndex] = useState(null);
   const [playerHandicaps, setPlayerHandicaps] = useState({});
   const [expandedGroups, setExpandedGroups] = useState({});
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const isGroupExpanded = (key) => {
+    if (expandedGroups[key] !== undefined) {
+      return expandedGroups[key];
+    }
+    return !isMobile;
+  };
 
   const toggleGroup = (key) => {
-    setExpandedGroups(prev => ({ ...prev, [key]: !prev[key] }));
+    setExpandedGroups(prev => {
+      const currentState = prev[key] !== undefined ? prev[key] : !isMobile;
+      return { ...prev, [key]: !currentState };
+    });
   };
 
   const formatTime = (timeString) => {
@@ -412,6 +430,31 @@ const Schedule = () => {
     return grouped;
   }, [teeTimeAssignments]);
 
+  const allGroupKeys = useMemo(() => {
+    const keys = [];
+    groupedSchedule.forEach(day => {
+      day.rounds.forEach(round => {
+        round.teeTimes.forEach((_, timeIndex) => {
+          keys.push(`${round.originalIndex}-${timeIndex}`);
+        });
+      });
+    });
+    return keys;
+  }, [groupedSchedule]);
+
+  const areAllExpanded = allGroupKeys.every(key => isGroupExpanded(key));
+
+  const toggleAllGroups = () => {
+    const targetState = !areAllExpanded;
+    setExpandedGroups(prev => {
+      const newState = { ...prev };
+      allGroupKeys.forEach(key => {
+        newState[key] = targetState;
+      });
+      return newState;
+    });
+  };
+
   return (
     <>
       <Head>
@@ -425,7 +468,13 @@ const Schedule = () => {
           <div className="overlay"></div>
           <div className="content glass-panel" style={{ maxWidth: '1400px' }}>
             <h1 className="text-5xl font-extrabold mb-2 text-center hero-title">Tournament Schedule</h1>
-            <p className="text-center text-gray-600 mb-8 font-medium">Guyscorp Golf Weekend 2026</p>
+            <p className="text-center text-gray-600 mb-4 font-medium">Guyscorp Golf Weekend 2026</p>
+
+            <div className="d-flex justify-content-end mb-3">
+              <button className="btn btn-outline-success" onClick={toggleAllGroups}>
+                {areAllExpanded ? 'Minimize All Groups ▲' : 'Maximize All Groups ▼'}
+              </button>
+            </div>
 
             <div className="schedule-layout">
               {groupedSchedule.map((day, dayIndex) => (
@@ -528,10 +577,10 @@ const Schedule = () => {
                                   className="btn btn-outline-success btn-manage-group w-100 mb-2"
                                   onClick={() => toggleGroup(`${originalIndex}-${timeIndex}`)}
                                 >
-                                  {expandedGroups[`${originalIndex}-${timeIndex}`] ? 'Hide Group Management ▲' : 'Manage Tee Time Group ▼'}
+                                  {isGroupExpanded(`${originalIndex}-${timeIndex}`) ? 'Hide Group Management ▲' : 'Manage Tee Time Group ▼'}
                                 </button>
 
-                                {expandedGroups[`${originalIndex}-${timeIndex}`] && (
+                                {isGroupExpanded(`${originalIndex}-${timeIndex}`) && (
                                   <div className="player-slots p-3 bg-light rounded border w-100" style={{ maxWidth: 'none' }}>
                                     <div className="row g-2">
                                       {[0, 1, 2, 3].map((playerSlot) => (
