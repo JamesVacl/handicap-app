@@ -2507,3 +2507,80 @@ body {
     font-size: 0.95rem;
   }
 }
+
+/* ── Secret Delete Popover ─────────────────────────────────────────────────── */
+.delete-popover {
+  background: #fff;
+  border: 1px solid rgba(18, 37, 27, 0.14);
+  border-radius: 12px;
+  padding: 14px 16px 12px;
+  width: 250px;
+  box-shadow: 0 12px 32px rgba(14, 21, 17, 0.18), 0 2px 6px rgba(14, 21, 17, 0.08);
+  animation: popoverIn 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes popoverIn {
+  from { opacity: 0; transform: scale(0.9) translateY(4px); }
+  to   { opacity: 1; transform: scale(1)  translateY(0); }
+}
+
+.delete-popover-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #888;
+  margin: 0 0 4px;
+}
+
+.delete-popover-score {
+  font-size: 0.82rem;
+  color: #2c3e35;
+  margin: 0 0 12px;
+  line-height: 1.35;
+  word-break: break-word;
+}
+
+.delete-popover-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.delete-popover-btn {
+  flex: 1;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.delete-popover-btn:active {
+  transform: scale(0.97);
+}
+
+.delete-popover-btn--cancel {
+  background: #f0f2f1;
+  color: #4a5a52;
+}
+
+.delete-popover-btn--cancel:hover {
+  background: #e3e7e5;
+}
+
+.delete-popover-btn--confirm {
+  background: #dc3545;
+  color: #fff;
+}
+
+.delete-popover-btn--confirm:hover {
+  background: #c82333;
+}
+
+/* Make rows feel subtly interactive on desktop (cursor hint for those in the know) */
+.scores-table tbody tr {
+  cursor: default;
+}
+/* ─────────────────────────────────────────────────────────────────────────── */

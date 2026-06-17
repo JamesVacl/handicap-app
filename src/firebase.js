@@ -455,6 +455,17 @@ export const archiveMatch = async (match, result) => {
   }
 };
 
+// Delete a score by its Firestore document ID
+const deleteScore = async (scoreId) => {
+  try {
+    await deleteDoc(doc(db, 'scores', scoreId));
+    console.log('Score deleted:', scoreId);
+  } catch (e) {
+    console.error('Error deleting score:', e);
+    throw e;
+  }
+};
+
 // Update the exports section to only include it once
 export { 
   db, 
@@ -471,6 +482,7 @@ export {
   getPlayerHandicaps,
   analytics,
   calculateLeaderboard,
+  deleteScore,
   // Redhawk Trials
   getRedhawkAdjustments,
   saveRedhawkAdjustment,

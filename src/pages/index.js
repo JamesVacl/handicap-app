@@ -1,5 +1,5 @@
-import { useState, useEffect, useMemo } from 'react';
-import { getPlayers, getCourses, getScores, addScore, addCourse, signIn, signOutUser } from 'src/firebase';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import { getPlayers, getCourses, getScores, addScore, addCourse, signIn, signOutUser, deleteScore } from 'src/firebase';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import Head from 'next/head';
 
@@ -121,6 +121,21 @@ const Home = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const [filterPlayer, setFilterPlayer] = useState(''); // New state for filter selection
   const [filterCourse, setFilterCourse] = useState(''); // New state for filter selection
+
+  // ── Secret delete popover state ───────────────────────────────────────────
+  const [deletePopover, setDeletePopover] = useState(null); // { x, y, scoreId, scoreLabel }
+  const longPressTimer = useRef(null);
+  const popoverRef = useRef(null);
+
+  // ── Toast notification state ──────────────────────────────────────────────
+  const [toast, setToast] = useState(null); // { message, type: 'success'|'info' }
+  const toastTimer = useRef(null);
+
+  const showToast = useCallback((message, type = 'success') => {
+    clearTimeout(toastTimer.current);
+    setToast({ message, type });
+    toastTimer.current = setTimeout(() => setToast(null), 3000);
+  }, []);
   const [datePlayed, setDatePlayed] = useState(() => {
     const today = new Date();
     today.setMinutes(today.getMinutes() - today.getTimezoneOffset());
@@ -302,14 +317,7 @@ const Home = () => {
       date: new Date(`${datePlayed}T12:00:00`) // Add noon time to prevent timezone issues
     });
 
-    // Customize alert based on hole type
-    if (holeType === '9') {
-      alert("9-hole score added! It will be combined with your next 9-hole score for handicap calculation.");
-    } else {
-      alert("18-hole score added!");
-    }
-
-    // Reset form fields
+    // Reset form fields immediately so the form feels snappy
     setScore('');
     setSelectedCourse('');
     setRating('');
@@ -317,11 +325,16 @@ const Home = () => {
     setHoleType('');
     setDatePlayed(new Date().toISOString().split('T')[0]);
 
-    // Refresh data
+    // Refresh data and show non-blocking toast
     const updatedScores = await getScores();
     setScores(updatedScores);
-    const updatedLeaderboard = calculateLeaderboard(updatedScores);
-    setLeaderboard(updatedLeaderboard);
+    setLeaderboard(calculateLeaderboard(updatedScores));
+
+    if (holeType === '9') {
+      showToast('9-hole score added! It will be combined with your next 9-hole score.', 'info');
+    } else {
+      showToast('Score added successfully!');
+    }
   };
 
   const handleAddCourseSubmit = async (e) => {
@@ -340,6 +353,50 @@ const Home = () => {
 
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
+  };
+
+  // ── Secret delete handlers ────────────────────────────────────────────────
+
+  const openDeletePopover = useCallback((e, row) => {
+    e.preventDefault();
+    const x = e.clientX ?? (e.touches?.[0]?.clientX ?? 0);
+    const y = e.clientY ?? (e.touches?.[0]?.clientY ?? 0);
+    setDeletePopover({
+      x,
+      y,
+      scoreId: row.id,
+      scoreLabel: `${row.player} — ${row.course} (${row._formattedDate})`,
+    });
+  }, []);
+
+  const startLongPress = useCallback((e, row) => {
+    longPressTimer.current = setTimeout(() => openDeletePopover(e, row), 600);
+  }, [openDeletePopover]);
+
+  const cancelLongPress = useCallback(() => {
+    clearTimeout(longPressTimer.current);
+  }, []);
+
+  const handleDeleteConfirm = async () => {
+    if (!deletePopover) return;
+    const idToRemove = deletePopover.scoreId;
+    // Close popover and optimistically remove from local state immediately
+    setDeletePopover(null);
+    setScores((prev) => {
+      const next = prev.filter((s) => s.id !== idToRemove);
+      setLeaderboard(calculateLeaderboard(next));
+      return next;
+    });
+    try {
+      await deleteScore(idToRemove);
+      showToast('Score removed.');
+    } catch {
+      // Roll back on failure by re-fetching
+      const restored = await getScores();
+      setScores(restored);
+      setLeaderboard(calculateLeaderboard(restored));
+      showToast('Failed to remove score. Please try again.', 'error');
+    }
   };
 
   const totalPages = Math.ceil(filteredScores.length / itemsPerPage);
@@ -571,6 +628,10 @@ const Home = () => {
                         key={row.id} 
                         data-used-for-differential={row._isHighlighted}
                         className={row._isHighlighted ? 'used-for-differential' : ''}
+                        onContextMenu={(e) => openDeletePopover(e, row)}
+                        onTouchStart={(e) => startLongPress(e, row)}
+                        onTouchEnd={cancelLongPress}
+                        onTouchMove={cancelLongPress}
                       >
                         <td className="col-player">{row.player}</td>
                         <td className="col-course">{row.course}</td>
@@ -590,6 +651,54 @@ const Home = () => {
                 <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages - 1} className="btn btn-success">Next</button>
               </div>
             </div>
+          )}
+
+          {/* ── Toast notification ── */}
+          {toast && (
+            <div className={`app-toast app-toast--${toast.type}`} role="status">
+              {toast.type === 'success' && <span className="app-toast-icon">✓</span>}
+              {toast.type === 'info' && <span className="app-toast-icon">ℹ</span>}
+              {toast.type === 'error' && <span className="app-toast-icon">✕</span>}
+              <span>{toast.message}</span>
+            </div>
+          )}
+
+          {/* ── Secret Delete Popover ── */}
+          {deletePopover && (
+            <>
+              {/* Backdrop to dismiss */}
+              <div
+                style={{ position: 'fixed', inset: 0, zIndex: 9998 }}
+                onClick={() => setDeletePopover(null)}
+              />
+              <div
+                ref={popoverRef}
+                className="delete-popover"
+                style={{
+                  position: 'fixed',
+                  left: Math.min(deletePopover.x, window.innerWidth - 260),
+                  top: Math.min(deletePopover.y, window.innerHeight - 130),
+                  zIndex: 9999,
+                }}
+              >
+                <p className="delete-popover-label">Remove this score?</p>
+                <p className="delete-popover-score">{deletePopover.scoreLabel}</p>
+                <div className="delete-popover-actions">
+                  <button
+                    className="delete-popover-btn delete-popover-btn--cancel"
+                    onClick={() => setDeletePopover(null)}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    className="delete-popover-btn delete-popover-btn--confirm"
+                    onClick={handleDeleteConfirm}
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+            </>
           )}
 
           {/* Add Course Modal */}
