@@ -10,7 +10,7 @@ import NavigationMenu from '../components/NavigationMenu';
 import FloatingNavigation from '../components/FloatingNavigation';
 import MatchSetupModal from '../components/MatchSetupModal';
 import TeamMatchSetupModal from '../components/TeamMatchSetupModal';
-import { calculateLeaderboard } from '../firebase';
+import { calculateLeaderboard, getRedhawkAdjustments } from '../firebase';
 
 
 const Schedule = () => {
@@ -27,6 +27,8 @@ const Schedule = () => {
   const [expandedGroups, setExpandedGroups] = useState({});
   const [isMobile, setIsMobile] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [useTournamentHandicaps, setUseTournamentHandicaps] = useState(true);
+  const [redhawkAdjustments, setRedhawkAdjustments] = useState({});
 
   useEffect(() => {
     const saved = localStorage.getItem('expandedGroupsPref');
@@ -208,13 +210,17 @@ const Schedule = () => {
             ...doc.data()
           }));
 
-          // Calculate handicaps using the imported calculation function
+          // Calculate base handicaps
           const leaderboard = calculateLeaderboard(scores);
           const handicaps = {};
           leaderboard.forEach(entry => {
             handicaps[entry.name] = entry.handicap;
           });
           setPlayerHandicaps(handicaps);
+
+          // Fetch Redhawk adjustments for tournament handicaps (small collection, fetched once)
+          const adjustments = await getRedhawkAdjustments();
+          setRedhawkAdjustments(adjustments);
         } catch (error) {
           console.error("Error fetching handicaps:", error);
         }
@@ -279,10 +285,12 @@ const Schedule = () => {
 
     const key = `${baseKey}-match${existingMatches + 1}`;
 
-    // Round handicaps for match play strokes
-    const player1Handicap = Math.round(playerHandicaps[matchData.player1] || 0);
-    const player2Handicap = Math.round(playerHandicaps[matchData.player2] || 0);
+    // Round handicaps for match play strokes using tournament or regular handicaps
+    const player1Handicap = Math.round(effectiveHandicaps[matchData.player1] || 0);
+    const player2Handicap = Math.round(effectiveHandicaps[matchData.player2] || 0);
     const strokesGiven = Math.abs(player1Handicap - player2Handicap);
+    const receivingStrokes = player1Handicap > player2Handicap ? matchData.player1 : matchData.player2;
+    const handicapMode = useTournamentHandicaps ? 'tournament' : 'regular';
 
     try {
       await setDoc(doc(db, 'matches', '2025-schedule'), {
@@ -293,8 +301,9 @@ const Schedule = () => {
           player1Team: 'Putt Pirates',
           player2Team: 'Golden Boys',
           format: 'Singles Match Play ',
-          strokesGiven: strokesGiven,
-          receivingStrokes: player1Handicap > player2Handicap ? matchData.player1 : matchData.player2,
+          strokesGiven,
+          receivingStrokes,
+          handicapMode,
           createdAt: new Date()
         }
       }, { merge: true });
@@ -311,6 +320,9 @@ const Schedule = () => {
           courseName: scheduleData[eventIndex].courseName,
           date: getEventDate(eventIndex),
           teeTime: scheduleData[eventIndex].teeTimes[timeIndex],
+          strokesGiven,
+          receivingStrokes,
+          handicapMode,
           status: 'not_started',
           createdAt: new Date(),
           currentScore: { player1Score: 0, player2Score: 0, holesPlayed: 0 }
@@ -334,14 +346,19 @@ const Schedule = () => {
 
     const key = `${baseKey}-match${existingMatches + 1}`;
 
-    const t1p1Hdcp = playerHandicaps[matchData.team1Player1] || 0;
-    const t1p2Hdcp = playerHandicaps[matchData.team1Player2] || 0;
-    const t2p1Hdcp = playerHandicaps[matchData.team2Player1] || 0;
-    const t2p2Hdcp = playerHandicaps[matchData.team2Player2] || 0;
+    // Use tournament or regular handicaps based on toggle
+    const t1p1Hdcp = effectiveHandicaps[matchData.team1Player1] || 0;
+    const t1p2Hdcp = effectiveHandicaps[matchData.team1Player2] || 0;
+    const t2p1Hdcp = effectiveHandicaps[matchData.team2Player1] || 0;
+    const t2p2Hdcp = effectiveHandicaps[matchData.team2Player2] || 0;
 
     const team1Hdcp = (t1p1Hdcp + t1p2Hdcp) / 2;
     const team2Hdcp = (t2p1Hdcp + t2p2Hdcp) / 2;
     const strokesGiven = Math.round(Math.abs(team1Hdcp - team2Hdcp));
+    const receivingStrokes = team1Hdcp > team2Hdcp
+      ? matchData.team1Player1 + ' & ' + matchData.team1Player2
+      : matchData.team2Player1 + ' & ' + matchData.team2Player2;
+    const handicapMode = useTournamentHandicaps ? 'tournament' : 'regular';
 
     try {
       await setDoc(doc(db, 'matches', '2025-schedule'), {
@@ -351,8 +368,9 @@ const Schedule = () => {
           format: matchData.format,
           team1: [matchData.team1Player1, matchData.team1Player2],
           team2: [matchData.team2Player1, matchData.team2Player2],
-          strokesGiven: strokesGiven,
-          receivingStrokes: team1Hdcp > team2Hdcp ? matchData.team1Player1 + ' & ' + matchData.team1Player2 : matchData.team2Player1 + ' & ' + matchData.team2Player2,
+          strokesGiven,
+          receivingStrokes,
+          handicapMode,
           createdAt: new Date()
         }
       }, { merge: true });
@@ -367,6 +385,9 @@ const Schedule = () => {
           courseName: scheduleData[eventIndex].courseName,
           date: getEventDate(eventIndex),
           teeTime: scheduleData[eventIndex].teeTimes[timeIndex],
+          strokesGiven,
+          receivingStrokes,
+          handicapMode,
           status: 'not_started',
           createdAt: new Date(),
           currentScore: { player1Score: 0, player2Score: 0, holesPlayed: 0 }
@@ -447,6 +468,17 @@ const Schedule = () => {
     return grouped;
   }, [teeTimeAssignments]);
 
+  // Compute effective handicaps: tournament (base + redhawk delta) or regular (base only)
+  const effectiveHandicaps = useMemo(() => {
+    if (!useTournamentHandicaps) return playerHandicaps;
+    const adjusted = { ...playerHandicaps };
+    Object.keys(adjusted).forEach(name => {
+      const delta = redhawkAdjustments[name]?.delta || 0;
+      adjusted[name] = parseFloat((adjusted[name] + delta).toFixed(1));
+    });
+    return adjusted;
+  }, [playerHandicaps, redhawkAdjustments, useTournamentHandicaps]);
+
   const allGroupKeys = useMemo(() => {
     const keys = [];
     groupedSchedule.forEach(day => {
@@ -487,7 +519,28 @@ const Schedule = () => {
             <h1 className="text-5xl font-extrabold mb-2 text-center hero-title">Tournament Schedule</h1>
             <p className="text-center text-gray-600 mb-4 font-medium">Guyscorp Golf Weekend 2026</p>
 
-            <div className="d-flex justify-content-end mb-3">
+            <div className="d-flex justify-content-between align-items-center mb-3 gap-2 flex-wrap">
+              <div className="d-flex align-items-center gap-2">
+                <span className="text-muted small fw-semibold">Handicap Mode:</span>
+                <div className="btn-group btn-group-sm" role="group" aria-label="Handicap mode selection">
+                  <button
+                    id="btn-tournament-hcp"
+                    className={`btn ${useTournamentHandicaps ? 'btn-success' : 'btn-outline-success'}`}
+                    onClick={() => setUseTournamentHandicaps(true)}
+                    title="Use Redhawk-adjusted tournament handicaps"
+                  >
+                    🏆 Tournament HCP
+                  </button>
+                  <button
+                    id="btn-regular-hcp"
+                    className={`btn ${!useTournamentHandicaps ? 'btn-success' : 'btn-outline-success'}`}
+                    onClick={() => setUseTournamentHandicaps(false)}
+                    title="Use base calculated handicaps"
+                  >
+                    ⛳ Regular HCP
+                  </button>
+                </div>
+              </div>
               <button className="btn btn-outline-success" onClick={toggleAllGroups}>
                 {areAllExpanded ? 'Minimize All Groups ▲' : 'Maximize All Groups ▼'}
               </button>
@@ -553,7 +606,7 @@ const Schedule = () => {
                                         {match.matchType === '2v2' ? match.team1?.join(' & ') : match.player1}
                                       </span>
                                       <span className="vs-player-hdcp">
-                                        {match.matchType === '2v2' ? 'Putt Pirates' : `HDCP: ${playerHandicaps[match.player1]?.toFixed(1) || 'N/A'}`}
+                                        {match.matchType === '2v2' ? 'Putt Pirates' : `HDCP: ${effectiveHandicaps[match.player1]?.toFixed(1) || 'N/A'}`}
                                       </span>
                                     </div>
 
@@ -567,6 +620,11 @@ const Schedule = () => {
                                       {match.matchType === '2v2' && (
                                         <span className="badge bg-success mt-1">{match.format}</span>
                                       )}
+                                      {match.handicapMode && (
+                                        <span className={`badge mt-1 ${match.handicapMode === 'tournament' ? 'bg-warning text-dark' : 'bg-secondary'}`}>
+                                          {match.handicapMode === 'tournament' ? '🏆 Tourn. HCPs' : '⛳ Regular HCPs'}
+                                        </span>
+                                      )}
                                     </div>
 
                                     <div className="vs-player-side">
@@ -574,7 +632,7 @@ const Schedule = () => {
                                         {match.matchType === '2v2' ? match.team2?.join(' & ') : match.player2}
                                       </span>
                                       <span className="vs-player-hdcp">
-                                        {match.matchType === '2v2' ? 'Golden Boys' : `HDCP: ${playerHandicaps[match.player2]?.toFixed(1) || 'N/A'}`}
+                                        {match.matchType === '2v2' ? 'Golden Boys' : `HDCP: ${effectiveHandicaps[match.player2]?.toFixed(1) || 'N/A'}`}
                                       </span>
                                     </div>
 

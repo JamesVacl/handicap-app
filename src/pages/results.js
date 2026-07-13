@@ -4,7 +4,7 @@ import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { Navbar, Nav, Container, Button, Form, Badge, Card, Row, Col } from 'react-bootstrap';
 import { getFirestore, doc, setDoc, onSnapshot, collection, getDocs, query, orderBy, deleteField, getDoc } from 'firebase/firestore';
-import { getPlayerHandicaps, getPlayers } from '../firebase';
+import { getPlayerHandicaps, getPlayers, getRedhawkAdjustments } from '../firebase';
 import NavigationMenu from '../components/NavigationMenu';
 import FloatingNavigation from '../components/FloatingNavigation';
 import ScoreEntryModal from '../components/ScoreEntryModal';
@@ -120,7 +120,8 @@ const LiveMatchesTab = ({
   handleCompleteMatch, 
   handleDeleteMatch,
   confirmingId,
-  setConfirmingId 
+  setConfirmingId,
+  effectiveHandicaps
 }) => (
   <div className="live-matches-section">
     <div className="section-header mb-4">
@@ -146,6 +147,15 @@ const LiveMatchesTab = ({
                   <h5 className="mb-0">
                     {match.courseName}
                     {match.matchType === '2v2' && <Badge bg="info" className="ms-2">{match.format || '2v2'}</Badge>}
+                    {match.handicapMode && (
+                      <Badge
+                        bg={match.handicapMode === 'tournament' ? 'warning' : 'secondary'}
+                        text={match.handicapMode === 'tournament' ? 'dark' : undefined}
+                        className="ms-2"
+                      >
+                        {match.handicapMode === 'tournament' ? '🏆 Tourn. HCPs' : '⛳ Regular HCPs'}
+                      </Badge>
+                    )}
                   </h5>
                   <Badge bg={getStatusBadgeVariant(match.status)}>{getMatchStatus(match)}</Badge>
                 </div>
@@ -180,6 +190,11 @@ const LiveMatchesTab = ({
                           <small className="text-muted">
                             {match.matchType === 'alternating' ? (match.soloPlayerTeam || 'Unknown') : match.matchType === '2v2' ? 'Putt Pirates' : (match.player1Team || 'Unknown')}
                           </small>
+                          {match.matchType === '1v1' && effectiveHandicaps && (() => {
+                            const p1Name = typeof match.player1 === 'string' ? match.player1 : match.player1?.name;
+                            const hdcp = effectiveHandicaps[p1Name];
+                            return hdcp !== undefined ? <small className="text-success fw-semibold">HDCP: {hdcp.toFixed(1)}</small> : null;
+                          })()}
                         </div>
                         <span className="player-score">{match.currentScore?.player1Score || 0}</span>
                       </div>
@@ -191,6 +206,11 @@ const LiveMatchesTab = ({
                           <small className="text-muted">
                             {match.matchType === 'alternating' ? (match.team2PlayerTeams?.join(' & ') || 'Unknown') : match.matchType === '2v2' ? 'Golden Boys' : (match.player2Team || 'Unknown')}
                           </small>
+                          {match.matchType === '1v1' && effectiveHandicaps && (() => {
+                            const p2Name = typeof match.player2 === 'string' ? match.player2 : match.player2?.name;
+                            const hdcp = effectiveHandicaps[p2Name];
+                            return hdcp !== undefined ? <small className="text-success fw-semibold">HDCP: {hdcp.toFixed(1)}</small> : null;
+                          })()}
                         </div>
                         <span className="player-score">{match.currentScore?.player2Score || 0}</span>
                       </div>
@@ -211,6 +231,13 @@ const LiveMatchesTab = ({
                         </Badge>
                       ))}
                     </div>
+                  </div>
+                )}
+                {match.strokesGiven > 0 && (
+                  <div className="text-center mb-2">
+                    <small className="text-muted">
+                      {match.receivingStrokes} receives +{match.strokesGiven} strokes
+                    </small>
                   </div>
                 )}
                 <div className="match-footer mt-3 pt-3 border-top d-flex justify-content-between align-items-center">
@@ -459,6 +486,9 @@ const Results = () => {
   const [teamPoints, setTeamPoints] = useState({ goldenBoys: 0, puttPirates: 0 });
   const [newStrokeScore, setNewStrokeScore] = useState({ player: '', date: '', score: '' });
   const [confirmingId, setConfirmingId] = useState(null);
+  const [useTournamentHandicaps, setUseTournamentHandicaps] = useState(true);
+  const [redhawkAdjustments, setRedhawkAdjustments] = useState({});
+  const [baseHandicaps, setBaseHandicaps] = useState({});
 
   const router = useRouter();
 
@@ -498,6 +528,22 @@ const Results = () => {
       };
       fetchPlayers();
 
+      // Fetch base handicaps and redhawk adjustments for the HCP toggle
+      const fetchHandicapData = async () => {
+        try {
+          const [playerHcps, adjustments] = await Promise.all([
+            getPlayerHandicaps(),
+            getRedhawkAdjustments()
+          ]);
+          const hcpMap = Object.fromEntries(playerHcps.map(e => [e.name, e.handicap]));
+          setBaseHandicaps(hcpMap);
+          setRedhawkAdjustments(adjustments);
+        } catch (err) {
+          console.error('Error fetching handicap data for results:', err);
+        }
+      };
+      fetchHandicapData();
+
       return () => {
         liveUnsubscribe();
         historyUnsubscribe();
@@ -525,6 +571,17 @@ const Results = () => {
       })
       .sort((a, b) => a.teeTime?.localeCompare(b.teeTime));
   }, [liveMatches]);
+
+  // Compute effective handicaps: tournament (base + redhawk delta) or regular (base only)
+  const effectiveHandicaps = useMemo(() => {
+    if (!useTournamentHandicaps) return baseHandicaps;
+    const adjusted = { ...baseHandicaps };
+    Object.keys(adjusted).forEach(name => {
+      const delta = redhawkAdjustments[name]?.delta || 0;
+      adjusted[name] = parseFloat((adjusted[name] + delta).toFixed(1));
+    });
+    return adjusted;
+  }, [baseHandicaps, redhawkAdjustments, useTournamentHandicaps]);
   const sortedPlayers = useMemo(() => [...players].sort((a, b) => a.name.localeCompare(b.name)), [players]);
   const existingStrokeScores = useMemo(() => Object.entries(strokePlayScores).sort((a, b) => b[1].date?.localeCompare(a[1].date)), [strokePlayScores]);
 
@@ -631,6 +688,29 @@ const Results = () => {
             <h1 className="text-4xl font-semibold mb-8 cursive-font text-center">Match Results</h1>
             
             <div className="results-navigation mb-4">
+              <div className="d-flex justify-content-between align-items-center mb-3 gap-2 flex-wrap">
+                <div className="d-flex align-items-center gap-2">
+                  <span className="text-muted small fw-semibold">Handicap Mode:</span>
+                  <div className="btn-group btn-group-sm" role="group" aria-label="Handicap mode selection">
+                    <button
+                      id="results-btn-tournament-hcp"
+                      className={`btn ${useTournamentHandicaps ? 'btn-success' : 'btn-outline-success'}`}
+                      onClick={() => setUseTournamentHandicaps(true)}
+                      title="Show Redhawk-adjusted tournament handicaps"
+                    >
+                      🏆 Tournament HCP
+                    </button>
+                    <button
+                      id="results-btn-regular-hcp"
+                      className={`btn ${!useTournamentHandicaps ? 'btn-success' : 'btn-outline-success'}`}
+                      onClick={() => setUseTournamentHandicaps(false)}
+                      title="Show base calculated handicaps"
+                    >
+                      ⛳ Regular HCP
+                    </button>
+                  </div>
+                </div>
+              </div>
               <div className="nav-tabs-container">
                 <Button variant={activeTab === 'live' ? 'success' : 'outline-success'} className="nav-tab" onClick={() => setActiveTab('live')}>Active Matches</Button>
                 <Button variant={activeTab === 'leaderboards' ? 'success' : 'outline-success'} className="nav-tab" onClick={() => setActiveTab('leaderboards')}>Leaderboard</Button>
@@ -641,7 +721,7 @@ const Results = () => {
 
             {loading ? <div className="text-center py-5 text-success"><h4>Loading...</h4></div> : (
               <div className="results-content">
-                {activeTab === 'live' && <LiveMatchesTab liveMatches={liveMatches} sortedLiveMatches={sortedLiveMatches} setSelectedMatch={setSelectedMatch} setShowScoreModal={setShowScoreModal} handleCompleteMatch={handleCompleteMatch} handleDeleteMatch={handleDeleteMatch} confirmingId={confirmingId} setConfirmingId={setConfirmingId} />}
+                {activeTab === 'live' && <LiveMatchesTab liveMatches={liveMatches} sortedLiveMatches={sortedLiveMatches} setSelectedMatch={setSelectedMatch} setShowScoreModal={setShowScoreModal} handleCompleteMatch={handleCompleteMatch} handleDeleteMatch={handleDeleteMatch} confirmingId={confirmingId} setConfirmingId={setConfirmingId} effectiveHandicaps={effectiveHandicaps} />}
                 {activeTab === 'leaderboards' && <LeaderboardsTab teamStandings={teamStandings} strokePlayStandings={strokePlayStandings} />}
                 {activeTab === 'management' && <PointsManagementTab players={players} sortedPlayers={sortedPlayers} existingStrokeScores={existingStrokeScores} teamPoints={teamPoints} setTeamPoints={setTeamPoints} updateMessage={updateMessage} newStrokeScore={newStrokeScore} setNewStrokeScore={setNewStrokeScore} handleUpdateTeamPoints={handleUpdateTeamPoints} handleAddStrokeScore={handleAddStrokeScore} handleDeleteStrokeScore={handleDeleteStrokeScore} confirmingId={confirmingId} setConfirmingId={setConfirmingId} />}
                 {activeTab === 'history' && <MatchHistoryTab matchHistory={matchHistory} />}
