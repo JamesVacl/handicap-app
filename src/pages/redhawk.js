@@ -75,7 +75,7 @@ export default function RedhawkTrials() {
 
   // Edit panel
   const [editing, setEditing] = useState(null); // player name being edited
-  const [draftDelta, setDraftDelta] = useState('');
+  const [draftTarget, setDraftTarget] = useState('');
   const [draftNotes, setDraftNotes] = useState('');
   const [saving, setSaving] = useState(false);
   const panelRef = useRef(null);
@@ -164,21 +164,27 @@ export default function RedhawkTrials() {
 
   const openEdit = (player) => {
     const existing = adjustments[player.name];
-    setDraftDelta(existing ? String(existing.delta) : '');
+    // Pre-fill with the current adjusted handicap (target), or the base if no adjustment
+    const base = player.handicap;
+    const target = existing ? parseFloat((base + existing.delta).toFixed(1)) : base;
+    setDraftTarget(String(target));
     setDraftNotes(existing ? (existing.notes || '') : '');
     setEditing(player.name);
   };
 
   const handleSave = async () => {
-    if (draftDelta === '' || isNaN(parseFloat(draftDelta))) {
-      alert('Please enter a valid adjustment value (e.g. +1.5 or -2).');
+    const parsedTarget = parseFloat(draftTarget);
+    if (draftTarget === '' || isNaN(parsedTarget)) {
+      alert('Please enter a valid target handicap (e.g. 20).');
       return;
     }
-    
+
     const targetPlayer = editing;
-    const newDelta = parseFloat(draftDelta);
+    const base = baseHandicaps.find((p) => p.name === targetPlayer)?.handicap || 0;
+    // Compute delta from the desired final handicap
+    const newDelta = parseFloat((parsedTarget - base).toFixed(1));
     const newNotes = draftNotes;
-    
+
     // 1. Optimistic Update - feel instant
     setAdjustments((prev) => ({
       ...prev,
@@ -459,14 +465,14 @@ export default function RedhawkTrials() {
                         })()}
 
                         <div className="rh-panel-field">
-                          <label className="rh-panel-label" htmlFor="rh-delta-input">
-                            Trial Adjustment (+ or −)
+                          <label className="rh-panel-label" htmlFor="rh-target-input">
+                            Target Handicap
                           </label>
                           <div className="rh-delta-input-row">
                             <button
                               className="rh-stepper-btn"
                               onClick={() =>
-                                setDraftDelta((v) =>
+                                setDraftTarget((v) =>
                                   String(parseFloat(v || 0) - 0.5)
                                 )
                               }
@@ -474,18 +480,18 @@ export default function RedhawkTrials() {
                               −
                             </button>
                             <input
-                              id="rh-delta-input"
+                              id="rh-target-input"
                               type="number"
                               step="0.5"
-                              placeholder="e.g. -1.5"
-                              value={draftDelta}
-                              onChange={(e) => setDraftDelta(e.target.value)}
+                              placeholder="e.g. 20"
+                              value={draftTarget}
+                              onChange={(e) => setDraftTarget(e.target.value)}
                               className="form-control rh-delta-input"
                             />
                             <button
                               className="rh-stepper-btn"
                               onClick={() =>
-                                setDraftDelta((v) =>
+                                setDraftTarget((v) =>
                                   String(parseFloat(v || 0) + 0.5)
                                 )
                               }
@@ -493,17 +499,16 @@ export default function RedhawkTrials() {
                               +
                             </button>
                           </div>
-                          {draftDelta !== '' && !isNaN(parseFloat(draftDelta)) && (
-                            <div className="rh-panel-preview">
-                              Adjusted HCP →{' '}
-                              <strong>
-                                {(
-                                  (baseHandicaps.find((p) => p.name === editing)
-                                    ?.handicap || 0) + parseFloat(draftDelta)
-                                ).toFixed(1)}
-                              </strong>
-                            </div>
-                          )}
+                          {draftTarget !== '' && !isNaN(parseFloat(draftTarget)) && (() => {
+                            const base = baseHandicaps.find((p) => p.name === editing)?.handicap || 0;
+                            const delta = parseFloat((parseFloat(draftTarget) - base).toFixed(1));
+                            return (
+                              <div className="rh-panel-preview">
+                                Adjustment: <strong>{delta >= 0 ? '+' : ''}{delta.toFixed(1)}</strong>
+                                {' '}strokes → Final HCP: <strong>{parseFloat(draftTarget).toFixed(1)}</strong>
+                              </div>
+                            );
+                          })()}
                         </div>
 
                         <div className="rh-panel-field">
