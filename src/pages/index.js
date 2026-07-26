@@ -340,18 +340,15 @@ const Home = () => {
         const last3 = recent.slice(-3);
         const hcp = parseFloat(entry.handicap);
 
-        // A handicap represents POTENTIAL (best 8 of 20), not average score.
-        // A player only shoots their handicap ~20% of the time.
-        // Therefore, if ANY of their last 3 rounds is near their handicap, they are hot.
-        // If ALL of their last 3 rounds are 4+ strokes worse, they are cold.
-        
-        const hasGreatRound = last3.some(s => s.differential <= hcp + 0.5);
-        const allBadRounds = last3.every(s => s.differential >= hcp + 4.0);
+        // "The Grint" style trend logic:
+        // Average differential is usually ~3.5 strokes worse than handicap.
+        // We look at the average differential of the last 3 rounds.
+        const avgDiff = last3.reduce((sum, s) => sum + s.differential, 0) / 3;
 
-        if (hasGreatRound) {
-          trends[entry.name] = 'hot';
-        } else if (allBadRounds) {
-          trends[entry.name] = 'cold';
+        if (avgDiff <= hcp + 1.5) {
+          trends[entry.name] = 'hot';  // Averaging near their potential
+        } else if (avgDiff >= hcp + 5.0) {
+          trends[entry.name] = 'cold'; // Averaging much worse than normal
         }
       }
     });
