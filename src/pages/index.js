@@ -603,7 +603,7 @@ const Home = () => {
                     <label className="form-label text-muted small mb-1">Filter by Course</label>
                     <select onChange={(e) => { setFilterCourse(e.target.value); setCurrentPage(0); }} value={filterCourse} className="form-control">
                       <option value="">All Courses</option>
-                      {courses.map((course) => (
+                      {sortedCourses.map((course) => (
                         <option key={course.id} value={course.course}>{course.course}</option>
                       ))}
                     </select>
