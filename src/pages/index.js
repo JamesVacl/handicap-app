@@ -206,6 +206,17 @@ const Home = () => {
     [courses]
   );
 
+  // Top 5 most-played courses for the Favourites optgroup
+  const topCourses = useMemo(() => {
+    const counts = {};
+    scores.forEach((s) => { if (s.course) counts[s.course] = (counts[s.course] || 0) + 1; });
+    return Object.entries(counts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([name]) => name)
+      .sort((a, b) => a.localeCompare(b)); // alphabetical within favourites
+  }, [scores]);
+
   // Filter scores — only recomputes when scores/filterPlayer/filterCourse change
   const filteredScores = useMemo(
     () => scores.filter((score) =>
@@ -488,9 +499,18 @@ const Home = () => {
                       className="form-control"
                     >
                       <option value="">-- Choose a Course --</option>
-                      {sortedCourses.map((course) => (
-                        <option key={course.id} value={course.course}>{course.course}</option>
-                      ))}
+                      {topCourses.length > 0 && (
+                        <optgroup label="⭐ Favourites">
+                          {topCourses.map((name) => (
+                            <option key={`fav-${name}`} value={name}>{name}</option>
+                          ))}
+                        </optgroup>
+                      )}
+                      <optgroup label="All Courses">
+                        {sortedCourses.map((course) => (
+                          <option key={course.id} value={course.course}>{course.course}</option>
+                        ))}
+                      </optgroup>
                     </select>
                     <button
                       type="button"
