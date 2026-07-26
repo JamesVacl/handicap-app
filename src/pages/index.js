@@ -311,6 +311,53 @@ const Home = () => {
     return result;
   }, [scores]);
 
+  // ── Compute trends (hot/cold) based on recent differentials ────────────
+  const playerTrends = useMemo(() => {
+    const trends = {};
+    const TWO_MONTHS_MS = 60 * 24 * 60 * 60 * 1000;
+    const twoMonthsAgo = Date.now() - TWO_MONTHS_MS;
+
+    // Group eligible scores by player
+    const byPlayer = {};
+    scores.forEach((s) => {
+      if (s.differential !== null && (s.holeType === '18' || s.isComposed)) {
+        if (!byPlayer[s.player]) byPlayer[s.player] = [];
+        byPlayer[s.player].push(s);
+      }
+    });
+
+    leaderboard.forEach((entry) => {
+      const playerScores = byPlayer[entry.name] || [];
+      const sorted = [...playerScores].sort(
+        (a, b) => getScoreDateMs(a.date) - getScoreDateMs(b.date)
+      );
+
+      // Filter to last 60 days
+      const recent = sorted.filter(s => getScoreDateMs(s.date) >= twoMonthsAgo);
+      
+      // Activity requirement: 3 rounds in the last 60 days
+      if (recent.length >= 3) {
+        const last3 = recent.slice(-3);
+        const hcp = parseFloat(entry.handicap);
+
+        // A handicap represents POTENTIAL (best 8 of 20), not average score.
+        // A player only shoots their handicap ~20% of the time.
+        // Therefore, if ANY of their last 3 rounds is near their handicap, they are hot.
+        // If ALL of their last 3 rounds are 4+ strokes worse, they are cold.
+        
+        const hasGreatRound = last3.some(s => s.differential <= hcp + 0.5);
+        const allBadRounds = last3.every(s => s.differential >= hcp + 4.0);
+
+        if (hasGreatRound) {
+          trends[entry.name] = 'hot';
+        } else if (allBadRounds) {
+          trends[entry.name] = 'cold';
+        }
+      }
+    });
+    return trends;
+  }, [scores, leaderboard]);
+
   // ──────────────────────────────────────────────────────────────────────────
 
   const handleSignIn = async (e) => {
@@ -670,7 +717,11 @@ const Home = () => {
                             title="Click to view handicap history"
                           >
                             <td className="leaderboard-player-cell">
-                              <span className="leaderboard-player-name">{entry.name}</span>
+                              <span className="leaderboard-player-name">
+                                {entry.name}
+                                {playerTrends[entry.name] === 'hot' && <span title="Trending downwards (improving)"> 🔥</span>}
+                                {playerTrends[entry.name] === 'cold' && <span title="Trending upwards (cooling off)"> 🧊</span>}
+                              </span>
                               <span className={`leaderboard-chevron ${isExpanded ? 'leaderboard-chevron--open' : ''}`}>›</span>
                             </td>
                             <td>{entry.handicap}</td>
