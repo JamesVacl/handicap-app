@@ -104,6 +104,7 @@ const Home = () => {
   const [leaderboard, setLeaderboard] = useState([]);
   const [scoreView, setScoreView] = useState('allTime');
   const [loading, setLoading] = useState(true);
+  const [authResolved, setAuthResolved] = useState(false); // true once Firebase confirms session state
   const [selectedPlayer, setSelectedPlayer] = useState('');
   const [selectedCourse, setSelectedCourse] = useState('');
   const [score, setScore] = useState('');
@@ -146,11 +147,8 @@ const Home = () => {
   useEffect(() => {
     const auth = getAuth();
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setAuthenticated(true);
-      } else {
-        setAuthenticated(false);
-      }
+      setAuthenticated(!!user);
+      setAuthResolved(true); // Firebase has confirmed the session — safe to render
     });
 
     return () => unsubscribe();
@@ -172,26 +170,33 @@ const Home = () => {
   }, []);
 
   useEffect(() => {
+    if (!authResolved) return; // Wait until Firebase confirms auth state
+
     const fetchData = async () => {
       if (authenticated) {
-        const playerList = await getPlayers();
-        setPlayers(playerList);
+        try {
+          const playerList = await getPlayers();
+          setPlayers(playerList);
 
-        const scoreList = await getScores();
-        setScores(scoreList);
+          const scoreList = await getScores();
+          setScores(scoreList);
 
-        const courseList = await getCourses();
-        setCourses(courseList);
+          const courseList = await getCourses();
+          setCourses(courseList);
 
-        const leaderboardData = calculateLeaderboard(scoreList);
-        setLeaderboard(leaderboardData);
-        setLoading(false);
+          const leaderboardData = calculateLeaderboard(scoreList);
+          setLeaderboard(leaderboardData);
+        } catch (err) {
+          console.error('Failed to load data:', err);
+        } finally {
+          setLoading(false);
+        }
       } else {
         setLoading(false);
       }
     };
     fetchData();
-  }, [authenticated]);
+  }, [authenticated, authResolved]);
 
   // ── Memoized derived data ──────────────────────────────────────────────────
 
@@ -262,7 +267,7 @@ const Home = () => {
     e.preventDefault();
     try {
       await signIn(email, password);
-      setAuthenticated(true);
+      // Note: setAuthenticated is handled automatically by the onAuthStateChanged listener
 
       // Handle remember me functionality
       if (rememberMe) {
@@ -434,7 +439,14 @@ const Home = () => {
               </div>
             </div>
             <h1 className="text-4xl font-semibold text-center mb-8 cursive-font">Guyscorp Handicap Tracking</h1>
-            {!authenticated ? (
+            {!authResolved || (!authenticated && loading) ? (
+              // Firebase is still checking the persisted session — show neutral spinner
+              <div className="text-center py-5">
+                <div className="spinner-border text-success" role="status">
+                  <span className="visually-hidden">Loading...</span>
+                </div>
+              </div>
+            ) : !authenticated ? (
               <div className="auth-container">
                 <form onSubmit={handleSignIn} className="d-flex flex-column align-items-center mb-8 auth-form">
                   <input
