@@ -2622,3 +2622,97 @@ body {
   font-weight: 600;
 }
 /* ─────────────────────────────────────────────────────────────────────────── */
+
+/* ── Leaderboard expandable rows ─────────────────────────────────────────── */
+.leaderboard-row {
+  cursor: pointer;
+  transition: background 0.18s ease;
+  user-select: none;
+}
+
+.leaderboard-row:hover {
+  background: rgba(80, 200, 120, 0.07) !important;
+}
+
+.leaderboard-row--expanded {
+  background: rgba(80, 200, 120, 0.1) !important;
+}
+
+.leaderboard-player-cell {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.leaderboard-player-name {
+  font-weight: 600;
+}
+
+.leaderboard-chevron {
+  font-size: 1.1rem;
+  color: #50C878;
+  opacity: 0.6;
+  transition: transform 0.25s ease, opacity 0.2s ease;
+  display: inline-block;
+  line-height: 1;
+}
+
+.leaderboard-chevron--open {
+  transform: rotate(90deg);
+  opacity: 1;
+}
+
+/* ── Handicap history chart panel ────────────────────────────────────────── */
+.leaderboard-chart-row td {
+  padding: 0 !important;
+  border-top: none !important;
+}
+
+.leaderboard-chart-cell {
+  background: linear-gradient(135deg, rgba(80, 200, 120, 0.04) 0%, rgba(255, 255, 255, 0.6) 100%);
+  border-radius: 0 0 10px 10px;
+  animation: chart-slide-in 0.25s ease forwards;
+}
+
+@keyframes chart-slide-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.hcp-history-panel {
+  padding: 1rem 1.25rem 1.25rem;
+}
+
+.hcp-history-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.hcp-history-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #2d3748;
+}
+
+.hcp-history-current {
+  font-size: 0.85rem;
+  color: #50C878;
+  background: rgba(80, 200, 120, 0.1);
+  border: 1px solid rgba(80, 200, 120, 0.25);
+  border-radius: 20px;
+  padding: 0.2rem 0.75rem;
+}
+
+.hcp-history-empty {
+  text-align: center;
+  color: #9ca3af;
+  font-size: 0.875rem;
+  padding: 1.5rem 0;
+  margin: 0;
+}
+/* ─────────────────────────────────────────────────────────────────────────── */

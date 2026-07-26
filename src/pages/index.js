@@ -6,6 +6,7 @@ import Head from 'next/head';
 import { Modal, Button } from 'react-bootstrap';
 import Image from 'next/image'; // Import the Image component from Next.js
 import NavigationMenu from 'src/components/NavigationMenu';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 
 // ── Pure helpers (defined outside the component so they are never re-created) ──
 
@@ -122,6 +123,7 @@ const Home = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const [filterPlayer, setFilterPlayer] = useState(''); // New state for filter selection
   const [filterCourse, setFilterCourse] = useState(''); // New state for filter selection
+  const [expandedPlayer, setExpandedPlayer] = useState(null); // player name whose chart row is open
 
   // ── Secret delete popover state ───────────────────────────────────────────
   const [deletePopover, setDeletePopover] = useState(null); // { x, y, scoreId, scoreLabel }
@@ -260,6 +262,54 @@ const Home = () => {
       _typeLabel: score.isComposed ? 'Combined 9s' : score.holeType === '9' ? '9-Hole' : '18-Hole',
     }));
   }, [filteredScores, currentPage, highlightedScoreKeys]);
+
+  // Scores bulk-imported on site launch (Feb 26 2025) skew the chart — start display from March 1 2025
+  const CHART_START_MS = new Date('2025-03-01').getTime();
+
+  // ── Handicap history: replay algorithm chronologically per player ────────────
+  const handicapHistory = useMemo(() => {
+    // Group eligible scores by player
+    const byPlayer = {};
+    scores.forEach((s) => {
+      if (s.differential !== null && (s.holeType === '18' || s.isComposed)) {
+        if (!byPlayer[s.player]) byPlayer[s.player] = [];
+        byPlayer[s.player].push(s);
+      }
+    });
+
+    const result = {};
+    Object.entries(byPlayer).forEach(([name, playerScores]) => {
+      // Sort oldest → newest
+      const sorted = [...playerScores].sort(
+        (a, b) => getScoreDateMs(a.date) - getScoreDateMs(b.date)
+      );
+
+      const history = [];
+      for (let i = 0; i < sorted.length; i++) {
+        const upToNow = sorted.slice(0, i + 1);
+        const recent20 = upToNow.slice(-20);
+        const best8 = [...recent20]
+          .sort((a, b) => {
+            if (a.differential !== b.differential) return a.differential - b.differential;
+            return getScoreDateMs(b.date) - getScoreDateMs(a.date);
+          })
+          .slice(0, 8);
+        if (best8.length === 0) continue;
+        const hcp = parseFloat(
+          (best8.reduce((sum, s) => sum + s.differential, 0) / best8.length).toFixed(1)
+        );
+        const dateMs = getScoreDateMs(sorted[i].date);
+        history.push({
+          dateMs,
+          label: new Date(dateMs).toLocaleDateString('en-CA', { month: 'short', day: 'numeric', year: '2-digit' }),
+          handicap: hcp,
+        });
+      }
+      // Only display points from March 2025 onward — earlier scores still feed the calculation above
+      result[name] = history.filter((h) => h.dateMs >= CHART_START_MS);
+    });
+    return result;
+  }, [scores]);
 
   // ──────────────────────────────────────────────────────────────────────────
 
@@ -608,12 +658,86 @@ const Home = () => {
                         scoreView === 'last10' ? (entry.last10AverageScore ?? '—') :
                           scoreView === 'last20' ? (entry.last20AverageScore ?? '—') :
                             entry.averageScore;
+                      const isExpanded = expandedPlayer === entry.name;
+                      const history = handicapHistory[entry.name] || [];
+
                       return (
-                        <tr key={index}>
-                          <td>{entry.name}</td>
-                          <td>{entry.handicap}</td>
-                          <td>{displayScore}</td>
-                        </tr>
+                        <>
+                          <tr
+                            key={entry.name}
+                            className={`leaderboard-row ${isExpanded ? 'leaderboard-row--expanded' : ''}`}
+                            onClick={() => setExpandedPlayer(isExpanded ? null : entry.name)}
+                            title="Click to view handicap history"
+                          >
+                            <td className="leaderboard-player-cell">
+                              <span className="leaderboard-player-name">{entry.name}</span>
+                              <span className={`leaderboard-chevron ${isExpanded ? 'leaderboard-chevron--open' : ''}`}>›</span>
+                            </td>
+                            <td>{entry.handicap}</td>
+                            <td>{displayScore}</td>
+                          </tr>
+                          {isExpanded && (
+                            <tr key={`${entry.name}-chart`} className="leaderboard-chart-row">
+                              <td colSpan={3} className="leaderboard-chart-cell">
+                                <div className="hcp-history-panel">
+                                  <div className="hcp-history-header">
+                                    <span className="hcp-history-title">📈 {entry.name} — Handicap History</span>
+                                    <span className="hcp-history-current">Current: <strong>{entry.handicap}</strong></span>
+                                  </div>
+                                  {history.length < 2 ? (
+                                    <p className="hcp-history-empty">Not enough rounds yet to show a trend.</p>
+                                  ) : (
+                                    <ResponsiveContainer width="100%" height={220}>
+                                      <LineChart data={history} margin={{ top: 8, right: 16, left: -10, bottom: 0 }}>
+                                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(80,200,120,0.15)" />
+                                        <XAxis
+                                          dataKey="label"
+                                          tick={{ fontSize: 11, fill: '#6b7280' }}
+                                          interval="preserveStartEnd"
+                                          tickLine={false}
+                                        />
+                                        <YAxis
+                                          domain={['auto', 'auto']}
+                                          tick={{ fontSize: 11, fill: '#6b7280' }}
+                                          tickLine={false}
+                                          axisLine={false}
+                                          reversed={false}
+                                        />
+                                        <Tooltip
+                                          contentStyle={{
+                                            background: 'rgba(255,255,255,0.95)',
+                                            border: '1px solid rgba(80,200,120,0.3)',
+                                            borderRadius: '10px',
+                                            fontSize: '13px',
+                                            boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+                                          }}
+                                          formatter={(value) => [value.toFixed(1), 'Handicap']}
+                                          labelStyle={{ color: '#374151', fontWeight: 600 }}
+                                        />
+                                        <ReferenceLine
+                                          y={entry.handicap}
+                                          stroke="rgba(80,200,120,0.4)"
+                                          strokeDasharray="4 4"
+                                          label={{ value: 'Now', position: 'insideTopRight', fontSize: 10, fill: '#50C878' }}
+                                        />
+                                        <Line
+                                          type="monotone"
+                                          dataKey="handicap"
+                                          stroke="#50C878"
+                                          strokeWidth={2.5}
+                                          dot={{ r: 3, fill: '#50C878', strokeWidth: 0 }}
+                                          activeDot={{ r: 5, fill: '#3DAA6B', strokeWidth: 0 }}
+                                          isAnimationActive={true}
+                                          animationDuration={600}
+                                        />
+                                      </LineChart>
+                                    </ResponsiveContainer>
+                                  )}
+                                </div>
+                              </td>
+                            </tr>
+                          )}
+                        </>
                       );
                     })}
                   </tbody>
