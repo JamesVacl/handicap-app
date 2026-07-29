@@ -88,6 +88,12 @@ const Schedule = () => {
       cost: '$120'
     },
     {
+      courseName: 'Rainforest Cafe',
+      city: 'Niagara Falls, CA',
+      teeTimes: ['18:00', '18:10', '18:20'],
+      notes: 'How many Mongoose Mai tais can we (dewy) drink???'
+    },
+    {
       date: '2026-08-15',
       courseName: 'Thundering Waters (TEAM DAY)',
       city: 'Niagara Falls, CA',
@@ -118,12 +124,6 @@ const Schedule = () => {
       soloFormat: 'Modified Strokeplay',
       teamFormat: '1v1 singles',
       cost: '$110'
-    },
-    {
-      courseName: 'Rainforest Cafe',
-      city: 'Niagara Falls, CA',
-      teeTimes: ['18:00', '18:10', '18:20'],
-      notes: 'How many Mongoose Mai tais can we (dewy) drink???'
     },
     {
       date: '2026-08-17',
