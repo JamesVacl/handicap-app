@@ -103,7 +103,8 @@ const Home = () => {
   const [courses, setCourses] = useState([]);
   const [scores, setScores] = useState([]);
   const [leaderboard, setLeaderboard] = useState([]);
-  const [scoreView, setScoreView] = useState('allTime');
+  const [leaderboardStat, setLeaderboardStat] = useState('allTime'); // mobile unified: 'allTime'|'last20'|'last10'|'rounds'
+  const [scoreView, setScoreView] = useState('allTime');             // desktop avg col: 'allTime'|'last20'|'last10'
   const [loading, setLoading] = useState(true);
   const [authResolved, setAuthResolved] = useState(false); // true once Firebase confirms session state
   const [selectedPlayer, setSelectedPlayer] = useState('');
@@ -702,7 +703,9 @@ const Home = () => {
                 {/* Leaderboard Table */}
                 <div className="d-flex justify-content-between align-items-center mt-4 mb-3">
                   <h2 className="text-2xl font-semibold mb-0">Leaderboard</h2>
-                  <div className="d-flex gap-2">
+
+                  {/* ── Desktop controls: two separate dropdowns ── */}
+                  <div className="d-none d-sm-flex gap-2 align-items-center">
                     <select
                       id="scoreViewDropdown"
                       value={scoreView}
@@ -720,11 +723,26 @@ const Home = () => {
                       onChange={(e) => setRoundCountYear(Number(e.target.value))}
                       className="form-control"
                       style={{ width: 'auto' }}
-                      title="Filter rounds column by year"
                     >
                       {availableYears.map((y) => (
                         <option key={y} value={y}>{y} Round Count</option>
                       ))}
+                    </select>
+                  </div>
+
+                  {/* ── Mobile controls: single unified dropdown ── */}
+                  <div className="d-sm-none">
+                    <select
+                      id="leaderboardStatDropdown"
+                      value={leaderboardStat}
+                      onChange={(e) => setLeaderboardStat(e.target.value)}
+                      className="form-control"
+                      style={{ width: 'auto' }}
+                    >
+                      <option value="allTime">All-time Avg</option>
+                      <option value="last20">Last 20 Avg</option>
+                      <option value="last10">Last 10 Avg</option>
+                      <option value="rounds">{roundCountYear} Round Count</option>
                     </select>
                   </div>
                 </div>
@@ -733,20 +751,26 @@ const Home = () => {
                     <tr>
                       <th>Player</th>
                       <th>Handicap</th>
+                      {/* 3rd col header — label differs by viewport */}
                       <th>
-                        {scoreView === 'last10' ? 'Last 10 Avg' :
-                          scoreView === 'last20' ? 'Last 20 Avg' :
-                            'All-time Avg'}
+                        {/* Desktop: avg score label */}
+                        <span className="d-none d-sm-inline">
+                          {scoreView === 'last10' ? 'Last 10 Avg' :
+                            scoreView === 'last20' ? 'Last 20 Avg' : 'All-time Avg'}
+                        </span>
+                        {/* Mobile: unified stat label */}
+                        <span className="d-sm-none">
+                          {leaderboardStat === 'rounds' ? `${roundCountYear} Rounds` :
+                            leaderboardStat === 'last10' ? 'Last 10 Avg' :
+                              leaderboardStat === 'last20' ? 'Last 20 Avg' : 'All-time Avg'}
+                        </span>
                       </th>
-                      <th className="text-center" title="18-hole rounds played in selected year (true 18s + combined 9s)">Rounds</th>
+                      {/* 4th col: rounds — desktop only */}
+                      <th className="d-none d-sm-table-cell text-center">Rounds</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {leaderboard.map((entry, index) => {
-                      const displayScore =
-                        scoreView === 'last10' ? (entry.last10AverageScore ?? '—') :
-                          scoreView === 'last20' ? (entry.last20AverageScore ?? '—') :
-                            entry.averageScore;
+                    {leaderboard.map((entry) => {
                       const isExpanded = expandedPlayer === entry.name;
                       const history = handicapHistory[entry.name] || [];
 
@@ -767,8 +791,42 @@ const Home = () => {
                               <span className={`leaderboard-chevron ${isExpanded ? 'leaderboard-chevron--open' : ''}`}>›</span>
                             </td>
                             <td>{entry.handicap}</td>
-                            <td>{displayScore}</td>
-                            <td className="text-center leaderboard-rounds-cell">
+
+                            {/* 3rd col: avg on desktop, unified stat on mobile */}
+                            <td className="text-center">
+                              {/* Desktop: always avg score */}
+                              <span className="d-none d-sm-inline">
+                                {scoreView === 'last10' ? (entry.last10AverageScore ?? '\u2014') :
+                                  scoreView === 'last20' ? (entry.last20AverageScore ?? '\u2014') :
+                                    entry.averageScore}
+                              </span>
+                              {/* Mobile: unified stat */}
+                              <span className="d-sm-none">
+                                {leaderboardStat === 'rounds' ? (() => {
+                                  const rc = roundCounts[entry.name] || { full18: 0, composed: 0 };
+                                  return (
+                                    <span className="leaderboard-rounds-cell">
+                                      <span className="leaderboard-rounds-main">{rc.full18}</span>
+                                      {rc.composed > 0 && (
+                                        <span
+                                          className="leaderboard-rounds-composed"
+                                          title={`${rc.composed} combined 9-hole round${rc.composed !== 1 ? 's' : ''}`}
+                                        >
+                                          &nbsp;+{rc.composed}
+                                        </span>
+                                      )}
+                                    </span>
+                                  );
+                                })() : (
+                                  leaderboardStat === 'last10' ? (entry.last10AverageScore ?? '\u2014') :
+                                  leaderboardStat === 'last20' ? (entry.last20AverageScore ?? '\u2014') :
+                                  entry.averageScore
+                                )}
+                              </span>
+                            </td>
+
+                            {/* 4th col: rounds — desktop only */}
+                            <td className="d-none d-sm-table-cell text-center leaderboard-rounds-cell">
                               {(() => {
                                 const rc = roundCounts[entry.name] || { full18: 0, composed: 0 };
                                 return (
