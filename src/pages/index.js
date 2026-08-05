@@ -124,6 +124,7 @@ const Home = () => {
   const [filterPlayer, setFilterPlayer] = useState(''); // New state for filter selection
   const [filterCourse, setFilterCourse] = useState(''); // New state for filter selection
   const [expandedPlayer, setExpandedPlayer] = useState(null); // player name whose chart row is open
+  const [roundCountYear, setRoundCountYear] = useState(() => new Date().getFullYear());
 
   // ── Secret delete popover state ───────────────────────────────────────────
   const [deletePopover, setDeletePopover] = useState(null); // { x, y, scoreId, scoreLabel }
@@ -354,6 +355,35 @@ const Home = () => {
     });
     return trends;
   }, [scores, leaderboard]);
+
+  // ── Available years for round counter (2026 → current year) ────────────────
+  const availableYears = useMemo(() => {
+    const current = new Date().getFullYear();
+    const years = [];
+    for (let y = 2026; y <= current; y++) years.push(y);
+    return years;
+  }, []);
+
+  // ── 18-hole round counts per player, filtered by year ──────────────────────
+  const roundCounts = useMemo(() => {
+    const startMs = new Date(`${roundCountYear}-01-01`).getTime();
+    const endMs   = new Date(`${roundCountYear + 1}-01-01`).getTime();
+    const counts  = {}; // { playerName: { full18: number, composed: number } }
+
+    scores.forEach((s) => {
+      const ms = getScoreDateMs(s.date);
+      if (ms < startMs || ms >= endMs) return;
+      if (!counts[s.player]) counts[s.player] = { full18: 0, composed: 0 };
+      if (s.isComposed) {
+        counts[s.player].composed += 1;
+      } else if (s.holeType === '18') {
+        counts[s.player].full18 += 1;
+      }
+      // standalone unpaired 9s are intentionally excluded
+    });
+
+    return counts;
+  }, [scores, roundCountYear]);
 
   // ──────────────────────────────────────────────────────────────────────────
 
@@ -672,17 +702,31 @@ const Home = () => {
                 {/* Leaderboard Table */}
                 <div className="d-flex justify-content-between align-items-center mt-4 mb-3">
                   <h2 className="text-2xl font-semibold mb-0">Leaderboard</h2>
-                  <select
-                    id="scoreViewDropdown"
-                    value={scoreView}
-                    onChange={(e) => setScoreView(e.target.value)}
-                    className="form-control"
-                    style={{ width: 'auto' }}
-                  >
-                    <option value="allTime">All-time Avg Score</option>
-                    <option value="last20">Last 20 Avg Score</option>
-                    <option value="last10">Last 10 Avg Score</option>
-                  </select>
+                  <div className="d-flex gap-2">
+                    <select
+                      id="scoreViewDropdown"
+                      value={scoreView}
+                      onChange={(e) => setScoreView(e.target.value)}
+                      className="form-control"
+                      style={{ width: 'auto' }}
+                    >
+                      <option value="allTime">All-time Avg Score</option>
+                      <option value="last20">Last 20 Avg Score</option>
+                      <option value="last10">Last 10 Avg Score</option>
+                    </select>
+                    <select
+                      id="roundCountYearDropdown"
+                      value={roundCountYear}
+                      onChange={(e) => setRoundCountYear(Number(e.target.value))}
+                      className="form-control"
+                      style={{ width: 'auto' }}
+                      title="Filter rounds column by year"
+                    >
+                      {availableYears.map((y) => (
+                        <option key={y} value={y}>{y} Round Count</option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
                 <table className="table table-bordered">
                   <thead>
@@ -694,6 +738,7 @@ const Home = () => {
                           scoreView === 'last20' ? 'Last 20 Avg' :
                             'All-time Avg'}
                       </th>
+                      <th className="text-center" title="18-hole rounds played in selected year (true 18s + combined 9s)">Rounds</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -723,10 +768,28 @@ const Home = () => {
                             </td>
                             <td>{entry.handicap}</td>
                             <td>{displayScore}</td>
+                            <td className="text-center leaderboard-rounds-cell">
+                              {(() => {
+                                const rc = roundCounts[entry.name] || { full18: 0, composed: 0 };
+                                return (
+                                  <>
+                                    <span className="leaderboard-rounds-main">{rc.full18}</span>
+                                    {rc.composed > 0 && (
+                                      <span
+                                        className="leaderboard-rounds-composed"
+                                        title={`${rc.composed} combined 9-hole round${rc.composed !== 1 ? 's' : ''}`}
+                                      >
+                                        &nbsp;+{rc.composed}
+                                      </span>
+                                    )}
+                                  </>
+                                );
+                              })()}
+                            </td>
                           </tr>
                           {isExpanded && (
                             <tr key={`${entry.name}-chart`} className="leaderboard-chart-row">
-                              <td colSpan={3} className="leaderboard-chart-cell">
+                              <td colSpan={4} className="leaderboard-chart-cell">
                                 <div className="hcp-history-panel">
                                   <div className="hcp-history-header">
                                     <span className="hcp-history-title">📈 {entry.name} — Handicap History</span>

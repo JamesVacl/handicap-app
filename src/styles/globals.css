@@ -2716,3 +2716,100 @@ body {
   margin: 0;
 }
 /* ─────────────────────────────────────────────────────────────────────────── */
+
+/* ── Round Counter ───────────────────────────────────────────────────────── */
+.round-counter-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+}
+
+.round-counter-card {
+  background: linear-gradient(145deg, rgba(80, 200, 120, 0.06), rgba(80, 200, 120, 0.12));
+  border: 1px solid rgba(80, 200, 120, 0.22);
+  border-radius: 16px;
+  padding: 1.1rem 0.75rem 0.9rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.round-counter-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 22px rgba(80, 200, 120, 0.18);
+  border-color: rgba(80, 200, 120, 0.42);
+}
+
+.round-counter-name {
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: #4b5563;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  letter-spacing: 0.01em;
+}
+
+.round-counter-value {
+  display: flex;
+  align-items: baseline;
+  gap: 0.2rem;
+  margin: 0.2rem 0 0.05rem;
+}
+
+.round-counter-main {
+  font-size: 2.4rem;
+  font-weight: 700;
+  color: var(--primary-dark);
+  line-height: 1;
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+}
+
+.round-counter-composed {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #6b7280;
+  align-self: flex-end;
+  padding-bottom: 0.25rem;
+  cursor: default;
+}
+
+.round-counter-label {
+  font-size: 0.67rem;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+@media (max-width: 480px) {
+  .round-counter-grid {
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 0.5rem;
+  }
+
+  .round-counter-main {
+    font-size: 2rem;
+  }
+}
+
+/* ── Leaderboard Rounds Column ───────────────────────────────────────────── */
+.leaderboard-rounds-cell {
+  white-space: nowrap;
+}
+
+.leaderboard-rounds-main {
+  font-weight: 600;
+  color: var(--primary-dark);
+}
+
+.leaderboard-rounds-composed {
+  font-size: 0.85em;
+  color: #6b7280;
+  cursor: default;
+}
