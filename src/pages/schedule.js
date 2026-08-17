@@ -512,7 +512,7 @@ const Schedule = () => {
       </Head>
       <div className="app-wrapper">
         {authenticated && <NavigationMenu />}
-        <FloatingNavigation />
+        {/* <FloatingNavigation /> */}
         <div className="home-container">
           <div className="overlay"></div>
           <div className="content glass-panel" style={{ maxWidth: '1400px' }}>

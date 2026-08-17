@@ -601,7 +601,7 @@ const MatchHistoryTab = ({ matchHistory }) => (
 
 const Results = () => {
   const [authenticated, setAuthenticated] = useState(false);
-  const [activeTab, setActiveTab] = useState('live');
+  const [activeTab, setActiveTab] = useState('leaderboards');
   const [liveMatches, setLiveMatches] = useState([]);
   const [matchHistory, setMatchHistory] = useState([]);
   const [leaderboards, setLeaderboards] = useState({});
@@ -619,6 +619,12 @@ const Results = () => {
   const [useTournamentHandicaps, setUseTournamentHandicaps] = useState(true);
   const [redhawkAdjustments, setRedhawkAdjustments] = useState({});
   const [baseHandicaps, setBaseHandicaps] = useState({});
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
+  const currentYear = new Date().getFullYear();
+  const availableYears = Array.from(
+    { length: Math.max(4, currentYear - 2026 + 3) }, 
+    (_, i) => (2026 + i).toString()
+  );
 
   const router = useRouter();
 
@@ -635,21 +641,25 @@ const Results = () => {
     if (authenticated) {
       const db = getFirestore();
       
-      const liveUnsubscribe = onSnapshot(doc(db, 'liveMatches', '2025'), (doc) => {
+      const liveUnsubscribe = onSnapshot(doc(db, 'liveMatches', selectedYear), (doc) => {
         if (doc.exists()) setLiveMatches(Object.entries(doc.data()).map(([id, data]) => ({ id, ...data })));
+        else setLiveMatches([]);
         setLoading(false);
       });
 
-      const historyUnsubscribe = onSnapshot(doc(db, 'matchHistory', '2025'), (doc) => {
+      const historyUnsubscribe = onSnapshot(doc(db, 'matchHistory', selectedYear), (doc) => {
         if (doc.exists()) setMatchHistory(Object.entries(doc.data()).map(([id, data]) => ({ id, ...data })).sort((a, b) => b.completedAt?.toMillis() - a.completedAt?.toMillis()));
+        else setMatchHistory([]);
       });
 
-      const leaderboardUnsubscribe = onSnapshot(doc(db, 'leaderboards', '2025'), (doc) => {
+      const leaderboardUnsubscribe = onSnapshot(doc(db, 'leaderboards', selectedYear), (doc) => {
         if (doc.exists()) setLeaderboards(doc.data());
+        else setLeaderboards({});
       });
 
-      const strokePlayUnsubscribe = onSnapshot(doc(db, 'strokePlay', '2025'), (doc) => {
+      const strokePlayUnsubscribe = onSnapshot(doc(db, 'strokePlay', selectedYear), (doc) => {
         if (doc.exists()) setStrokePlayScores(doc.data());
+        else setStrokePlayScores({});
       });
 
       const fetchPlayers = async () => {
@@ -681,7 +691,7 @@ const Results = () => {
         strokePlayUnsubscribe();
       };
     }
-  }, [authenticated]);
+  }, [authenticated, selectedYear]);
 
   // Sync teamPoints state with DB data when it loads
   useEffect(() => {
@@ -742,7 +752,7 @@ const Results = () => {
   const handleUpdateTeamPoints = async (team, points) => {
     try {
       const db = getFirestore();
-      await setDoc(doc(db, 'leaderboards', '2025'), { [team]: { points: parseInt(points) } }, { merge: true });
+      await setDoc(doc(db, 'leaderboards', selectedYear), { [team]: { points: parseInt(points) } }, { merge: true });
       setUpdateMessage(`${team} points updated!`);
       setTimeout(() => setUpdateMessage(''), 5000);
     } catch (error) {
@@ -769,7 +779,7 @@ const Results = () => {
     try {
       const db = getFirestore();
       const scoreKey = `${newStrokeScore.date}-${newStrokeScore.player}`;
-      await setDoc(doc(db, 'strokePlay', '2025'), {
+      await setDoc(doc(db, 'strokePlay', selectedYear), {
         [scoreKey]: {
           player: newStrokeScore.player,
           date: newStrokeScore.date,
@@ -792,7 +802,7 @@ const Results = () => {
   const handleDeleteStrokeScore = async (scoreKey) => {
     try {
       const db = getFirestore();
-      await setDoc(doc(db, 'strokePlay', '2025'), { [scoreKey]: deleteField() }, { merge: true });
+      await setDoc(doc(db, 'strokePlay', selectedYear), { [scoreKey]: deleteField() }, { merge: true });
       setUpdateMessage('Score deleted successfully!');
       setConfirmingId(null);
       setTimeout(() => setUpdateMessage(''), 5000);
@@ -807,8 +817,8 @@ const Results = () => {
     try {
       const db = getFirestore();
       const updatedMatch = { ...match, status: 'completed', completedAt: new Date() };
-      await setDoc(doc(db, 'matchHistory', '2025'), { [match.id]: updatedMatch }, { merge: true });
-      await setDoc(doc(db, 'liveMatches', '2025'), { [match.id]: deleteField() }, { merge: true });
+      await setDoc(doc(db, 'matchHistory', selectedYear), { [match.id]: updatedMatch }, { merge: true });
+      await setDoc(doc(db, 'liveMatches', selectedYear), { [match.id]: deleteField() }, { merge: true });
       setConfirmingId(null);
     } catch (error) {
       console.error('Error completing match:', error);
@@ -819,7 +829,7 @@ const Results = () => {
   const handleDeleteMatch = async (match) => {
     try {
       const db = getFirestore();
-      await setDoc(doc(db, 'liveMatches', '2025'), { [match.id]: deleteField() }, { merge: true });
+      await setDoc(doc(db, 'liveMatches', selectedYear), { [match.id]: deleteField() }, { merge: true });
       setConfirmingId(null);
     } catch (error) {
       console.error('Error deleting match:', error);
@@ -835,7 +845,7 @@ const Results = () => {
       </Head>
       <div className="app-wrapper">
         {authenticated && <NavigationMenu />}
-        <FloatingNavigation />
+        {/* <FloatingNavigation /> */}
         <div className="home-container">
           <div className="overlay"></div>
           <div className="content">
@@ -843,6 +853,19 @@ const Results = () => {
             
             <div className="results-navigation mb-4">
               <div className="d-flex justify-content-between align-items-center mb-3 gap-2 flex-wrap">
+                <div className="d-flex align-items-center gap-2">
+                  <span className="text-muted small fw-semibold">Year:</span>
+                  <select 
+                    className="form-select form-select-sm shadow-sm" 
+                    value={selectedYear} 
+                    onChange={(e) => setSelectedYear(e.target.value)}
+                    style={{ width: '100px', cursor: 'pointer' }}
+                  >
+                    {availableYears.map(year => (
+                      <option key={year} value={year}>{year}</option>
+                    ))}
+                  </select>
+                </div>
                 <div className="d-flex align-items-center gap-2">
                   <span className="text-muted small fw-semibold">Handicap Mode:</span>
                   <div className="btn-group btn-group-sm" role="group" aria-label="Handicap mode selection">
@@ -866,9 +889,9 @@ const Results = () => {
                 </div>
               </div>
               <div className="nav-tabs-container">
-                <Button variant={activeTab === 'live' ? 'success' : 'outline-success'} className="nav-tab" onClick={() => setActiveTab('live')}>Active Matches</Button>
                 <Button variant={activeTab === 'leaderboards' ? 'success' : 'outline-success'} className="nav-tab" onClick={() => setActiveTab('leaderboards')}>Leaderboard</Button>
                 <Button variant={activeTab === 'management' ? 'success' : 'outline-success'} className="nav-tab" onClick={() => setActiveTab('management')}>Points Management</Button>
+                <Button variant={activeTab === 'live' ? 'success' : 'outline-success'} className="nav-tab" onClick={() => setActiveTab('live')}>Active Matches</Button>
                 <Button variant={activeTab === 'history' ? 'success' : 'outline-success'} className="nav-tab" onClick={() => setActiveTab('history')}>Match History</Button>
               </div>
             </div>
