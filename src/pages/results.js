@@ -707,8 +707,14 @@ const Results = () => {
     if (!useTournamentHandicaps) return baseHandicaps;
     const adjusted = { ...baseHandicaps };
     Object.keys(adjusted).forEach(name => {
-      const delta = redhawkAdjustments[name]?.delta || 0;
-      adjusted[name] = parseFloat((adjusted[name] + delta).toFixed(1));
+      const adj = redhawkAdjustments[name];
+      if (adj) {
+        if (adj.targetHandicap !== undefined) {
+          adjusted[name] = adj.targetHandicap;
+        } else {
+          adjusted[name] = parseFloat((adjusted[name] + (adj.delta || 0)).toFixed(1));
+        }
+      }
     });
     return adjusted;
   }, [baseHandicaps, redhawkAdjustments, useTournamentHandicaps]);

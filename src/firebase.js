@@ -420,7 +420,7 @@ const getRedhawkAdjustments = withCache('redhawk', async () => {
 });
 
 // Save (upsert) a Redhawk adjustment for one player
-const saveRedhawkAdjustment = async (playerName, delta, notes = '') => {
+const saveRedhawkAdjustment = async (playerName, targetHandicap, delta, notes = '') => {
   // Check if a doc already exists for this player
   const q = query(
     collection(db, 'redhawkAdjustments'),
@@ -430,6 +430,7 @@ const saveRedhawkAdjustment = async (playerName, delta, notes = '') => {
 
   const payload = {
     playerName,
+    targetHandicap: parseFloat(targetHandicap),
     delta: parseFloat(delta),
     notes: notes || '',
     updatedAt: new Date(),

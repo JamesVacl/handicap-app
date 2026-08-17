@@ -165,8 +165,14 @@ export default function RedhawkTrials() {
   const openEdit = (player) => {
     const existing = adjustments[player.name];
     // Pre-fill with the current adjusted handicap (target), or the base if no adjustment
-    const base = player.handicap;
-    const target = existing ? parseFloat((base + existing.delta).toFixed(1)) : base;
+    let target = player.handicap;
+    if (existing) {
+      if (existing.targetHandicap !== undefined) {
+        target = existing.targetHandicap;
+      } else {
+        target = parseFloat((player.handicap + existing.delta).toFixed(1));
+      }
+    }
     setDraftTarget(String(target));
     setDraftNotes(existing ? (existing.notes || '') : '');
     setEditing(player.name);
@@ -191,6 +197,7 @@ export default function RedhawkTrials() {
       [targetPlayer]: {
         ...prev[targetPlayer],
         playerName: targetPlayer,
+        targetHandicap: parsedTarget,
         delta: newDelta,
         notes: newNotes,
         updatedAt: new Date()
@@ -200,7 +207,7 @@ export default function RedhawkTrials() {
 
     // 2. Background Save
     try {
-      await saveRedhawkAdjustment(targetPlayer, newDelta, newNotes);
+      await saveRedhawkAdjustment(targetPlayer, parsedTarget, newDelta, newNotes);
     } catch (err) {
       console.error('Failed to save adjustment:', err);
       alert('Failed to save adjustment. Reverting changes.');
@@ -236,12 +243,22 @@ export default function RedhawkTrials() {
   const leaderboard = baseHandicaps
     .map((p) => {
       const adj = adjustments[p.name];
-      const delta = adj ? adj.delta : 0;
+      let adjusted = p.handicap;
+      let delta = 0;
+      if (adj) {
+        if (adj.targetHandicap !== undefined) {
+          adjusted = adj.targetHandicap;
+          delta = parseFloat((adjusted - p.handicap).toFixed(1));
+        } else {
+          delta = adj.delta || 0;
+          adjusted = parseFloat((p.handicap + delta).toFixed(1));
+        }
+      }
       return {
         ...p,
         delta,
         notes: adj ? adj.notes : '',
-        adjusted: parseFloat((p.handicap + delta).toFixed(1)),
+        adjusted,
         hasAdjustment: !!adj,
       };
     })
