@@ -556,7 +556,10 @@ const PointsManagementTab = ({
                     <div className="d-flex justify-content-between align-items-center p-2 border rounded">
                       <div>
                         <strong>{data.player}</strong> <small className="text-muted">({data.date})</small>
-                        <div className="text-success fw-bold">{data.score > 0 ? `+${data.score}` : data.score}</div>
+                        <div className="text-success fw-bold">
+                          {data.score > 0 ? `+${data.score}` : data.score}
+                          {data.rawScore && <span className="ms-1 text-muted" style={{ fontSize: '0.85em' }}>({data.rawScore})</span>}
+                        </div>
                       </div>
                       {confirmingId === key ? (
                         <div className="d-flex gap-1">
@@ -741,7 +744,13 @@ const Results = () => {
     return adjusted;
   }, [baseHandicaps, redhawkAdjustments, useTournamentHandicaps]);
   const sortedPlayers = useMemo(() => [...players].sort((a, b) => a.name.localeCompare(b.name)), [players]);
-  const existingStrokeScores = useMemo(() => Object.entries(strokePlayScores).sort((a, b) => b[1].date?.localeCompare(a[1].date)), [strokePlayScores]);
+  const existingStrokeScores = useMemo(() => {
+    return Object.entries(strokePlayScores).sort((a, b) => {
+      const dateCompare = b[1].date?.localeCompare(a[1].date);
+      if (dateCompare !== 0) return dateCompare;
+      return a[1].score - b[1].score;
+    });
+  }, [strokePlayScores]);
 
   const teamStandings = useMemo(() => {
     const allowedTeams = ['Golden Boys', 'Putt Pirates'];
