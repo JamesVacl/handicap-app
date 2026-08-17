@@ -327,7 +327,14 @@ const LeaderboardsTab = ({ teamStandings, strokePlayStandings }) => (
                   <tbody>
                     {strokePlayStandings.map((player, idx) => {
                       const sortedRounds = [...player.rounds].sort((a, b) => a.date?.localeCompare(b.date));
-                      const isLeader = idx === 0;
+                      
+                      // Calculate ties for accurate ranking
+                      const firstIndex = strokePlayStandings.findIndex(p => p.totalScore === player.totalScore);
+                      const isTied = strokePlayStandings.filter(p => p.totalScore === player.totalScore).length > 1;
+                      const isLeader = player.totalScore === strokePlayStandings[0]?.totalScore;
+                      
+                      let rankDisplay = firstIndex === 0 && !isTied ? '🥇' : (isTied ? `T${firstIndex + 1}` : firstIndex + 1);
+
                       return (
                         <tr
                           key={player.player}
@@ -337,7 +344,7 @@ const LeaderboardsTab = ({ teamStandings, strokePlayStandings }) => (
                           }}
                         >
                           <td className="ps-3 py-2 align-middle" style={{ color: isLeader ? '#1a3a1a' : '#888', fontWeight: isLeader ? 700 : 400, fontSize: '0.9rem' }}>
-                            {isLeader ? '🥇' : idx + 1}
+                            {rankDisplay}
                           </td>
                           <td className="py-2 align-middle" style={{ color: '#1a1a1a', fontWeight: 600, fontSize: '0.95rem' }}>
                             {player.player}
