@@ -301,28 +301,90 @@ const LeaderboardsTab = ({ teamStandings, strokePlayStandings }) => (
           </Card.Body>
         </Card>
       </Col>
-      <Col lg={6} md={12} className="mb-4">
-        <Card className="leaderboard-card">
-          <Card.Header><h5 className="mb-0">Stroke Play Leaders</h5></Card.Header>
-          <Card.Body>
+    </Row>
+    <Row>
+      <Col lg={12} className="mb-4">
+        <Card style={{ border: '1px solid #d4d4d4', borderRadius: '8px', overflow: 'hidden', boxShadow: '0 2px 12px rgba(0,0,0,0.10)' }}>
+          <Card.Header style={{ background: '#1a3a1a', borderBottom: '3px solid #2d6a2d', padding: '12px 16px' }}>
+            <div className="d-flex justify-content-between align-items-center">
+              <h5 className="mb-0 text-white fw-bold" style={{ letterSpacing: '0.5px' }}>⛳ Stroke Play Leaderboard</h5>
+              <span className="badge" style={{ background: 'rgba(255,255,255,0.15)', color: '#fff', fontWeight: 500 }}>{strokePlayStandings.length} players</span>
+            </div>
+          </Card.Header>
+          <Card.Body className="p-0" style={{ background: '#fff' }}>
             {strokePlayStandings.length > 0 ? (
-              <div className="individual-leaders">
-                {strokePlayStandings.slice(0, 10).map((player, idx) => (
-                  <div key={player.player} className="player-row d-flex justify-content-between align-items-center py-2 border-bottom">
-                    <div className="player-info">
-                      <span className="player-name">#{idx + 1} {player.player}</span>
-                      <small className="text-muted d-block">{player.rounds.length} rounds</small>
-                    </div>
-                    <div className="player-stats text-end">
-                      <span className={`fw-bold ${player.totalScore <= 0 ? 'text-success' : 'text-danger'}`}>
-                        {player.totalScore > 0 ? `+${player.totalScore}` : player.totalScore}
-                      </span>
-                      <small className="text-muted d-block">total score</small>
-                    </div>
-                  </div>
-                ))}
+              <div className="table-responsive">
+                <table className="table mb-0" style={{ borderCollapse: 'collapse', background: '#fff' }}>
+                  <thead>
+                    <tr style={{ background: '#f0f0f0', borderBottom: '2px solid #c8c8c8' }}>
+                      <th className="ps-3 py-2 fw-semibold" style={{ width: '3rem', color: '#555', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>POS</th>
+                      <th className="py-2 fw-semibold" style={{ color: '#555', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>PLAYER</th>
+                      <th className="py-2 fw-semibold text-center" style={{ width: '5rem', color: '#555', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>RDS</th>
+                      <th className="py-2 fw-semibold" style={{ minWidth: '14rem', color: '#555', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>ROUND SCORES</th>
+                      <th className="pe-3 py-2 fw-semibold text-end" style={{ width: '6rem', color: '#555', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>TOTAL</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {strokePlayStandings.map((player, idx) => {
+                      const sortedRounds = [...player.rounds].sort((a, b) => a.date?.localeCompare(b.date));
+                      const isLeader = idx === 0;
+                      return (
+                        <tr
+                          key={player.player}
+                          style={{
+                            borderBottom: '1px solid #e8e8e8',
+                            background: isLeader ? '#f9fff9' : '#fff',
+                          }}
+                        >
+                          <td className="ps-3 py-2 align-middle" style={{ color: isLeader ? '#1a3a1a' : '#888', fontWeight: isLeader ? 700 : 400, fontSize: '0.9rem' }}>
+                            {isLeader ? '🥇' : idx + 1}
+                          </td>
+                          <td className="py-2 align-middle" style={{ color: '#1a1a1a', fontWeight: 600, fontSize: '0.95rem' }}>
+                            {player.player}
+                            {isLeader && <span className="ms-2 badge" style={{ background: '#2d6a2d', color: '#fff', fontSize: '0.65rem', fontWeight: 600, verticalAlign: 'middle' }}>LEADER</span>}
+                          </td>
+                          <td className="py-2 text-center align-middle">
+                            <span className="badge rounded-pill" style={{ background: '#e8e8e8', color: '#555', fontWeight: 500 }}>{sortedRounds.length}</span>
+                          </td>
+                          <td className="py-2 align-middle">
+                            <div className="d-flex flex-wrap gap-1">
+                              {sortedRounds.map((round, rIdx) => (
+                                <span
+                                  key={rIdx}
+                                  title={round.date}
+                                  style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '3px',
+                                    padding: '2px 8px',
+                                    borderRadius: '4px',
+                                    background: '#f5f5f5',
+                                    border: '1px solid #ddd',
+                                    fontSize: '0.78rem',
+                                    fontWeight: 700,
+                                    color: '#c0392b',
+                                  }}
+                                >
+                                  {round.score > 0 ? `+${round.score}` : round.score}
+                                  <span style={{ color: '#888', fontWeight: 400, fontSize: '0.72rem' }}>
+                                    {round.date ? new Date(round.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : ''}
+                                  </span>
+                                </span>
+                              ))}
+                            </div>
+                          </td>
+                          <td className="pe-3 py-2 text-end align-middle">
+                            <span style={{ fontWeight: 800, fontSize: '1.05rem', color: '#c0392b' }}>
+                              +{player.totalScore}
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
               </div>
-            ) : <p className="text-muted text-center">No stroke play scores available</p>}
+            ) : <p className="text-muted text-center py-4">No stroke play scores available</p>}
           </Card.Body>
         </Card>
       </Col>
@@ -343,8 +405,25 @@ const PointsManagementTab = ({
   handleAddStrokeScore, 
   handleDeleteStrokeScore,
   confirmingId,
-  setConfirmingId 
-}) => (
+  setConfirmingId,
+  effectiveHandicaps
+}) => {
+  // Compute the lowest tournament handicap across all players
+  const hcpValues = Object.values(effectiveHandicaps || {});
+  const lowestHcp = hcpValues.length > 0 ? Math.min(...hcpValues) : null;
+
+  // Compute live adjusted score preview
+  const playerHcp = newStrokeScore.player && effectiveHandicaps ? effectiveHandicaps[newStrokeScore.player] : null;
+  const strokesGiven = (playerHcp !== null && playerHcp !== undefined && lowestHcp !== null)
+    ? Math.round(playerHcp - lowestHcp)
+    : null;
+  const rawScore = newStrokeScore.rawScore !== '' ? parseInt(newStrokeScore.rawScore) : null;
+  const par = newStrokeScore.par !== '' ? parseInt(newStrokeScore.par) : 72;
+  const adjustedScore = (rawScore !== null && strokesGiven !== null)
+    ? rawScore - strokesGiven - par
+    : null;
+
+  return (
   <div className="points-management-section">
     <div className="section-header mb-4">
       <h2 className="text-3xl font-semibold text-success">Points Management</h2>
@@ -389,16 +468,66 @@ const PointsManagementTab = ({
                 <option value="">-- Choose a Player --</option>
                 {sortedPlayers.map(p => <option key={p.id} value={p.name}>{p.name}</option>)}
               </Form.Select>
+              {newStrokeScore.player && playerHcp !== undefined && playerHcp !== null && lowestHcp !== null && (
+                <small className="text-muted d-block mt-1">
+                  Tournament HCP: <strong>{playerHcp.toFixed(1)}</strong>
+                  {strokesGiven > 0 && <span className="ms-2 text-success">receives <strong>{strokesGiven}</strong> stroke{strokesGiven !== 1 ? 's' : ''}</span>}
+                  {strokesGiven === 0 && <span className="ms-2 badge bg-warning text-dark">Field Leader — plays at scratch</span>}
+                </small>
+              )}
             </div>
             <div className="mb-3">
               <label className="form-label">Date</label>
               <Form.Control type="date" value={newStrokeScore.date} onChange={(e) => setNewStrokeScore(prev => ({ ...prev, date: e.target.value }))} />
             </div>
-            <div className="mb-3">
-              <label className="form-label">Score (+/-)</label>
-              <Form.Control type="number" value={newStrokeScore.score} onChange={(e) => setNewStrokeScore(prev => ({ ...prev, score: e.target.value }))} placeholder="+5, -2, etc." />
-            </div>
-            <Button variant="success" className="w-100" onClick={handleAddStrokeScore}>Add Score</Button>
+            <Row className="mb-3">
+              <Col>
+                <label className="form-label">Raw Score (total strokes)</label>
+                <Form.Control
+                  type="number"
+                  value={newStrokeScore.rawScore}
+                  onChange={(e) => setNewStrokeScore(prev => ({ ...prev, rawScore: e.target.value }))}
+                  placeholder="e.g. 90"
+                />
+              </Col>
+              <Col xs={4}>
+                <label className="form-label">Par</label>
+                <Form.Control
+                  type="number"
+                  value={newStrokeScore.par}
+                  onChange={(e) => setNewStrokeScore(prev => ({ ...prev, par: e.target.value }))}
+                  placeholder="72"
+                />
+              </Col>
+            </Row>
+
+            {/* Live calculation preview */}
+            {adjustedScore !== null ? (
+              <div className="mb-3 p-3 rounded" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)' }}>
+                <div className="d-flex justify-content-between align-items-center">
+                  <div>
+                    <small className="text-muted d-block">Calculation</small>
+                    <small className="text-muted">
+                      {rawScore} (raw) − {strokesGiven} (strokes) − {par} (par) =
+                    </small>
+                  </div>
+                  <span className="fw-bold fs-4" style={{ color: adjustedScore <= 0 ? '#2ecc71' : '#e74c3c' }}>
+                    {adjustedScore > 0 ? `+${adjustedScore}` : adjustedScore}
+                  </span>
+                </div>
+              </div>
+            ) : (
+              newStrokeScore.player && rawScore === null && (
+                <div className="mb-3">
+                  <small className="text-muted">Enter a raw score to see the adjusted result</small>
+                </div>
+              )
+            )}
+
+            <Button variant="success" className="w-100" onClick={handleAddStrokeScore}
+              disabled={adjustedScore === null || !newStrokeScore.player || !newStrokeScore.date}>
+              Add Score
+            </Button>
           </Card.Body>
         </Card>
       </Col>
@@ -435,7 +564,8 @@ const PointsManagementTab = ({
       </Col>
     </Row>
   </div>
-);
+  );
+};
 
 const MatchHistoryTab = ({ matchHistory }) => (
   <div className="match-history-section">
@@ -484,7 +614,7 @@ const Results = () => {
   
   const [updateMessage, setUpdateMessage] = useState('');
   const [teamPoints, setTeamPoints] = useState({ goldenBoys: 0, puttPirates: 0 });
-  const [newStrokeScore, setNewStrokeScore] = useState({ player: '', date: '', score: '' });
+  const [newStrokeScore, setNewStrokeScore] = useState({ player: '', date: '', rawScore: '', par: '72' });
   const [confirmingId, setConfirmingId] = useState(null);
   const [useTournamentHandicaps, setUseTournamentHandicaps] = useState(true);
   const [redhawkAdjustments, setRedhawkAdjustments] = useState({});
@@ -617,18 +747,36 @@ const Results = () => {
   };
 
   const handleAddStrokeScore = async () => {
-    if (!newStrokeScore.player || !newStrokeScore.date || !newStrokeScore.score) {
+    if (!newStrokeScore.player || !newStrokeScore.date || newStrokeScore.rawScore === '') {
       setUpdateMessage('Please fill in all fields');
       setTimeout(() => setUpdateMessage(''), 5000);
       return;
     }
+    // Compute the adjusted score from raw score, par, and handicap strokes
+    const hcpValues = Object.values(effectiveHandicaps || {});
+    const lowestHcp = hcpValues.length > 0 ? Math.min(...hcpValues) : 0;
+    const playerHcp = effectiveHandicaps?.[newStrokeScore.player] ?? lowestHcp;
+    const strokesGiven = Math.round(playerHcp - lowestHcp);
+    const par = parseInt(newStrokeScore.par) || 72;
+    const rawScore = parseInt(newStrokeScore.rawScore);
+    const adjustedScore = rawScore - strokesGiven - par;
     try {
       const db = getFirestore();
       const scoreKey = `${newStrokeScore.date}-${newStrokeScore.player}`;
-      await setDoc(doc(db, 'strokePlay', '2025'), { [scoreKey]: { player: newStrokeScore.player, date: newStrokeScore.date, score: parseInt(newStrokeScore.score), submittedAt: new Date() } }, { merge: true });
-      setNewStrokeScore({ player: '', date: '', score: '' });
-      setUpdateMessage(`Score added for ${newStrokeScore.player}!`);
-      setTimeout(() => setUpdateMessage(''), 5000);
+      await setDoc(doc(db, 'strokePlay', '2025'), {
+        [scoreKey]: {
+          player: newStrokeScore.player,
+          date: newStrokeScore.date,
+          score: adjustedScore,
+          rawScore,
+          par,
+          strokesGiven,
+          submittedAt: new Date()
+        }
+      }, { merge: true });
+      setNewStrokeScore({ player: '', date: '', rawScore: '', par: '72' });
+      setUpdateMessage(`Score added for ${newStrokeScore.player}! (${rawScore} raw → ${adjustedScore > 0 ? '+' : ''}${adjustedScore} adjusted)`);
+      setTimeout(() => setUpdateMessage(''), 6000);
     } catch (error) {
       setUpdateMessage('Error adding score.');
       setTimeout(() => setUpdateMessage(''), 5000);
@@ -723,7 +871,7 @@ const Results = () => {
               <div className="results-content">
                 {activeTab === 'live' && <LiveMatchesTab liveMatches={liveMatches} sortedLiveMatches={sortedLiveMatches} setSelectedMatch={setSelectedMatch} setShowScoreModal={setShowScoreModal} handleCompleteMatch={handleCompleteMatch} handleDeleteMatch={handleDeleteMatch} confirmingId={confirmingId} setConfirmingId={setConfirmingId} effectiveHandicaps={effectiveHandicaps} />}
                 {activeTab === 'leaderboards' && <LeaderboardsTab teamStandings={teamStandings} strokePlayStandings={strokePlayStandings} />}
-                {activeTab === 'management' && <PointsManagementTab players={players} sortedPlayers={sortedPlayers} existingStrokeScores={existingStrokeScores} teamPoints={teamPoints} setTeamPoints={setTeamPoints} updateMessage={updateMessage} newStrokeScore={newStrokeScore} setNewStrokeScore={setNewStrokeScore} handleUpdateTeamPoints={handleUpdateTeamPoints} handleAddStrokeScore={handleAddStrokeScore} handleDeleteStrokeScore={handleDeleteStrokeScore} confirmingId={confirmingId} setConfirmingId={setConfirmingId} />}
+                {activeTab === 'management' && <PointsManagementTab players={players} sortedPlayers={sortedPlayers} existingStrokeScores={existingStrokeScores} teamPoints={teamPoints} setTeamPoints={setTeamPoints} updateMessage={updateMessage} newStrokeScore={newStrokeScore} setNewStrokeScore={setNewStrokeScore} handleUpdateTeamPoints={handleUpdateTeamPoints} handleAddStrokeScore={handleAddStrokeScore} handleDeleteStrokeScore={handleDeleteStrokeScore} confirmingId={confirmingId} setConfirmingId={setConfirmingId} effectiveHandicaps={effectiveHandicaps} />}
                 {activeTab === 'history' && <MatchHistoryTab matchHistory={matchHistory} />}
               </div>
             )}
