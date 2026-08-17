@@ -373,7 +373,12 @@ const LeaderboardsTab = ({ teamStandings, strokePlayStandings }) => (
                                   }}
                                 >
                                   {round.score > 0 ? `+${round.score}` : round.score}
-                                  <span style={{ color: '#888', fontWeight: 400, fontSize: '0.72rem' }}>
+                                  {round.rawScore && (
+                                    <span style={{ color: '#555', fontWeight: 600, fontSize: '0.75rem', margin: '0 2px' }}>
+                                      ({round.rawScore})
+                                    </span>
+                                  )}
+                                  <span style={{ color: '#888', fontWeight: 400, fontSize: '0.72rem', marginLeft: '2px' }}>
                                     {round.date ? new Date(round.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : ''}
                                   </span>
                                 </span>
