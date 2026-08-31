@@ -799,7 +799,7 @@ const Results = () => {
     const adjustedScore = rawScore - strokesGiven - par;
     try {
       const db = getFirestore();
-      const scoreKey = `${newStrokeScore.date}-${newStrokeScore.player}`;
+      const scoreKey = `${newStrokeScore.date}-${newStrokeScore.player}-${Date.now()}`;
       await setDoc(doc(db, 'strokePlay', selectedYear), {
         [scoreKey]: {
           player: newStrokeScore.player,
